@@ -339,7 +339,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="378" customClass="TSSTThumbnailView">
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="378" customClass="ThumbnailView" customModule="Simple_Comic" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <connections>

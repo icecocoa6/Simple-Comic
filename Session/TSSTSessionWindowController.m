@@ -37,7 +37,6 @@
 #import "TSSTImageUtilities.h"
 #import "TSSTPage.h"
 #import "TSSTManagedGroup.h"
-#import "TSSTThumbnailView.h"
 #import "TSSTManagedSession.h"
 #import "DTWindowCategory.h"
 #import "Simple_Comic-Swift.h"
@@ -176,7 +175,7 @@
 
 - (void)dealloc
 {
-	[(TSSTThumbnailView *)exposeView setDataSource: nil];
+	[(ThumbnailView *)exposeView setDataSource: nil];
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 	
     [defaults removeObserver: self forKeyPath: TSSTStatusbarVisible];
@@ -238,8 +237,8 @@
     else if([keyPath isEqualToString: TSSTPageOrder])
 	{
 		[defaults setValue: [session valueForKey: TSSTPageOrder] forKey: TSSTPageOrder];
-		[(TSSTThumbnailView *)exposeView setNeedsDisplay: YES];
-		[(TSSTThumbnailView *)exposeView buildTrackingRects];
+		[(ThumbnailView *)exposeView setNeedsDisplay: YES];
+		[(ThumbnailView *)exposeView buildTrackingRects];
         [self changeViewImages];
 	}
 	else if([keyPath isEqualToString: TSSTPageScaleOptions])
@@ -712,7 +711,7 @@
     else
     {
         [NSCursor unhide];
-        [(TSSTThumbnailView *)exposeView buildTrackingRects];
+        [(ThumbnailView *)exposeView buildTrackingRects];
         [exposeBezel setFrame: [[[self window] screen] frame] display: NO];
         [exposeBezel makeKeyAndOrderFront: self];
         [NSThread detachNewThreadSelector: @selector(processThumbs) toTarget: exposeView withObject: nil];
