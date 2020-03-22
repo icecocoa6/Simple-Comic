@@ -9,15 +9,14 @@
 #import <Cocoa/Cocoa.h>
 
 @class TSSTInfoWindow;
-@class TSSTImageView;
-
+@class ImageView;
 
 @interface TSSTThumbnailView : NSView
 {
     id dataSource;
     IBOutlet NSArrayController * pageController;
 	
-	IBOutlet TSSTImageView * thumbnailView;
+	IBOutlet ImageView * thumbnailView;
 	
     NSMutableIndexSet * trackingRects;
     NSMutableSet * trackingIndexes;

@@ -9,9 +9,8 @@
 #import "TSSTThumbnailView.h"
 #import "TSSTSessionWindowController.h"
 #import "TSSTImageUtilities.h"
-#import "TSSTImageView.h"
 #import "TSSTInfoWindow.h"
-
+#import "Simple_Comic-Swift.h"
 
 @implementation TSSTThumbnailView
 
@@ -20,7 +19,7 @@
 {
     [[self window] makeFirstResponder: self];
     [[self window] setAcceptsMouseMovedEvents: YES];
-    [thumbnailView setClears: YES];
+    thumbnailView.clears = YES;
 }
 
 

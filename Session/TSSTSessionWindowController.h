@@ -35,7 +35,6 @@
 @class TSSTPage;
 @class DTPolishedProgressBar;
 @class TSSTInfoWindow;
-@class TSSTImageView;
 @class TSSTManagedSession;
 
 enum PageSelectionMode {
