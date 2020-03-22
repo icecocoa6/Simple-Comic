@@ -39,7 +39,6 @@
 #import "TSSTManagedGroup.h"
 #import "TSSTThumbnailView.h"
 #import "TSSTManagedSession.h"
-#import "DTPolishedProgressBar.h"
 #import "DTWindowCategory.h"
 #import "Simple_Comic-Swift.h"
 
@@ -392,8 +391,8 @@
 - (void)infoPanelSetupAtPoint:(NSPoint)point
 {
 	NSPoint cursorPoint;
-	int index;
-	DTPolishedProgressBar * bar;
+	NSInteger index;
+	PolishedProgressBar * bar;
 
     bar = progressBar;
     [[infoWindow contentView] setBordered: NO];

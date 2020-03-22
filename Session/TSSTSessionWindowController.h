@@ -33,7 +33,7 @@
 @class TSSTPageView;
 @class TSSTKeyWindow;
 @class TSSTPage;
-@class DTPolishedProgressBar;
+@class PolishedProgressBar;
 @class InfoWindow;
 @class TSSTManagedSession;
 
@@ -74,7 +74,7 @@ enum PageSelectionMode {
 	IBOutlet NSTextField   * jumpField;
 	
     /* Progress bar */
-    IBOutlet DTPolishedProgressBar * progressBar;
+    IBOutlet PolishedProgressBar * progressBar;
 	
 	/* Page info window with caret. */
     IBOutlet InfoWindow     * infoWindow;

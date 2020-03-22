@@ -62,7 +62,7 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="607" customClass="DTPolishedProgressBar">
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="607" customClass="PolishedProgressBar" customModule="Simple_Comic" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="-1" width="460" height="23"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                     </customView>
@@ -359,7 +359,7 @@
         <window allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="445" userLabel="Jump" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="468" width="229" height="42"/>
+            <rect key="contentRect" x="196" y="468" width="229" height="36"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="446">
                 <rect key="frame" x="0.0" y="0.0" width="229" height="36"/>
