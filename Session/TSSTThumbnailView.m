@@ -9,7 +9,6 @@
 #import "TSSTThumbnailView.h"
 #import "TSSTSessionWindowController.h"
 #import "TSSTImageUtilities.h"
-#import "TSSTInfoWindow.h"
 #import "Simple_Comic-Swift.h"
 
 @implementation TSSTThumbnailView
@@ -295,7 +294,7 @@
         thumbPoint.x = NSMinX(visibleRect) + imageSize.width / 2;
     }
 	
-    [(TSSTInfoWindow *)[thumbnailView window] setFrame: NSMakeRect(thumbPoint.x - imageSize.width / 2, thumbPoint.y - imageSize.height / 2, imageSize.width, imageSize.height)
+    [(InfoWindow *)[thumbnailView window] setFrame: NSMakeRect(thumbPoint.x - imageSize.width / 2, thumbPoint.y - imageSize.height / 2, imageSize.width, imageSize.height)
 											   display: NO
 											   animate: NO];
 	[[self window] addChildWindow: [thumbnailView window] ordered: NSWindowAbove];

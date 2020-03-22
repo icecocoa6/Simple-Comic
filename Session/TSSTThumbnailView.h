@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class TSSTInfoWindow;
+@class InfoWindow;
 @class ImageView;
 
 @interface TSSTThumbnailView : NSView

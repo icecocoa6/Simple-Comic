@@ -34,7 +34,7 @@
 @class TSSTKeyWindow;
 @class TSSTPage;
 @class DTPolishedProgressBar;
-@class TSSTInfoWindow;
+@class InfoWindow;
 @class TSSTManagedSession;
 
 enum PageSelectionMode {
@@ -77,17 +77,17 @@ enum PageSelectionMode {
     IBOutlet DTPolishedProgressBar * progressBar;
 	
 	/* Page info window with caret. */
-    IBOutlet TSSTInfoWindow     * infoWindow;
+    IBOutlet InfoWindow     * infoWindow;
     IBOutlet NSImageView        * infoPicture;
 
     /* Localized image zoom loupe elements */
-    IBOutlet TSSTInfoWindow * loupeWindow;
+    IBOutlet InfoWindow * loupeWindow;
     IBOutlet NSImageView    * zoomView;
 	
 	/* Panel and view for the page expose method */
     IBOutlet NSPanel * exposeBezel;
     IBOutlet NSView * exposeView;
-	IBOutlet TSSTInfoWindow * thumbnailPanel;
+	IBOutlet InfoWindow * thumbnailPanel;
 	
 	/* The session object used to maintain settings */
     TSSTManagedSession * session;

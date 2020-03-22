@@ -26,7 +26,6 @@
 		286AB6D8115C3CFA0087BA97 /* sc_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 286AB6D7115C3CFA0087BA97 /* sc_icon.icns */; };
 		286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 286AEDB60C4161C20031E3D9 /* TSSTSortDescriptor.m */; };
 		286BA1110C4D5F3100E9D06D /* TSSTSessionWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28FA4FA50B8AA28000496668 /* TSSTSessionWindowController.m */; };
-		286BA19E0C4D819400E9D06D /* TSSTInfoWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 286BA19A0C4D819400E9D06D /* TSSTInfoWindow.m */; };
 		287D0C1210F0595900207768 /* Sessions_DataModel.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */; };
 		288693010FED553A002C6BF7 /* 7z.icns in Resources */ = {isa = PBXBuildFile; fileRef = 288692FA0FED553A002C6BF7 /* 7z.icns */; };
 		288693020FED553A002C6BF7 /* cbr.icns in Resources */ = {isa = PBXBuildFile; fileRef = 288692FB0FED553A002C6BF7 /* cbr.icns */; };
@@ -61,6 +60,7 @@
 		28FA89161094DA53005D6F0C /* TSSTKeyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F998320A1FF52C0047BD97 /* TSSTKeyWindow.m */; };
 		28FAECCF0C7CA801001D7001 /* TSSTThumbnailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 28FAECCD0C7CA801001D7001 /* TSSTThumbnailView.m */; };
 		526119102427438F00958E3F /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261190F2427438F00958E3F /* ImageView.swift */; };
+		52611912242759FA00958E3F /* InfoWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611911242759FA00958E3F /* InfoWindow.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -142,8 +142,6 @@
 		286AB6691159838C0087BA97 /* quicklook.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = quicklook.tiff; sourceTree = "<group>"; };
 		286AB6D7115C3CFA0087BA97 /* sc_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = sc_icon.icns; sourceTree = "<group>"; };
 		286AEDB60C4161C20031E3D9 /* TSSTSortDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TSSTSortDescriptor.m; sourceTree = "<group>"; };
-		286BA19A0C4D819400E9D06D /* TSSTInfoWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = TSSTInfoWindow.m; path = "Progress Bar/TSSTInfoWindow.m"; sourceTree = "<group>"; };
-		286BA19B0C4D819400E9D06D /* TSSTInfoWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TSSTInfoWindow.h; path = "Progress Bar/TSSTInfoWindow.h"; sourceTree = "<group>"; };
 		288692FA0FED553A002C6BF7 /* 7z.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = 7z.icns; sourceTree = "<group>"; };
 		288692FB0FED553A002C6BF7 /* cbr.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cbr.icns; sourceTree = "<group>"; };
 		288692FC0FED553A002C6BF7 /* cbz.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = cbz.icns; sourceTree = "<group>"; };
@@ -197,6 +195,7 @@
 		5261190D2427248F00958E3F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		5261190E2427248F00958E3F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/TSSTSessionWindow.xib; sourceTree = "<group>"; };
 		5261190F2427438F00958E3F /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageView.swift; path = "Progress Bar/ImageView.swift"; sourceTree = "<group>"; };
+		52611911242759FA00958E3F /* InfoWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoWindow.swift; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
@@ -358,9 +357,8 @@
 			children = (
 				28E39CC910A5CD6900A027A3 /* DTPolishedProgressBar.h */,
 				28E39CCA10A5CD6900A027A3 /* DTPolishedProgressBar.m */,
-				286BA19B0C4D819400E9D06D /* TSSTInfoWindow.h */,
-				286BA19A0C4D819400E9D06D /* TSSTInfoWindow.m */,
 				5261190F2427438F00958E3F /* ImageView.swift */,
+				52611911242759FA00958E3F /* InfoWindow.swift */,
 			);
 			name = "Progress Bar";
 			sourceTree = "<group>";
@@ -585,6 +583,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
+				52611912242759FA00958E3F /* InfoWindow.swift in Sources */,
 				77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
 				2895F9DA0B67D224008683C6 /* TSSTPage.m in Sources */,
@@ -594,7 +593,6 @@
 				281954EA0C1201E6001F5E95 /* TSSTManagedGroup.m in Sources */,
 				286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */,
 				283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */,
-				286BA19E0C4D819400E9D06D /* TSSTInfoWindow.m in Sources */,
 				28FAECCF0C7CA801001D7001 /* TSSTThumbnailView.m in Sources */,
 				281C0D700CEE6FBA009A9696 /* TSSTBezelWindow.m in Sources */,
 				28C1D4080DF18251003392B4 /* TSSTManagedSession.m in Sources */,
