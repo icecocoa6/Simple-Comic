@@ -31,7 +31,9 @@ Copyright (c) 2006-2009 Dancing Tortoise Software
 #import "SimpleComicAppDelegate.h"
 #import "TSSTImageUtilities.h"
 #import "TSSTManagedGroup.h"
+#if TAGET_OS_OSX
 #import <XADMaster/XADArchive.h>
+#endif
 
 
 static NSDictionary * TSSTInfoPageAttributes = nil;
@@ -44,7 +46,7 @@ static NSSize monospaceCharacterSize;
 	static NSMutableArray * imageTypes = nil;
 	if(!imageTypes)
 	{
-		imageTypes = [NSMutableArray arrayWithArray: [NSImage imageFileTypes]];
+		imageTypes = [NSMutableArray arrayWithArray: [NSImage imageTypes]];
 		[imageTypes removeObject: @"pdf"];
 		[imageTypes removeObject: @"eps"];
 		[imageTypes retain];
@@ -198,7 +200,7 @@ static NSSize monospaceCharacterSize;
 		[[NSGraphicsContext currentContext] setImageInterpolation: NSImageInterpolationHigh];
 		[managedImage drawInRect: NSMakeRect(0, 0, pixelSize.width, pixelSize.height) 
 						fromRect: NSZeroRect 
-					   operation: NSCompositeSourceOver 
+					   operation: NSCompositingOperationSourceOver
 						fraction: 1.0];
 		[temp unlockFocus];
 		thumbnailData = [[temp TIFFRepresentation] retain];

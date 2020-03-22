@@ -39,16 +39,25 @@ NSRect rectWithSizeCenteredInRect(NSSize size, NSRect rect);
 
 NSRect rectFromNegativeRect(NSRect rect);
 
-NSImage * imageScaledToSizeFromImage(NSSize size, NSImage * image);
+NSImage * _Nonnull imageScaledToSizeFromImage(NSSize size, NSImage * _Nonnull image);
 
 NSPoint centerPointOfRect(NSRect rect);
 
-NSBezierPath * roundedRectWithCornerRadius(NSRect aRect, float radius);
+NSBezierPath * _Nonnull roundedRectWithCornerRadius(NSRect aRect, float radius);
 
-CGImageRef CGImageRefNamed(NSString * name);
+CGImageRef _Nullable CGImageRefNamed(NSString * _Nonnull name);
 
 CGFloat RadiansToDegrees(CGFloat radians);
 
 CGFloat DegreesToRadians(CGFloat degrees);
 
+// NSData -> NSColor
+@interface TTSTColorTransformer : NSSecureUnarchiveFromDataTransformer
 
++ (Class _Nonnull )transformedValueClass;    // class of the "output" objects, as returned by transformedValue:
++ (BOOL)allowsReverseTransformation;    // flag indicating whether transformation is read-only or not
+
+- (nullable id)transformedValue:(nullable id)value;           // by default returns value
+- (nullable id)reverseTransformedValue:(nullable id)value;    // by default raises an exception if +allowsReverseTransformation returns NO and otherwise invokes transformedValue:
+
+@end

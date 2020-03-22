@@ -160,7 +160,7 @@ enum PageSelectionMode {
 - (void)extractPageWithSelection:(NSInteger)selection;
 - (void)changeViewForSelection;
 
-- (NSImage *)imageForPageAtIndex:(int)index;
+- (NSImage *)imageForPageAtIndex:(NSInteger)index;
 - (NSString *)nameForPageAtIndex:(int)index;
 
 - (void)restoreSession;

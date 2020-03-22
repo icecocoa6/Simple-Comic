@@ -66,7 +66,7 @@ static NSDictionary * stringAttributes;
 //    [[NSGraphicsContext currentContext] setImageInterpolation: NSImageInterpolationHigh];
     [[self image] drawInRect: imageRect
 					fromRect: NSZeroRect 
-				   operation: NSCompositeSourceOver 
+				   operation: NSCompositingOperationSourceOver
 					fraction: 1];
     if(self.imageName)
     {

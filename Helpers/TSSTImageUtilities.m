@@ -100,7 +100,7 @@ NSImage * imageScaledToSizeFromImage(NSSize size, NSImage * image)
 	
 	[scaledImage lockFocus];
     [[NSGraphicsContext currentContext] setImageInterpolation: NSImageInterpolationHigh];
-	[scaledImage drawInRect: scaledRect fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1.0];
+	[scaledImage drawInRect: scaledRect fromRect: NSZeroRect operation: NSCompositingOperationSourceOver fraction: 1.0];
     [scaledImage unlockFocus];
 	
 	return [scaledImage autorelease];
@@ -162,4 +162,20 @@ CGFloat RadiansToDegrees(CGFloat radians)
 }
 
 
+@implementation TTSTColorTransformer
 
++ (Class)transformedValueClass {
+    return [NSColor class];
+}
++ (BOOL)allowsReverseTransformation {
+    return YES;
+}
+
+- (nullable id)transformedValue:(nullable id)value {
+    return [NSKeyedUnarchiver unarchivedObjectOfClass:[NSColor class] fromData:value error:NULL];
+}
+- (nullable id)reverseTransformedValue:(nullable id)value {
+    return [NSKeyedArchiver archivedDataWithRootObject:value requiringSecureCoding:YES error:NULL];
+}
+
+@end

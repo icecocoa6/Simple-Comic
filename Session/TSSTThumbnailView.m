@@ -145,7 +145,7 @@
         thumbnail = [dataSource imageForPageAtIndex: counter];
         drawRect = [self rectForIndex: counter];
         drawRect = rectWithSizeCenteredInRect([thumbnail size], NSInsetRect(drawRect, 2, 2));
-        [thumbnail drawInRect: drawRect fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1.0];
+        [thumbnail drawInRect: drawRect fromRect: NSZeroRect operation: NSCompositingOperationSourceOver fraction: 1.0];
 		if(NSMouseInRect(mousePoint, drawRect, NO))
 		{
 			hoverIndex = counter;

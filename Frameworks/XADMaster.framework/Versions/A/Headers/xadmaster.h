@@ -6,7 +6,11 @@
 //  Copyright © 2016 Tim Oliver. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
+
+#if !TARGET_OS_OSX
 #import <UIKit/UIKit.h>
+#endif
 
 //! Project version number for XADMaster.
 FOUNDATION_EXPORT double XADMasterVersionNumber;

@@ -109,7 +109,7 @@
 
 
 
-- (NSData *)dataForPageIndex:(NSInteger)index
+- (NSData *)dataForPageIndex:(int)index
 {
     return nil;
 }
@@ -146,6 +146,8 @@
 		fileExtension = [[path pathExtension] lowercaseString];
 		fullPath = [folderPath stringByAppendingPathComponent: path];
 		exists = [fileManager fileExistsAtPath: fullPath isDirectory: &isDirectory];
+        CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)fileExtension, nil);
+        [(NSString *)uti autorelease];
 		if(exists && ![[[path lastPathComponent] substringToIndex: 1] isEqualToString: @"."])
 		{
 			if(isDirectory)
@@ -169,7 +171,7 @@
 				[nestedDescription setValue: path forKey: @"name"];
 				[(TSSTManagedPDF *)nestedDescription pdfContents];
 			}
-			else if([[TSSTPage imageExtensions] containsObject: fileExtension])
+			else if([[TSSTPage imageExtensions] containsObject: (NSString *)uti])
 			{
 				nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fullPath forKey: @"imagePath"];
@@ -279,7 +281,7 @@
 
 
 
-- (NSData *)dataForPageIndex:(NSInteger)index
+- (NSData *)dataForPageIndex:(int)index
 {
 	NSString * solidDirectory = [self valueForKey: @"solidDirectory"];
 	NSData * imageData;
@@ -363,7 +365,10 @@
         if(!([fileName isEqualToString: @""] || [[[fileName lastPathComponent] substringToIndex: 1] isEqualToString: @"."]))
         {
             extension = [[fileName pathExtension] lowercaseString];
-            if([[TSSTPage imageExtensions] containsObject: extension])
+            CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, nil);
+            [(NSString *)uti autorelease];
+            
+            if([[TSSTPage imageExtensions] containsObject: (NSString *)uti])
             {
                 nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fileName forKey: @"imagePath"];
@@ -473,7 +478,7 @@
 
 
 
-- (NSData *)dataForPageIndex:(NSInteger)index
+- (NSData *)dataForPageIndex:(int)index
 {	
     [groupLock lock];
 	PDFPage * page = [[self instance] pageAtIndex: index];
@@ -486,12 +491,13 @@
 	
 	NSImage * pageImage = [[NSImage alloc] initWithSize: bounds.size];
 	[pageImage lockFocus];
+    CGContextRef cgctx = [[NSGraphicsContext currentContext] CGContext];
 		[[NSColor whiteColor] set];
 		NSRectFill(bounds );
 		NSAffineTransform * scaleTransform = [NSAffineTransform transform];
 		[scaleTransform scaleBy: scale];
 		[scaleTransform concat];
-		[page drawWithBox: kPDFDisplayBoxMediaBox];
+		[page drawWithBox: kPDFDisplayBoxMediaBox toContext:cgctx];
 	[pageImage unlockFocus];
 	
 	NSData * imageData = [[pageImage TIFFRepresentation] retain];
@@ -513,7 +519,7 @@
     NSPDFImageRep * rep = [self instance];
     TSSTPage * imageDescription;
     NSMutableSet * pageSet = [NSMutableSet set];
-    int imageCount = [rep pageCount];
+    NSInteger imageCount = [rep pageCount];
     int pageNumber;
     for (pageNumber = 0; pageNumber < imageCount; ++pageNumber)
     {

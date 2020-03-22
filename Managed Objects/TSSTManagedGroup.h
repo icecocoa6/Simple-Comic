@@ -41,7 +41,7 @@ Copyright (c) 2006-2009 Dancing Tortoise Software
 - (void)setPath:(NSString *)newPath;
 - (NSString *)path;
 
-- (NSData *)dataForPageIndex:(NSInteger)index;
+- (NSData *)dataForPageIndex:(int)index;
 - (NSData *)dataForPageName:(NSString *)name;
 - (NSManagedObject *)topLevelGroup;
 - (NSSet *)nestedImages;

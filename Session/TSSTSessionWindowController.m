@@ -256,7 +256,7 @@
 	}
 	else if([keyPath isEqualToString: TSSTBackgroundColor])
 	{
-		NSColor * color = [NSUnarchiver unarchiveObjectWithData: [defaults valueForKey: TSSTBackgroundColor]];
+        NSColor * color = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSColor class] fromData:[defaults valueForKey:TSSTBackgroundColor] error:NULL];
 		[pageScrollView setBackgroundColor: color];
 	}
     else if([keyPath isEqualToString: TSSTStatusbarVisible])
@@ -289,7 +289,7 @@
 
 
 
-- (NSImage *)imageForPageAtIndex:(int)index
+- (NSImage *)imageForPageAtIndex:(NSInteger)index
 {
     return [[pageController arrangedObjects][index] valueForKey: @"thumbnail"];
 }
@@ -450,7 +450,7 @@
 
 - (IBAction)turnPage:(id)sender
 {
-    int segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
+    NSInteger segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
     if(segmentTag == 701)
     {
         [self pageLeft: self];
@@ -529,7 +529,7 @@
 
 - (IBAction)skipRight:(id)sender
 {
-    int index;
+    NSUInteger index;
     if([[session valueForKey: TSSTPageOrder] boolValue])
     {
         index = ([pageController selectionIndex] + 10);
@@ -537,8 +537,14 @@
     }
     else
     {
-        index = ([pageController selectionIndex] - 10);
-        index = index > 0 ? index : 0;
+        if ([pageController selectionIndex] < 10)
+        {
+            index = 0;
+        }
+        else
+        {
+            index = ([pageController selectionIndex] - 10);
+        }
     }
     
     [pageController setSelectionIndex: index];
@@ -548,7 +554,7 @@
 
 - (IBAction)skipLeft:(id)sender
 {
-    int index;
+    NSInteger index;
     if(![[session valueForKey: TSSTPageOrder] boolValue])
     {
         index = ([pageController selectionIndex] + 10);
@@ -581,7 +587,7 @@
 /* Zoom method for the zoom segmented control. Each segment has its own tag. */
 - (IBAction)zoom:(id)sender
 {
-    int segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
+    NSInteger segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
     if(segmentTag == 801)
     {
         [self zoomIn: self];
@@ -647,7 +653,7 @@
 
 - (IBAction)rotate:(id)sender
 {
-    int segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
+    NSInteger segmentTag = [[sender cell] tagForSegment: [sender selectedSegment]];
     if(segmentTag == 901)
     {
         [self rotateLeft: self];
@@ -718,7 +724,7 @@
 
 - (IBAction)launchJumpPanel:(id)sender
 {
-	[jumpField setIntValue: [pageController selectionIndex] + 1];
+	[jumpField setIntegerValue: (NSInteger)[pageController selectionIndex] + 1];
     [self.window beginSheet: jumpPanel completionHandler:^(NSModalResponse returnCode) { }];
 }
 
@@ -801,7 +807,7 @@
 
 - (BOOL)canSelectPageIndex:(NSInteger)selection
 {
-	int index = [pageController selectionIndex];
+	NSInteger index = [pageController selectionIndex];
 	index += selection;
 	TSSTPage * selectedPage = [pageController arrangedObjects][index];
 	TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
@@ -858,7 +864,7 @@
 {
 	if(selection != -1)
 	{
-		int index = [pageController selectionIndex];
+		NSUInteger index = [pageController selectionIndex];
 		index += selection;
 		TSSTPage * selectedPage = [pageController arrangedObjects][index];
 		[pageController removeObject: selectedPage];
@@ -874,7 +880,7 @@
 	 otherwise 1. */
 	if(selection != -1)
 	{
-		int index = [pageController selectionIndex];
+		NSUInteger index = [pageController selectionIndex];
 		index += selection;
 		TSSTPage * selectedPage = [pageController arrangedObjects][index];
 		
@@ -894,7 +900,7 @@
 {
 	if(selection != -1)
 	{
-		int index = [pageController selectionIndex];
+		NSUInteger index = [pageController selectionIndex];
 		index += selection;
 		TSSTPage * selectedPage = [pageController arrangedObjects][index];
 		TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
@@ -929,7 +935,7 @@
 				
 				[iconImage lockFocus];
 				[[NSGraphicsContext currentContext] setImageInterpolation: NSImageInterpolationHigh];
-				[[selectedPage pageImage] drawInRect: drawRect fromRect: cropRect operation: NSCompositeSourceOver fraction: 1];
+				[[selectedPage pageImage] drawInRect: drawRect fromRect: cropRect operation: NSCompositingOperationSourceOver fraction: 1];
 				[iconImage unlockFocus];
 				
 				NSImage * shadowImage = [[NSImage alloc] initWithSize: NSMakeSize(512, 512)];
@@ -941,7 +947,7 @@
 				
 				[shadowImage lockFocus];
 				[thumbShadow set];
-				[iconImage drawInRect: NSMakeRect(16, 16, 496, 496) fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1];
+				[iconImage drawInRect: NSMakeRect(16, 16, 496, 496) fromRect: NSZeroRect operation: NSCompositingOperationSourceOver fraction: 1];
 				[shadowImage unlockFocus];
 				
 				[[NSWorkspace sharedWorkspace] setIcon: shadowImage forFile: archivePath options: 0];
@@ -985,7 +991,7 @@
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     int loupeDiameter = [[defaults valueForKey: TSSTLoupeDiameter] intValue];
     [loupeWindow setFrame:NSMakeRect(0,0, loupeDiameter, loupeDiameter) display: NO];
-    NSColor * color = [NSUnarchiver unarchiveObjectWithData: [defaults valueForKey: TSSTBackgroundColor]];
+    NSColor * color = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSColor class] fromData:[defaults valueForKey: TSSTBackgroundColor] error:NULL];
 	[pageScrollView setBackgroundColor: color];
     [pageView setRotation: [[session valueForKey: TSSTViewRotation] intValue]];
     NSValue * positionValue;
@@ -993,13 +999,13 @@
 	
     if(posData)
     {
-        positionValue = [NSUnarchiver unarchiveObjectWithData: posData];
+        positionValue = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSValue class] fromData:posData error:NULL];
         [[self window] setFrame: [positionValue rectValue] display: NO];
 		NSData * scrollData = [session valueForKey: TSSTScrollPosition];
 		if(scrollData)
 		{
 			[self setShouldCascadeWindows: NO];
-			positionValue = [NSUnarchiver unarchiveObjectWithData: scrollData];
+			positionValue = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSValue class] fromData:scrollData error:NULL];
 			[pageView scrollPoint: [positionValue pointValue]];
 		}
     }
@@ -1018,8 +1024,8 @@
     and that of the next image */
 - (void)changeViewImages
 {
-    int count = [[pageController arrangedObjects] count];
-    int index = [pageController selectionIndex];
+    NSUInteger count = [[pageController arrangedObjects] count];
+    NSUInteger index = [pageController selectionIndex];
     TSSTPage * pageOne = [pageController arrangedObjects][index];
     TSSTPage * pageTwo = (index + 1) < count ? [pageController arrangedObjects][(index + 1)] : nil;
     NSString * titleString = [pageOne valueForKey: @"name"];
@@ -1169,8 +1175,8 @@ images are currently visible and then skips over them.
         return;
     }
     
-    int numberOfImages = [[pageController arrangedObjects] count];
-	int selectionIndex = [pageController selectionIndex];
+    NSUInteger numberOfImages = [[pageController arrangedObjects] count];
+	NSUInteger selectionIndex = [pageController selectionIndex];
 	if((selectionIndex + 1) >= numberOfImages)
 	{
 		return;
@@ -1207,7 +1213,7 @@ images are currently visible and then skips over them.
         return;
     }
     
-	int selectionIndex = [pageController selectionIndex];
+	NSUInteger selectionIndex = [pageController selectionIndex];
 	if((selectionIndex - 2) >= 0)
 	{
         NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
@@ -1238,11 +1244,11 @@ images are currently visible and then skips over them.
     if(![[self window] isFullscreen])
     {
         NSValue * postionValue = [NSValue valueWithRect: [[self window] frame]];
-        NSData * posData = [NSArchiver archivedDataWithRootObject: postionValue];
+        NSData * posData = [NSKeyedArchiver archivedDataWithRootObject:postionValue requiringSecureCoding:YES error:NULL];
         [session setValue: posData forKey: @"position" ];
         
         postionValue = [NSValue valueWithPoint: [[pageView enclosingScrollView] documentVisibleRect].origin];
-        posData = [NSArchiver archivedDataWithRootObject: postionValue];
+        posData = [NSKeyedArchiver archivedDataWithRootObject:postionValue requiringSecureCoding:YES error:NULL];
         [session setValue: posData forKey: TSSTScrollPosition ];
     }
     else
@@ -1337,7 +1343,7 @@ images are currently visible and then skips over them.
 
 - (BOOL)canTurnPageNext
 {
-	int selectionIndex = [pageController selectionIndex];
+	NSUInteger selectionIndex = [pageController selectionIndex];
 	if([pageController selectionIndex] >= ([[pageController content] count] - 1))
 	{
 		return NO;
@@ -1372,12 +1378,12 @@ images are currently visible and then skips over them.
     int state;
     if([menuItem action] == @selector(toggleFullScreen:))
     {
-        state = [[self window] isFullscreen] ? NSOnState : NSOffState;
+        state = [[self window] isFullscreen] ? NSControlStateValueOn : NSControlStateValueOff;
         [menuItem setState: state];
     }
     else if([menuItem action] == @selector(changeTwoPage:))
     {
-        state = [[session valueForKey: TSSTTwoPageSpread] boolValue] ? NSOnState : NSOffState;
+        state = [[session valueForKey: TSSTTwoPageSpread] boolValue] ? NSControlStateValueOn : NSControlStateValueOff;
         [menuItem setState: state];
     }
     else if([menuItem action] == @selector(changePageOrder:))
@@ -1437,17 +1443,17 @@ images are currently visible and then skips over them.
 	}
     else if([menuItem tag] == 400)
     {
-        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 0 ? NSOnState : NSOffState;
+        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 0 ? NSControlStateValueOn : NSControlStateValueOff;
         [menuItem setState: state];
     }
     else if([menuItem tag] == 401)
     {
-        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 1 ? NSOnState : NSOffState;
+        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 1 ? NSControlStateValueOn : NSControlStateValueOff;
         [menuItem setState: state];
     }
     else if([menuItem tag] == 402)
     {
-        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 2 ? NSOnState : NSOffState;
+        state = [[session valueForKey: TSSTPageScaleOptions] intValue] == 2 ? NSControlStateValueOn : NSControlStateValueOff;
         [menuItem setState: state];
     }
 	
@@ -1464,12 +1470,12 @@ images are currently visible and then skips over them.
 	int pageNumber = [string intValue];
 	if(pageNumber > [[pageController arrangedObjects] count])
 	{
-		[jumpField setIntValue: [[pageController arrangedObjects] count]];
+		[jumpField setIntegerValue: [[pageController arrangedObjects] count]];
 	}
 	else
 	{
 		NSBeep();
-		[jumpField setIntValue: [pageController selectionIndex] + 1];
+		[jumpField setIntegerValue: [pageController selectionIndex] + 1];
 	}
 	
 	return YES;
@@ -1632,6 +1638,9 @@ images are currently visible and then skips over them.
 
 - (BOOL)currentPageIsText
 {
+    NSIndexSet *selectedObjects = [pageController selectionIndexes];
+    if ([selectedObjects count] == 0)
+        return false;
 	TSSTPage * page = [pageController selectedObjects][0];
 	return [[page valueForKey: @"text"] boolValue];
 }

@@ -72,7 +72,7 @@ NSString * TSSTSessionEndNotification = @"sessionEnd";
 
 static NSArray * allAvailableStringEncodings(void)
 {
-    NSStringEncoding encodings[] = {
+    CFStringEncoding encodings[] = {
         kCFStringEncodingMacRoman,
         kCFStringEncodingISOLatin1,
         kCFStringEncodingASCII,
@@ -129,13 +129,13 @@ static NSArray * allAvailableStringEncodings(void)
         kCFStringEncodingWindowsVietnamese,
         kCFStringEncodingDOSPortuguese,
         kCFStringEncodingWindowsBalticRim,
-        NSNotFound
+        (CFStringEncoding)NSNotFound
     };
     
     NSMutableArray * codeNumbers = [NSMutableArray array];
     int counter = 0;
     NSStringEncoding encoding;
-    while(encodings[counter] != NSNotFound)
+    while(encodings[counter] != (CFStringEncoding)NSNotFound)
     {
         if(encodings[counter] != 101)
         {
@@ -188,7 +188,7 @@ static NSArray * allAvailableStringEncodings(void)
     standardDefaults[TSSTScrollersVisible] = @YES;
     standardDefaults[TSSTSessionRestore] = @YES;
     standardDefaults[TSSTAutoPageTurn] = @YES;
-	standardDefaults[TSSTBackgroundColor] = [NSArchiver archivedDataWithRootObject: [NSColor whiteColor]];
+	standardDefaults[TSSTBackgroundColor] = [NSKeyedArchiver archivedDataWithRootObject: [NSColor whiteColor] requiringSecureCoding:YES error:NULL];
     standardDefaults[TSSTWindowAutoResize] = @YES;
     standardDefaults[TSSTLoupeDiameter] = @500;
 	standardDefaults[TSSTLoupePower] = @2.0f;
@@ -290,34 +290,28 @@ static NSArray * allAvailableStringEncodings(void)
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {	
-	NSUserDefaults * userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	if(![[userDefaults valueForKey: TSSTSessionRestore] boolValue])
-	{
-		/* Goes through and deletes all active sessions if the user has auto save turned off */
-		for(TSSTSessionWindowController * sessionWindow in sessions)
-		{
-			[[sessionWindow window] performClose: self];
-		}
-	}
-	
-    int reply = NSTerminateNow;
-	/* TODO: some day I really need to add the fallback error handling */
+    NSUserDefaults * userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    /* Goes through if the user has auto save turned off */
+    if(![[userDefaults valueForKey: TSSTSessionRestore] boolValue])
+        return NSTerminateNow;
+    
+    /* TODO: some day I really need to add the fallback error handling */
     if(![self saveContext])
     {
         // Error handling wasn't implemented. Fall back to displaying a "quit anyway" panel.
         NSAlert * alertPanel = [NSAlert new];
         alertPanel.messageText = @"Quit without saving session?";
         alertPanel.informativeText = @"Could not save session while quitting.";
-        [alertPanel addButtonWithTitle: @"Quit?"];
+        [alertPanel addButtonWithTitle: @"Quit"];
         [alertPanel addButtonWithTitle: @"Cancel"];
         if ([alertPanel runModal] == NSAlertSecondButtonReturn)
         {
-            reply = NSTerminateCancel;	
+            return NSTerminateCancel;
         }
     }
-	
-	return reply;
+    
+    return NSTerminateNow;
 }
 
 
@@ -472,7 +466,7 @@ static NSArray * allAvailableStringEncodings(void)
     url = [NSURL fileURLWithPath: [applicationSupportFolder stringByAppendingPathComponent: @"SimpleComic.sql"]];
 	
 	error = nil;
-	NSDictionary * storeInfo = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType: NSSQLiteStoreType URL: url error: &error];
+    NSDictionary * storeInfo = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType: NSSQLiteStoreType URL: url options:NULL error: &error];
 	if(error)
 	{
 		NSLog(@"%@",[error localizedDescription]);
@@ -509,7 +503,7 @@ static NSArray * allAvailableStringEncodings(void)
     NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
     if (coordinator != nil)
 	{
-        managedObjectContext = [[NSManagedObjectContext alloc] init];
+        managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
         [managedObjectContext setPersistentStoreCoordinator: coordinator];
     }
     

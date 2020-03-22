@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15705" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15705"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="DTPreferencesController">
+            <connections>
+                <outlet property="window" destination="246" id="248"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <userDefaultsController representsSharedInstance="YES" id="42" userLabel="Shared Defaults"/>
+        <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="246" customClass="NSPanel">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="140" y="154" width="312" height="304"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+            <view key="contentView" id="247">
+                <rect key="frame" x="0.0" y="0.0" width="312" height="304"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="Gc7-w7-ILb">
+                        <rect key="frame" x="26" y="20" width="268" height="50"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="218">
+                                <rect key="frame" x="17" y="0.0" width="253" height="28"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Open windows are preserved between exit and relaunch." id="236">
+                                    <font key="font" metaFont="label" size="11"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button toolTip="Save all open comics on exit" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="41">
+                                <rect key="frame" x="-2" y="34" width="272" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="14" id="gvi-hS-qY4"/>
+                                </constraints>
+                                <buttonCell key="cell" type="check" title="Auto-save open windows" bezelStyle="regularSquare" imagePosition="leading" alignment="left" state="on" inset="2" id="230">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <binding destination="42" name="value" keyPath="values.sessionRestore" id="43"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="218" secondAttribute="trailing" id="8BW-fv-F7f"/>
+                            <constraint firstItem="218" firstAttribute="top" secondItem="41" secondAttribute="bottom" constant="8" id="Hxq-S9-mpX"/>
+                            <constraint firstItem="41" firstAttribute="top" secondItem="Gc7-w7-ILb" secondAttribute="top" id="aCE-PM-jec"/>
+                            <constraint firstAttribute="bottom" secondItem="218" secondAttribute="bottom" id="hmZ-gD-6gF"/>
+                            <constraint firstAttribute="trailing" secondItem="41" secondAttribute="trailing" id="nfI-eL-wTH"/>
+                            <constraint firstItem="218" firstAttribute="leading" secondItem="Gc7-w7-ILb" secondAttribute="leading" constant="19" id="x1T-IJ-nin"/>
+                            <constraint firstItem="41" firstAttribute="leading" secondItem="Gc7-w7-ILb" secondAttribute="leading" id="xl2-5E-o9P"/>
+                        </constraints>
+                    </customView>
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="jjx-rV-E1n">
+                        <rect key="frame" x="26" y="90" width="274" height="50"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="216">
+                                <rect key="frame" x="17" y="0.0" width="259" height="28"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Windows automatically resize to maximize viewing area." id="235">
+                                    <font key="font" metaFont="label" size="11"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button toolTip="Windows are dynamically resized to fit the page-view and screen" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="152">
+                                <rect key="frame" x="-2" y="34" width="278" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="14" id="Tff-zk-BjW"/>
+                                </constraints>
+                                <buttonCell key="cell" type="check" title="Automatically resize windows" bezelStyle="regularSquare" imagePosition="leading" alignment="left" state="on" inset="2" id="231">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <binding destination="42" name="value" keyPath="values.windowAutoResize" id="154"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="216" secondAttribute="trailing" id="510-5w-kK4"/>
+                            <constraint firstAttribute="trailing" secondItem="152" secondAttribute="trailing" id="8X4-gl-WvQ"/>
+                            <constraint firstAttribute="bottom" secondItem="216" secondAttribute="bottom" id="N54-Lc-Mng"/>
+                            <constraint firstItem="152" firstAttribute="leading" secondItem="jjx-rV-E1n" secondAttribute="leading" id="acL-kA-Twp"/>
+                            <constraint firstItem="216" firstAttribute="leading" secondItem="jjx-rV-E1n" secondAttribute="leading" constant="19" id="epd-xM-DVV"/>
+                            <constraint firstItem="152" firstAttribute="top" secondItem="jjx-rV-E1n" secondAttribute="top" id="xhE-Mi-j4m"/>
+                            <constraint firstItem="216" firstAttribute="top" secondItem="152" secondAttribute="bottom" constant="8" id="z3d-lb-49W"/>
+                        </constraints>
+                    </customView>
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="xXi-pe-hIX">
+                        <rect key="frame" x="26" y="160" width="274" height="50"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="213">
+                                <rect key="frame" x="17" y="0.0" width="259" height="28"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Images will not excede their actual resolution in &quot;fit to window&quot; scaling modes." id="234">
+                                    <font key="font" metaFont="label" size="11"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button toolTip="Pages are never automatically scaled past their actual resolution" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="36">
+                                <rect key="frame" x="-2" y="34" width="278" height="18"/>
+                                <buttonCell key="cell" type="check" title="Page scaling constrained by resolution" bezelStyle="regularSquare" imagePosition="leading" alignment="left" state="on" inset="2" id="229">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <binding destination="42" name="value" keyPath="values.constrainScale" id="45"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="36" firstAttribute="top" secondItem="xXi-pe-hIX" secondAttribute="top" id="0gn-BF-bgx"/>
+                            <constraint firstItem="213" firstAttribute="top" secondItem="36" secondAttribute="bottom" constant="8" id="3Y8-Pc-2pl"/>
+                            <constraint firstItem="213" firstAttribute="leading" secondItem="xXi-pe-hIX" secondAttribute="leading" constant="19" id="3Yc-FV-Md9"/>
+                            <constraint firstAttribute="bottom" secondItem="213" secondAttribute="bottom" id="4RG-RV-bKj"/>
+                            <constraint firstItem="36" firstAttribute="leading" secondItem="xXi-pe-hIX" secondAttribute="leading" id="6pi-Di-zjc"/>
+                            <constraint firstAttribute="trailing" secondItem="36" secondAttribute="trailing" id="GHr-xO-IDR"/>
+                            <constraint firstAttribute="trailing" secondItem="213" secondAttribute="trailing" id="V1r-Ra-lAj"/>
+                        </constraints>
+                    </customView>
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="gIJ-Ca-6hM">
+                        <rect key="frame" x="20" y="230" width="280" height="53"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="243">
+                                <rect key="frame" x="23" y="0.0" width="259" height="28"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="This color is displayed around pages in fullscreen mode." id="244">
+                                    <font key="font" metaFont="label" size="11"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="237">
+                                <rect key="frame" x="22" y="36" width="260" height="17"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="17" id="POa-ry-Xer"/>
+                                </constraints>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Background color" id="239">
+                                    <font key="font" metaFont="label" size="12"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <colorWell translatesAutoresizingMaskIntoConstraints="NO" id="238">
+                                <rect key="frame" x="0.0" y="33" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="20" id="A6z-Ot-V5Q"/>
+                                    <constraint firstAttribute="height" constant="20" id="HPv-jo-HqV"/>
+                                </constraints>
+                                <color key="color" red="0.058130499000000002" green="0.055541898999999999" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <connections>
+                                    <binding destination="42" name="value" keyPath="values.pageBackgroundColor" id="1bS-ZZ-J8D">
+                                        <dictionary key="options">
+                                            <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
+                                            <bool key="NSConditionallySetsEnabled" value="NO"/>
+                                            <string key="NSValueTransformerName">TTSTColorTransformer</string>
+                                        </dictionary>
+                                    </binding>
+                                </connections>
+                            </colorWell>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="237" firstAttribute="top" secondItem="gIJ-Ca-6hM" secondAttribute="top" id="BP5-aR-AyP"/>
+                            <constraint firstAttribute="trailing" secondItem="243" secondAttribute="trailing" id="CMI-W8-94y"/>
+                            <constraint firstItem="238" firstAttribute="leading" secondItem="gIJ-Ca-6hM" secondAttribute="leading" id="S3o-wM-zMe"/>
+                            <constraint firstAttribute="bottom" secondItem="243" secondAttribute="bottom" id="Tpa-Ev-QtX"/>
+                            <constraint firstAttribute="trailing" secondItem="237" secondAttribute="trailing" id="XY8-xS-bbU"/>
+                            <constraint firstItem="238" firstAttribute="top" secondItem="gIJ-Ca-6hM" secondAttribute="top" id="cmQ-na-DxR"/>
+                            <constraint firstItem="243" firstAttribute="top" secondItem="237" secondAttribute="bottom" constant="8" id="sep-QW-4dH"/>
+                            <constraint firstItem="243" firstAttribute="leading" secondItem="gIJ-Ca-6hM" secondAttribute="leading" constant="25" id="tuV-L1-fos"/>
+                            <constraint firstItem="237" firstAttribute="leading" secondItem="238" secondAttribute="trailing" constant="4" id="uAM-5e-VuS"/>
+                        </constraints>
+                    </customView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Gc7-w7-ILb" firstAttribute="top" secondItem="jjx-rV-E1n" secondAttribute="bottom" constant="20" id="51V-Om-fNu"/>
+                    <constraint firstAttribute="trailing" secondItem="jjx-rV-E1n" secondAttribute="trailing" constant="12" id="ILC-eJ-EVe"/>
+                    <constraint firstItem="Gc7-w7-ILb" firstAttribute="leading" secondItem="247" secondAttribute="leading" constant="26" id="K6f-vu-Kjt"/>
+                    <constraint firstAttribute="trailing" secondItem="Gc7-w7-ILb" secondAttribute="trailing" constant="18" id="Pkp-Ho-Dz2"/>
+                    <constraint firstAttribute="trailing" secondItem="xXi-pe-hIX" secondAttribute="trailing" constant="12" id="Xje-wG-G2j"/>
+                    <constraint firstItem="xXi-pe-hIX" firstAttribute="leading" secondItem="247" secondAttribute="leading" constant="26" id="cDO-Fr-Kwz"/>
+                    <constraint firstItem="jjx-rV-E1n" firstAttribute="top" secondItem="xXi-pe-hIX" secondAttribute="bottom" constant="20" id="dQW-Of-I29"/>
+                    <constraint firstItem="gIJ-Ca-6hM" firstAttribute="leading" secondItem="247" secondAttribute="leading" constant="20" id="flr-Ij-xFz"/>
+                    <constraint firstAttribute="trailing" secondItem="gIJ-Ca-6hM" secondAttribute="trailing" constant="12" id="ie1-Ew-Fd2"/>
+                    <constraint firstItem="xXi-pe-hIX" firstAttribute="top" secondItem="gIJ-Ca-6hM" secondAttribute="bottom" constant="20" id="jr1-9D-Xvf"/>
+                    <constraint firstAttribute="bottom" secondItem="Gc7-w7-ILb" secondAttribute="bottom" constant="20" id="o0e-m1-Osa"/>
+                    <constraint firstItem="jjx-rV-E1n" firstAttribute="leading" secondItem="247" secondAttribute="leading" constant="26" id="wVT-aZ-Psx"/>
+                </constraints>
+            </view>
+            <point key="canvasLocation" x="139" y="147"/>
+        </window>
+    </objects>
+</document>
