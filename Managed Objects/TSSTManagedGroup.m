@@ -12,7 +12,7 @@
 #import <XADMaster/XADArchive.h>
 #import <Quartz/Quartz.h>
 #import "TSSTImageUtilities.h"
-#import "TSSTPage.h"
+#import "Simple_Comic-Swift.h"
 
 @implementation TSSTManagedGroup
 
@@ -171,12 +171,12 @@
 				[nestedDescription setValue: path forKey: @"name"];
 				[(TSSTManagedPDF *)nestedDescription pdfContents];
 			}
-			else if([[TSSTPage imageExtensions] containsObject: (NSString *)uti])
+			else if([[Image imageExtensions] containsObject: (NSString *)uti])
 			{
 				nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fullPath forKey: @"imagePath"];
 			}
-			else if ([[TSSTPage textExtensions] containsObject: fileExtension])
+			else if ([[Image textExtensions] containsObject: fileExtension])
 			{
 				nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fullPath forKey: @"imagePath"];
@@ -368,7 +368,7 @@
             CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, nil);
             [(NSString *)uti autorelease];
             
-            if([[TSSTPage imageExtensions] containsObject: (NSString *)uti])
+            if([[Image imageExtensions] containsObject: (NSString *)uti])
             {
                 nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fileName forKey: @"imagePath"];
@@ -397,7 +397,7 @@
                 [nestedDescription setValue: archivePath forKey: @"path"];
                 [(TSSTManagedArchive *)nestedDescription nestedArchiveContents];
             }
-			else if([[TSSTPage textExtensions] containsObject: extension])
+			else if([[Image textExtensions] containsObject: extension])
 			{
 				nestedDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[nestedDescription setValue: fileName forKey: @"imagePath"];
@@ -517,7 +517,7 @@
 - (void)pdfContents
 {
     NSPDFImageRep * rep = [self instance];
-    TSSTPage * imageDescription;
+    Image * imageDescription;
     NSMutableSet * pageSet = [NSMutableSet set];
     NSInteger imageCount = [rep pageCount];
     int pageNumber;

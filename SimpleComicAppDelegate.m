@@ -31,11 +31,11 @@
 #import <XADMaster/XADArchive.h>
 #import "TSSTSessionWindowController.h"
 #import "TSSTSortDescriptor.h"
-#import "TSSTPage.h"
 #import "TSSTManagedGroup.h"
 #import "TSSTManagedSession.h"
 #import "TSSTCustomValueTransformers.h"
 #import "DTPreferencesController.h"
+#import "Simple_Comic-Swift.h"
 
 
 NSString * TSSTPageOrder =         @"pageOrder";
@@ -657,7 +657,7 @@ static NSArray * allAvailableStringEncodings(void)
 				[fileDescription setValue: [path lastPathComponent] forKey: @"name"];
 				[(TSSTManagedPDF *)fileDescription pdfContents];
 			}
-			else if([[TSSTPage imageExtensions] containsObject: fileExtension] || [[TSSTPage textExtensions] containsObject: fileExtension])
+			else if([[Image imageExtensions] containsObject: fileExtension] || [[Image textExtensions] containsObject: fileExtension])
 			{
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[fileDescription setValue: path forKey: @"imagePath"];
@@ -668,7 +668,7 @@ static NSArray * allAvailableStringEncodings(void)
 				[pageSet unionSet: [(TSSTManagedGroup *)fileDescription nestedImages]];
 				[fileDescription setValue: session forKey: @"session"];
 			}
-			else if ([fileDescription class] == [TSSTPage class])
+			else if ([fileDescription class] == [Image class])
 			{
 				[pageSet addObject: fileDescription];
 			}
@@ -704,7 +704,7 @@ static NSArray * allAvailableStringEncodings(void)
     NSString * filePath;
     
 	NSMutableArray * allAllowedFilesExtensions = [NSMutableArray arrayWithArray: [TSSTManagedArchive archiveExtensions]];
-	[allAllowedFilesExtensions addObjectsFromArray: [TSSTPage imageExtensions]];
+	[allAllowedFilesExtensions addObjectsFromArray: [Image imageExtensions]];
     [addPagesModal setAllowedFileTypes:allAllowedFilesExtensions];
 
 	if([addPagesModal runModal] !=  NSModalResponseCancel)

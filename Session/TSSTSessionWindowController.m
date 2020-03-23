@@ -35,7 +35,6 @@
 #import "TSSTPageView.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
-#import "TSSTPage.h"
 #import "TSSTManagedGroup.h"
 #import "TSSTManagedSession.h"
 #import "DTWindowCategory.h"
@@ -806,7 +805,7 @@
 {
 	NSInteger index = [pageController selectionIndex];
 	index += selection;
-	TSSTPage * selectedPage = [pageController arrangedObjects][index];
+	Image * selectedPage = [pageController arrangedObjects][index];
 	TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
 	/* Makes sure that the group is both an archive and not nested */
 	if([selectedGroup class] == [TSSTManagedArchive class] && 
@@ -863,7 +862,7 @@
 	{
 		NSUInteger index = [pageController selectionIndex];
 		index += selection;
-		TSSTPage * selectedPage = [pageController arrangedObjects][index];
+		Image * selectedPage = [pageController arrangedObjects][index];
 		[pageController removeObject: selectedPage];
 		[[self managedObjectContext] deleteObject: selectedPage];
 	}
@@ -879,7 +878,7 @@
 	{
 		NSUInteger index = [pageController selectionIndex];
 		index += selection;
-		TSSTPage * selectedPage = [pageController arrangedObjects][index];
+		Image * selectedPage = [pageController arrangedObjects][index];
 		
 		NSSavePanel * savePanel = [NSSavePanel savePanel];
 		[savePanel setTitle: @"Extract Page"];
@@ -899,7 +898,7 @@
 	{
 		NSUInteger index = [pageController selectionIndex];
 		index += selection;
-		TSSTPage * selectedPage = [pageController arrangedObjects][index];
+		Image * selectedPage = [pageController arrangedObjects][index];
 		TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
 		/* Makes sure that the group is both an archive and not nested */
 		if([selectedGroup class] == [TSSTManagedArchive class] && 
@@ -1023,8 +1022,8 @@
 {
     NSUInteger count = [[pageController arrangedObjects] count];
     NSUInteger index = [pageController selectionIndex];
-    TSSTPage * pageOne = [pageController arrangedObjects][index];
-    TSSTPage * pageTwo = (index + 1) < count ? [pageController arrangedObjects][(index + 1)] : nil;
+    Image * pageOne = [pageController arrangedObjects][index];
+    Image * pageTwo = (index + 1) < count ? [pageController arrangedObjects][(index + 1)] : nil;
     NSString * titleString = [pageOne valueForKey: @"name"];
 	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 	NSString * representationPath;
@@ -1638,7 +1637,7 @@ images are currently visible and then skips over them.
     NSIndexSet *selectedObjects = [pageController selectionIndexes];
     if ([selectedObjects count] == 0)
         return false;
-	TSSTPage * page = [pageController selectedObjects][0];
+	Image * page = [pageController selectedObjects][0];
 	return [[page valueForKey: @"text"] boolValue];
 }
 

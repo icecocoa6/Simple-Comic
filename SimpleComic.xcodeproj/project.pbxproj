@@ -45,7 +45,6 @@
 		2886932C0FED554E002C6BF7 /* thumbnails.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 288693190FED554E002C6BF7 /* thumbnails.tiff */; };
 		2886932D0FED554E002C6BF7 /* two_page.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 2886931A0FED554E002C6BF7 /* two_page.tiff */; };
 		2886932E0FED554E002C6BF7 /* win_scale.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 2886931B0FED554E002C6BF7 /* win_scale.tiff */; };
-		2895F9DA0B67D224008683C6 /* TSSTPage.m in Sources */ = {isa = PBXBuildFile; fileRef = 2895F9D80B67D224008683C6 /* TSSTPage.m */; };
 		28A2660A1285C34300ED6391 /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28A266081285C34300ED6391 /* Preferences.xib */; };
 		28A2660E1285C35700ED6391 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28A2660C1285C35700ED6391 /* MainMenu.xib */; };
 		28A266161285C3A700ED6391 /* TSSTSessionWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28A266141285C3A700ED6391 /* TSSTSessionWindow.xib */; };
@@ -61,6 +60,8 @@
 		52611912242759FA00958E3F /* InfoWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611911242759FA00958E3F /* InfoWindow.swift */; };
 		526119142427756400958E3F /* PolishedProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526119132427756400958E3F /* PolishedProgressBar.swift */; };
 		5261191624279D1000958E3F /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261191524279D1000958E3F /* ThumbnailView.swift */; };
+		5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526119282427DFB800958E3F /* Image+CoreDataClass.swift */; };
+		5261192B2427DFB800958E3F /* Image+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526119292427DFB800958E3F /* Image+CoreDataProperties.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -162,7 +163,6 @@
 		288693190FED554E002C6BF7 /* thumbnails.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = thumbnails.tiff; sourceTree = "<group>"; };
 		2886931A0FED554E002C6BF7 /* two_page.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = two_page.tiff; sourceTree = "<group>"; };
 		2886931B0FED554E002C6BF7 /* win_scale.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = win_scale.tiff; sourceTree = "<group>"; };
-		2895F9D80B67D224008683C6 /* TSSTPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TSSTPage.m; sourceTree = "<group>"; };
 		28A2662E1285C73200ED6391 /* DTPreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTPreferencesController.h; sourceTree = "<group>"; };
 		28A2662F1285C73200ED6391 /* DTPreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTPreferencesController.m; sourceTree = "<group>"; };
 		28A8EAB00B412DE5006C036D /* TSSTPageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TSSTPageView.h; path = Session/TSSTPageView.h; sourceTree = "<group>"; };
@@ -173,7 +173,6 @@
 		28EF3FBE0E9970BD002AD2EE /* UKXattrMetadataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKXattrMetadataStore.h; sourceTree = "<group>"; };
 		28EF3FBF0E9970BD002AD2EE /* UKXattrMetadataStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UKXattrMetadataStore.m; sourceTree = "<group>"; };
 		28F59A9A0B784892003530FB /* TSSTSortDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSSTSortDescriptor.h; sourceTree = "<group>"; };
-		28F5A5F00B7E0F8B003530FB /* TSSTPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSSTPage.h; sourceTree = "<group>"; };
 		28F998310A1FF52C0047BD97 /* TSSTKeyWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TSSTKeyWindow.h; path = "Custom Windows/Fullscreen/TSSTKeyWindow.h"; sourceTree = "<group>"; };
 		28F998320A1FF52C0047BD97 /* TSSTKeyWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TSSTKeyWindow.m; path = "Custom Windows/Fullscreen/TSSTKeyWindow.m"; sourceTree = "<group>"; };
 		28FA4FA40B8AA28000496668 /* TSSTSessionWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TSSTSessionWindowController.h; path = Session/TSSTSessionWindowController.h; sourceTree = "<group>"; };
@@ -194,6 +193,8 @@
 		52611911242759FA00958E3F /* InfoWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoWindow.swift; sourceTree = "<group>"; };
 		526119132427756400958E3F /* PolishedProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PolishedProgressBar.swift; path = "Progress Bar/PolishedProgressBar.swift"; sourceTree = "<group>"; };
 		5261191524279D1000958E3F /* ThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThumbnailView.swift; path = Session/ThumbnailView.swift; sourceTree = "<group>"; };
+		526119282427DFB800958E3F /* Image+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+CoreDataClass.swift"; sourceTree = "<group>"; };
+		526119292427DFB800958E3F /* Image+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
@@ -362,8 +363,8 @@
 		28FA4DD50B8A6F3B00496668 /* Managed Objects */ = {
 			isa = PBXGroup;
 			children = (
-				28F5A5F00B7E0F8B003530FB /* TSSTPage.h */,
-				2895F9D80B67D224008683C6 /* TSSTPage.m */,
+				526119282427DFB800958E3F /* Image+CoreDataClass.swift */,
+				526119292427DFB800958E3F /* Image+CoreDataProperties.swift */,
 				281954E70C1201E5001F5E95 /* TSSTManagedGroup.h */,
 				281954E80C1201E5001F5E95 /* TSSTManagedGroup.m */,
 				2803B2FE0D5E541800CD7906 /* TSSTManagedSession.h */,
@@ -582,10 +583,11 @@
 				52611912242759FA00958E3F /* InfoWindow.swift in Sources */,
 				77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
-				2895F9DA0B67D224008683C6 /* TSSTPage.m in Sources */,
+				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
 				526119102427438F00958E3F /* ImageView.swift in Sources */,
 				286BA1110C4D5F3100E9D06D /* TSSTSessionWindowController.m in Sources */,
 				285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */,
+				5261192B2427DFB800958E3F /* Image+CoreDataProperties.swift in Sources */,
 				281954EA0C1201E6001F5E95 /* TSSTManagedGroup.m in Sources */,
 				5261191624279D1000958E3F /* ThumbnailView.swift in Sources */,
 				286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */,

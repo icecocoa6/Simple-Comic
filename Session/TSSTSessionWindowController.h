@@ -32,7 +32,7 @@
 
 @class TSSTPageView;
 @class TSSTKeyWindow;
-@class TSSTPage;
+@class Image;
 @class PolishedProgressBar;
 @class InfoWindow;
 @class TSSTManagedSession;
