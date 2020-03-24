@@ -35,7 +35,6 @@
 #import "TSSTPageView.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
-#import "DTWindowCategory.h"
 #import "Simple_Comic-Swift.h"
 
 @implementation TSSTSessionWindowController

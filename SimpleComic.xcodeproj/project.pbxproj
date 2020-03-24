@@ -48,7 +48,6 @@
 		28A2660E1285C35700ED6391 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28A2660C1285C35700ED6391 /* MainMenu.xib */; };
 		28A266161285C3A700ED6391 /* TSSTSessionWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28A266141285C3A700ED6391 /* TSSTSessionWindow.xib */; };
 		28A266301285C73200ED6391 /* DTPreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28A2662F1285C73200ED6391 /* DTPreferencesController.m */; };
-		28B34A731013779B006C551C /* DTWindowCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B34A721013779B006C551C /* DTWindowCategory.m */; };
 		28BD08E60C9836E600BD7EAF /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28BD08E50C9836E600BD7EAF /* Quartz.framework */; };
 		28C1D5600DF1FE37003392B4 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28C1D55F0DF1FE37003392B4 /* QuickLook.framework */; };
 		28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 28EF3FBF0E9970BD002AD2EE /* UKXattrMetadataStore.m */; };
@@ -68,6 +67,7 @@
 		5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261193B242911BC00958E3F /* PDF+CoreDataProperties.swift */; };
 		52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611940242A406500958E3F /* Session+CoreDataClass.swift */; };
 		52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611941242A406500958E3F /* Session+CoreDataProperties.swift */; };
+		52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611944242A434200958E3F /* NSWindow+SimpleComic.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -168,8 +168,6 @@
 		28A2662E1285C73200ED6391 /* DTPreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTPreferencesController.h; sourceTree = "<group>"; };
 		28A2662F1285C73200ED6391 /* DTPreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTPreferencesController.m; sourceTree = "<group>"; };
 		28A8EAB00B412DE5006C036D /* TSSTPageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TSSTPageView.h; path = Session/TSSTPageView.h; sourceTree = "<group>"; };
-		28B34A711013779A006C551C /* DTWindowCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DTWindowCategory.h; path = "Custom Windows/DTWindowCategory.h"; sourceTree = "<group>"; };
-		28B34A721013779B006C551C /* DTWindowCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DTWindowCategory.m; path = "Custom Windows/DTWindowCategory.m"; sourceTree = "<group>"; };
 		28BD08E50C9836E600BD7EAF /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		28C1D55F0DF1FE37003392B4 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = /System/Library/Frameworks/QuickLook.framework; sourceTree = "<absolute>"; };
 		28EF3FBE0E9970BD002AD2EE /* UKXattrMetadataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKXattrMetadataStore.h; sourceTree = "<group>"; };
@@ -205,6 +203,7 @@
 		5261193B242911BC00958E3F /* PDF+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PDF+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		52611940242A406500958E3F /* Session+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataClass.swift"; sourceTree = "<group>"; };
 		52611941242A406500958E3F /* Session+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		52611944242A434200958E3F /* NSWindow+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+SimpleComic.swift"; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
@@ -464,8 +463,7 @@
 				FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */,
 				284D3819101249BE00A37AB2 /* DTToolbarItems.h */,
 				284D381A101249BE00A37AB2 /* DTToolbarItems.m */,
-				28B34A711013779A006C551C /* DTWindowCategory.h */,
-				28B34A721013779B006C551C /* DTWindowCategory.m */,
+				52611944242A434200958E3F /* NSWindow+SimpleComic.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -601,6 +599,7 @@
 				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
 				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
+				52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */,
 				526119102427438F00958E3F /* ImageView.swift in Sources */,
 				286BA1110C4D5F3100E9D06D /* TSSTSessionWindowController.m in Sources */,
 				285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */,
@@ -613,7 +612,6 @@
 				28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */,
 				284D381B101249BE00A37AB2 /* DTToolbarItems.m in Sources */,
 				5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */,
-				28B34A731013779B006C551C /* DTWindowCategory.m in Sources */,
 				28FA89161094DA53005D6F0C /* TSSTKeyWindow.m in Sources */,
 				526119142427756400958E3F /* PolishedProgressBar.swift in Sources */,
 				526119302428CC8600958E3F /* ImageGroup+CoreDataClass.swift in Sources */,
