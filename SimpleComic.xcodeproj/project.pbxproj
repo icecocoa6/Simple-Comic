@@ -16,7 +16,6 @@
 		283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 283C4D5C0C43DE6800DB4FE9 /* TSSTImageUtilities.m */; };
 		284348140DA95C4A00F602E2 /* XADMaster.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 284348060DA95C4300F602E2 /* XADMaster.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		284348CE0DA95C5300F602E2 /* XADMaster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 284348060DA95C4300F602E2 /* XADMaster.framework */; };
-		284D381B101249BE00A37AB2 /* DTToolbarItems.m in Sources */ = {isa = PBXBuildFile; fileRef = 284D381A101249BE00A37AB2 /* DTToolbarItems.m */; };
 		2851C5A00FC8651C002927E0 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2851C59F0FC8651C002927E0 /* dsa_pub.pem */; };
 		285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */ = {isa = PBXBuildFile; fileRef = FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */; };
 		285FE3300F945E2300CD8F96 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 285FE32F0F945E2300CD8F96 /* Carbon.framework */; };
@@ -68,6 +67,7 @@
 		52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611940242A406500958E3F /* Session+CoreDataClass.swift */; };
 		52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611941242A406500958E3F /* Session+CoreDataProperties.swift */; };
 		52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611944242A434200958E3F /* NSWindow+SimpleComic.swift */; };
+		52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611946242A44CF00958E3F /* ToolbarItem.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -137,8 +137,6 @@
 		283C4D7B0C43DF5300DB4FE9 /* TSSTBezelWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = TSSTBezelWindow.m; path = "Custom Windows/Bezel/TSSTBezelWindow.m"; sourceTree = "<group>"; };
 		283C4D7C0C43DF5300DB4FE9 /* TSSTBezelWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TSSTBezelWindow.h; path = "Custom Windows/Bezel/TSSTBezelWindow.h"; sourceTree = "<group>"; };
 		284348060DA95C4300F602E2 /* XADMaster.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XADMaster.framework; path = Frameworks/XADMaster.framework; sourceTree = "<group>"; };
-		284D3819101249BE00A37AB2 /* DTToolbarItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DTToolbarItems.h; path = Session/DTToolbarItems.h; sourceTree = "<group>"; };
-		284D381A101249BE00A37AB2 /* DTToolbarItems.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DTToolbarItems.m; path = Session/DTToolbarItems.m; sourceTree = "<group>"; };
 		2851C59F0FC8651C002927E0 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		285FE32F0F945E2300CD8F96 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		286236010AADDB6200B83E77 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
@@ -204,6 +202,7 @@
 		52611940242A406500958E3F /* Session+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataClass.swift"; sourceTree = "<group>"; };
 		52611941242A406500958E3F /* Session+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		52611944242A434200958E3F /* NSWindow+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+SimpleComic.swift"; sourceTree = "<group>"; };
+		52611946242A44CF00958E3F /* ToolbarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ToolbarItem.swift; path = Session/ToolbarItem.swift; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
@@ -461,9 +460,8 @@
 				28FA4FA50B8AA28000496668 /* TSSTSessionWindowController.m */,
 				28A8EAB00B412DE5006C036D /* TSSTPageView.h */,
 				FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */,
-				284D3819101249BE00A37AB2 /* DTToolbarItems.h */,
-				284D381A101249BE00A37AB2 /* DTToolbarItems.m */,
 				52611944242A434200958E3F /* NSWindow+SimpleComic.swift */,
+				52611946242A44CF00958E3F /* ToolbarItem.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -605,12 +603,12 @@
 				285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */,
 				5261192B2427DFB800958E3F /* Image+CoreDataProperties.swift in Sources */,
 				5261191624279D1000958E3F /* ThumbnailView.swift in Sources */,
+				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,
 				286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */,
 				5261193C242911BC00958E3F /* Archive+CoreDataClass.swift in Sources */,
 				283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */,
 				281C0D700CEE6FBA009A9696 /* TSSTBezelWindow.m in Sources */,
 				28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */,
-				284D381B101249BE00A37AB2 /* DTToolbarItems.m in Sources */,
 				5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */,
 				28FA89161094DA53005D6F0C /* TSSTKeyWindow.m in Sources */,
 				526119142427756400958E3F /* PolishedProgressBar.swift in Sources */,

@@ -70,7 +70,7 @@
             </view>
             <toolbar key="toolbar" implicitIdentifier="1A96E21F-07EA-4D3B-B356-508A45D1FCBB" displayMode="iconAndLabel" sizeMode="regular" id="507">
                 <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="ADD2836D-8728-474F-9355-80FA8EA9972C" label="Turn Page" paletteLabel="Turn Page" sizingBehavior="auto" id="553" customClass="DTPageTurnToolbarItem">
+                    <toolbarItem implicitItemIdentifier="ADD2836D-8728-474F-9355-80FA8EA9972C" label="Turn Page" paletteLabel="Turn Page" sizingBehavior="auto" id="553" customClass="PageTurnToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="554">
                             <rect key="frame" x="3" y="14" width="54" height="23"/>
@@ -89,7 +89,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="E33C7D17-8160-4B40-8EDF-78600C84FE8C" label="Page Scaling" paletteLabel="Page Scaling" sizingBehavior="auto" id="517" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="E33C7D17-8160-4B40-8EDF-78600C84FE8C" label="Page Scaling" paletteLabel="Page Scaling" sizingBehavior="auto" id="517" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="515">
                             <rect key="frame" x="0.0" y="14" width="79" height="23"/>
@@ -113,7 +113,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="9C25BD8E-6129-4874-917D-C4C5F75BD24F" label="Page Order" paletteLabel="Page Order" sizingBehavior="auto" id="520" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="9C25BD8E-6129-4874-917D-C4C5F75BD24F" label="Page Order" paletteLabel="Page Order" sizingBehavior="auto" id="520" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="518">
                             <rect key="frame" x="0.0" y="14" width="70" height="23"/>
@@ -134,7 +134,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="57633342-20D2-433A-9828-1C85F79205A8" label="Page Layout" paletteLabel="Page Layout" sizingBehavior="auto" id="523" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="57633342-20D2-433A-9828-1C85F79205A8" label="Page Layout" paletteLabel="Page Layout" sizingBehavior="auto" id="523" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="521">
                             <rect key="frame" x="1" y="14" width="70" height="23"/>
@@ -151,7 +151,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="2FEB6E2E-5C3E-4725-B4B7-D5204BC8F2A8" label="Rotate" paletteLabel="Rotate Pages" sizingBehavior="auto" id="585" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="2FEB6E2E-5C3E-4725-B4B7-D5204BC8F2A8" label="Rotate" paletteLabel="Rotate Pages" sizingBehavior="auto" id="585" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="586">
                             <rect key="frame" x="11" y="14" width="55" height="23"/>
@@ -168,7 +168,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="C8491130-5672-4D81-9D91-76BB3F03D233" label="Zoom" paletteLabel="Zoom" sizingBehavior="auto" id="559" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="C8491130-5672-4D81-9D91-76BB3F03D233" label="Zoom" paletteLabel="Zoom" sizingBehavior="auto" id="559" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <segmentedControl key="view" verticalHuggingPriority="750" id="557">
                             <rect key="frame" x="0.0" y="14" width="79" height="23"/>
@@ -188,7 +188,7 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="55B2F7CD-2E3A-405A-BF65-65B5A68E94BD" label="Loupe" paletteLabel="Loupe" image="Loupe" id="575" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="55B2F7CD-2E3A-405A-BF65-65B5A68E94BD" label="Loupe" paletteLabel="Loupe" image="Loupe" id="575" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <size key="minSize" width="27" height="25"/>
                         <size key="maxSize" width="27" height="25"/>
@@ -204,14 +204,14 @@
                             </connections>
                         </button>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="AB4BCD46-EE79-45CC-9A97-733E3740BA34" label="Thumbnails" paletteLabel="Thumbnails" image="thumbnails" id="577" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="AB4BCD46-EE79-45CC-9A97-733E3740BA34" label="Thumbnails" paletteLabel="Thumbnails" image="thumbnails" id="577" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <size key="minSize" width="27" height="25"/>
                         <size key="maxSize" width="27" height="25"/>
                         <button key="view" toolTip="Thumbnail View" verticalHuggingPriority="750" id="578">
                             <rect key="frame" x="21" y="14" width="27" height="25"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="squareTextured" title="Thumbnails" bezelStyle="texturedSquare" image="thumbnails" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="579">
+                            <buttonCell key="cell" type="squareTextured" bezelStyle="texturedSquare" image="thumbnails" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="579">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
                             </buttonCell>
@@ -220,7 +220,7 @@
                             </connections>
                         </button>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="7D6CA1DF-7F26-421E-874E-21596C513A14" label="Capture Page" paletteLabel="Capture Page" image="extract" id="688" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="7D6CA1DF-7F26-421E-874E-21596C513A14" label="Capture Page" paletteLabel="Capture Page" image="extract" id="688" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <size key="minSize" width="27" height="25"/>
                         <size key="maxSize" width="27" height="25"/>
@@ -236,7 +236,7 @@
                             </connections>
                         </button>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="7ACC3052-A491-4940-83A9-B40928F5C001" label="Set Icon" paletteLabel="Set Icon" image="quicklook" id="693" customClass="DTToolbarItem">
+                    <toolbarItem implicitItemIdentifier="7ACC3052-A491-4940-83A9-B40928F5C001" label="Set Icon" paletteLabel="Set Icon" image="quicklook" id="693" customClass="ToolbarItem" customModule="Simple_Comic" customModuleProvider="target">
                         <nil key="toolTip"/>
                         <size key="minSize" width="27" height="25"/>
                         <size key="maxSize" width="27" height="25"/>
