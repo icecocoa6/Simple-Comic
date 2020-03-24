@@ -31,7 +31,6 @@
 #import <XADMaster/XADArchive.h>
 #import "TSSTSessionWindowController.h"
 #import "TSSTSortDescriptor.h"
-#import "TSSTManagedSession.h"
 #import "TSSTCustomValueTransformers.h"
 #import "DTPreferencesController.h"
 #import "Simple_Comic-Swift.h"
@@ -253,7 +252,7 @@ static NSArray * allAvailableStringEncodings(void)
 
 	if(launchFiles)
 	{
-        TSSTManagedSession * session;
+        Session * session;
         session = [self newSessionWithFiles: launchFiles];
         [self windowForSession: session];
 		
@@ -321,7 +320,7 @@ static NSArray * allAvailableStringEncodings(void)
 {	
 	if(!launchInProgress)
 	{
-		TSSTManagedSession * session;
+		Session * session;
 		session = [self newSessionWithFiles: filenames];
 		[self windowForSession: session];
 	}
@@ -330,27 +329,6 @@ static NSArray * allAvailableStringEncodings(void)
 		launchFiles = [filenames retain];
 	}
 }
-
-
-
-//- (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename;
-//{	
-//	if(!launchInProgress)
-//	{
-//		TSSTManagedSession * session;
-//		session = [self newSessionWithFiles: [NSArray arrayWithObject: filename]];
-//		[self windowForSession: session];
-//		return YES;
-//
-//	}
-//	
-//	return NO;
-//
-////	else
-////	{
-////		launchFiles = [filenames retain];
-////	}
-//}
 
 
 #pragma mark -
@@ -488,7 +466,7 @@ static NSArray * allAvailableStringEncodings(void)
 
 
 
-- (void)windowForSession:(TSSTManagedSession *)settings
+- (void)windowForSession:(Session *)settings
 {
 	NSArray * existingSessions = [sessions valueForKey: @"session"];
     if([[settings valueForKey: @"images"] count] > 0 && ![existingSessions containsObject: settings])
@@ -505,7 +483,7 @@ static NSArray * allAvailableStringEncodings(void)
 - (void)endSession:(NSNotification *)notification
 {
 	TSSTSessionWindowController * controller = [notification object];
-	TSSTManagedSession * sessionToRemove = [[controller session] retain];
+	Session * sessionToRemove = [[controller session] retain];
 	[sessions removeObject: controller];
 	[[self managedObjectContext] deleteObject: sessionToRemove];
 	[sessionToRemove release];
@@ -515,7 +493,7 @@ static NSArray * allAvailableStringEncodings(void)
 
 - (void)sessionRelaunch
 {
-    TSSTManagedSession * session;
+    Session * session;
 	NSFetchRequest * sessionRequest = [NSFetchRequest new];
 	[sessionRequest setEntity: [NSEntityDescription entityForName: @"Session" inManagedObjectContext: [self managedObjectContext]]];
 	NSError * fetchError;
@@ -536,9 +514,9 @@ static NSArray * allAvailableStringEncodings(void)
 }
 
 
-- (TSSTManagedSession *)newSessionWithFiles:(NSArray *)files
+- (Session *)newSessionWithFiles:(NSArray *)files
 {
-    TSSTManagedSession * sessionDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Session" inManagedObjectContext: [self managedObjectContext]];
+    Session * sessionDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Session" inManagedObjectContext: [self managedObjectContext]];
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     
     [sessionDescription setValue: [defaults valueForKey: TSSTPageScaleOptions] forKey: TSSTPageScaleOptions];
@@ -552,7 +530,7 @@ static NSArray * allAvailableStringEncodings(void)
 
 
 
-- (void)addFiles:(NSArray *)paths toSession:(TSSTManagedSession *)session
+- (void)addFiles:(NSArray *)paths toSession:(Session *)session
 {	
 //	[[self managedObjectContext] retain];
 //	[[self managedObjectContext] lock];
@@ -649,7 +627,7 @@ static NSArray * allAvailableStringEncodings(void)
             [filePaths addObject:filePath];
         }
         
-		TSSTManagedSession * session = [self newSessionWithFiles: filePaths];
+		Session * session = [self newSessionWithFiles: filePaths];
 		[self windowForSession: session];
 	}
 }

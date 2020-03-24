@@ -35,7 +35,6 @@
 #import "TSSTPageView.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
-#import "TSSTManagedSession.h"
 #import "DTWindowCategory.h"
 #import "Simple_Comic-Swift.h"
 
@@ -84,7 +83,7 @@
 /*!
  
 */
-- (id)initWithSession:(TSSTManagedSession *)aSession
+- (id)initWithSession:(Session *)aSession
 {
     self = [super init];
     if (self != nil)
@@ -1290,7 +1289,7 @@ images are currently visible and then skips over them.
 #pragma mark Binding Methods
 
 
-- (TSSTManagedSession *)session
+- (Session *)session
 {
     return session;
 }

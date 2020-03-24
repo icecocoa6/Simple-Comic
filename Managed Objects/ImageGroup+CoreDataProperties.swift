@@ -2,10 +2,7 @@
 //  ImageGroup+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Original version is created by Alexander Rauchfuss on 2/9/08.
-//  Copyright 2008 Dancing Tortoise Software. All rights reserved.
-//
-//  Ported by Tomioka Taichi on 2020/03/24.
+//  Created by 冨岡太一 on 2020/03/24.
 //
 //
 
@@ -25,7 +22,7 @@ extension ImageGroup {
     @NSManaged public var name: String?
     @NSManaged public var groups: NSSet?
     @NSManaged public var images: NSSet?
-    @NSManaged public var session: TSSTManagedSession?
+    @NSManaged public var session: Session?
     @NSManaged public var group: ImageGroup?
     @NSManaged public var nestedImages: NSSet?
 

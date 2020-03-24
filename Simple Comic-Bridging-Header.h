@@ -6,5 +6,4 @@
 
 #import "TSSTImageUtilities.h"
 #import "TSSTSessionWindowController.h"
-#import "TSSTManagedSession.h"
 #import "SimpleComicAppDelegate.h"

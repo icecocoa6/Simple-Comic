@@ -2,7 +2,7 @@
 //  Image+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Ported by Tomioka Taichi on 2020/03/24.
+//  Created by 冨岡太一 on 2020/03/24.
 //
 //
 
@@ -24,7 +24,7 @@ extension Image {
     @NSManaged public var aspectRatio: NSNumber?
     @NSManaged public var thumbnailData: Data?
     @NSManaged public var group: ImageGroup?
-    @NSManaged public var session: TSSTManagedSession?
+    @NSManaged public var session: Session?
     @NSManaged public var includedGroups: NSSet?
 
 }

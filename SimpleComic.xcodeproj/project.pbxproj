@@ -50,7 +50,6 @@
 		28A266301285C73200ED6391 /* DTPreferencesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28A2662F1285C73200ED6391 /* DTPreferencesController.m */; };
 		28B34A731013779B006C551C /* DTWindowCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 28B34A721013779B006C551C /* DTWindowCategory.m */; };
 		28BD08E60C9836E600BD7EAF /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28BD08E50C9836E600BD7EAF /* Quartz.framework */; };
-		28C1D4080DF18251003392B4 /* TSSTManagedSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2803B2FF0D5E541800CD7906 /* TSSTManagedSession.m */; };
 		28C1D5600DF1FE37003392B4 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28C1D55F0DF1FE37003392B4 /* QuickLook.framework */; };
 		28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 28EF3FBF0E9970BD002AD2EE /* UKXattrMetadataStore.m */; };
 		28F660461067255600EC8A34 /* Help in Resources */ = {isa = PBXBuildFile; fileRef = 28F6603B1067255600EC8A34 /* Help */; };
@@ -67,6 +66,8 @@
 		5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611939242911BC00958E3F /* Archive+CoreDataProperties.swift */; };
 		5261193E242911BC00958E3F /* PDF+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261193A242911BC00958E3F /* PDF+CoreDataClass.swift */; };
 		5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261193B242911BC00958E3F /* PDF+CoreDataProperties.swift */; };
+		52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611940242A406500958E3F /* Session+CoreDataClass.swift */; };
+		52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611941242A406500958E3F /* Session+CoreDataProperties.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -126,8 +127,6 @@
 
 /* Begin PBXFileReference section */
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		2803B2FE0D5E541800CD7906 /* TSSTManagedSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSSTManagedSession.h; sourceTree = "<group>"; };
-		2803B2FF0D5E541800CD7906 /* TSSTManagedSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TSSTManagedSession.m; sourceTree = "<group>"; };
 		28073CAF0FF9956500D2602B /* extract.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = extract.tiff; sourceTree = "<group>"; };
 		28073DAF0FFB0EED00D2602B /* icon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = icon.tiff; sourceTree = "<group>"; };
 		28073DE20FFC2F8B00D2602B /* QuickComic.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = QuickComic.xcodeproj; path = QuickComic/QuickComic.xcodeproj; sourceTree = "<group>"; };
@@ -204,6 +203,8 @@
 		52611939242911BC00958E3F /* Archive+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Archive+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		5261193A242911BC00958E3F /* PDF+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PDF+CoreDataClass.swift"; sourceTree = "<group>"; };
 		5261193B242911BC00958E3F /* PDF+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PDF+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		52611940242A406500958E3F /* Session+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataClass.swift"; sourceTree = "<group>"; };
+		52611941242A406500958E3F /* Session+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
@@ -372,6 +373,8 @@
 		28FA4DD50B8A6F3B00496668 /* Managed Objects */ = {
 			isa = PBXGroup;
 			children = (
+				52611940242A406500958E3F /* Session+CoreDataClass.swift */,
+				52611941242A406500958E3F /* Session+CoreDataProperties.swift */,
 				52611938242911BC00958E3F /* Archive+CoreDataClass.swift */,
 				52611939242911BC00958E3F /* Archive+CoreDataProperties.swift */,
 				5261193A242911BC00958E3F /* PDF+CoreDataClass.swift */,
@@ -380,8 +383,6 @@
 				5261192F2428CC8600958E3F /* ImageGroup+CoreDataProperties.swift */,
 				526119282427DFB800958E3F /* Image+CoreDataClass.swift */,
 				526119292427DFB800958E3F /* Image+CoreDataProperties.swift */,
-				2803B2FE0D5E541800CD7906 /* TSSTManagedSession.h */,
-				2803B2FF0D5E541800CD7906 /* TSSTManagedSession.m */,
 			);
 			path = "Managed Objects";
 			sourceTree = "<group>";
@@ -597,6 +598,7 @@
 				52611912242759FA00958E3F /* InfoWindow.swift in Sources */,
 				77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */,
 				5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */,
+				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
 				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
 				526119102427438F00958E3F /* ImageView.swift in Sources */,
@@ -608,7 +610,6 @@
 				5261193C242911BC00958E3F /* Archive+CoreDataClass.swift in Sources */,
 				283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */,
 				281C0D700CEE6FBA009A9696 /* TSSTBezelWindow.m in Sources */,
-				28C1D4080DF18251003392B4 /* TSSTManagedSession.m in Sources */,
 				28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */,
 				284D381B101249BE00A37AB2 /* DTToolbarItems.m in Sources */,
 				5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */,
@@ -618,6 +619,7 @@
 				526119302428CC8600958E3F /* ImageGroup+CoreDataClass.swift in Sources */,
 				287D0C1210F0595900207768 /* Sessions_DataModel.xcdatamodel in Sources */,
 				5261193E242911BC00958E3F /* PDF+CoreDataClass.swift in Sources */,
+				52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */,
 				28A266301285C73200ED6391 /* DTPreferencesController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

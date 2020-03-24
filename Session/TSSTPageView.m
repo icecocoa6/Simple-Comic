@@ -1320,7 +1320,7 @@
 
 - (void)magnifyWithEvent:(NSEvent *)event
 {
-    TSSTManagedSession * session = [sessionController session];
+    Session * session = [sessionController session];
     int scalingOption = [[session valueForKey: TSSTPageScaleOptions] intValue];
     float previousZoom = [[session valueForKey: TSSTZoomLevel] floatValue];
     if(scalingOption != 0)

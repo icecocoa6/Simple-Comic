@@ -32,7 +32,7 @@
 
 @class SS_PrefsController;
 @class TSSTSessionWindowController;
-@class TSSTManagedSession;
+@class Session;
 @class DTPreferencesController;
 
 extern NSString * TSSTPageOrder;
@@ -129,11 +129,11 @@ extern NSString * TSSTSessionEndNotification;
 
 /*  Creates a new Session object based on user prefs and then 
     passes the files array to addFiles:toSesion: */
-- (TSSTManagedSession *)newSessionWithFiles:(NSArray *)files;
+- (Session *)newSessionWithFiles:(NSArray *)files;
 
 /*  This method is called every time an existing session needs
     to be made visible to a user. */
-- (void)windowForSession:(TSSTManagedSession *)session;
+- (void)windowForSession:(Session *)session;
 
 /*  When an end session notification is received this method
 	is called. */
@@ -145,7 +145,7 @@ extern NSString * TSSTSessionEndNotification;
     
 /*  This method adds any file passed to it to a session.  This includes recursive
 	parsing of archives and folders. */
-- (void)addFiles:(NSArray *)paths toSession:(TSSTManagedSession *)session;
+- (void)addFiles:(NSArray *)paths toSession:(Session *)session;
 
 /*  Called when Simple Comic encounters a password protected
     archive.  Brings a password dialog forward. */

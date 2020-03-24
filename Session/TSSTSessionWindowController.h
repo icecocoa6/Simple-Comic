@@ -35,7 +35,7 @@
 @class Image;
 @class PolishedProgressBar;
 @class InfoWindow;
-@class TSSTManagedSession;
+@class Session;
 
 enum PageSelectionMode {
 	None,
@@ -90,7 +90,7 @@ enum PageSelectionMode {
 	IBOutlet InfoWindow * thumbnailPanel;
 	
 	/* The session object used to maintain settings */
-    TSSTManagedSession * session;
+    Session * session;
     
     /* This var is bound to the session window name */
     NSString * pageNames;
@@ -112,7 +112,7 @@ enum PageSelectionMode {
 @property (assign) NSInteger pageTurn;
 @property (retain) NSString * pageNames;
 
-- (id)initWithSession:(TSSTManagedSession *)aSession;
+- (id)initWithSession:(Session *)aSession;
 
 // View Actions
 - (IBAction)changePageOrder:(id)sender;
@@ -189,7 +189,7 @@ enum PageSelectionMode {
 - (BOOL)canTurnPageRight;
 
 
-- (TSSTManagedSession *)session;
+- (Session *)session;
 - (NSManagedObjectContext *)managedObjectContext;
 - (void)toolbarWillAddItem:(NSNotification *)notification;
 
