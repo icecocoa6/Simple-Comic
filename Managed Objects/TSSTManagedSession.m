@@ -7,7 +7,7 @@
 //
 
 #import "TSSTManagedSession.h"
-#import "TSSTManagedGroup.h"
+#import "Simple_Comic-Swift.h"
 
 @implementation TSSTManagedSession
 
@@ -17,7 +17,7 @@
 - (void)awakeFromFetch
 {
 	[super awakeFromFetch];
-	TSSTManagedGroup * group;
+	ImageGroup * group;
 	NSString * path;
     /* By calling path for all children, groups with unresolved bookmarks
      are deleted. */

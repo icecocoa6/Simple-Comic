@@ -34,6 +34,7 @@ class PolishedProgressBar: NSView {
     /* The maximum value of the progress bar. */
     @objc dynamic var maxValue: Int = 1 {
         didSet {
+            assert(maxValue > 0)
             self.needsDisplay = true
         }
     }
@@ -80,8 +81,6 @@ class PolishedProgressBar: NSView {
             NSAttributedString.Key.shadow: stringEmboss
         ]
     }()
-    
-    var observers: [NSKeyValueObservation] = []
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)

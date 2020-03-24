@@ -2,7 +2,7 @@
 //  Image+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by Tomioka Taichi on 2020/03/23.
+//  Ported by Tomioka Taichi on 2020/03/24.
 //
 //
 
@@ -23,7 +23,25 @@ extension Image {
     @NSManaged public var text: NSNumber?
     @NSManaged public var aspectRatio: NSNumber?
     @NSManaged public var thumbnailData: Data?
-    @NSManaged public var group: TSSTManagedGroup?
+    @NSManaged public var group: ImageGroup?
     @NSManaged public var session: TSSTManagedSession?
+    @NSManaged public var includedGroups: NSSet?
+
+}
+
+// MARK: Generated accessors for includedGroups
+extension Image {
+
+    @objc(addIncludedGroupsObject:)
+    @NSManaged public func addToIncludedGroups(_ value: ImageGroup)
+
+    @objc(removeIncludedGroupsObject:)
+    @NSManaged public func removeFromIncludedGroups(_ value: ImageGroup)
+
+    @objc(addIncludedGroups:)
+    @NSManaged public func addToIncludedGroups(_ values: NSSet)
+
+    @objc(removeIncludedGroups:)
+    @NSManaged public func removeFromIncludedGroups(_ values: NSSet)
 
 }

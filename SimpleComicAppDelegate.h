@@ -32,9 +32,6 @@
 
 @class SS_PrefsController;
 @class TSSTSessionWindowController;
-@class TSSTManagedArchive;
-@class TSSTManagedGroup;
-@class TSSTManagedPDF;
 @class TSSTManagedSession;
 @class DTPreferencesController;
 

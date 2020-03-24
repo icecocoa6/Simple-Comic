@@ -31,7 +31,6 @@
 #import <XADMaster/XADArchive.h>
 #import "TSSTSessionWindowController.h"
 #import "TSSTSortDescriptor.h"
-#import "TSSTManagedGroup.h"
 #import "TSSTManagedSession.h"
 #import "TSSTCustomValueTransformers.h"
 #import "DTPreferencesController.h"
@@ -246,7 +245,7 @@ static NSArray * allAvailableStringEncodings(void)
 	/* Starts the auto save timer */
 	if([[userDefaults valueForKey: TSSTSessionRestore] boolValue])
 	{
-		autoSave = [NSTimer scheduledTimerWithTimeInterval: 30.0 target: self selector: @selector(saveContext) userInfo: nil repeats: YES];
+//		autoSave = [NSTimer scheduledTimerWithTimeInterval: 30.0 target: self selector: @selector(saveContext) userInfo: nil repeats: YES];
 	}
     sessions = [NSMutableArray new];
 	[self sessionRelaunch];
@@ -254,33 +253,9 @@ static NSArray * allAvailableStringEncodings(void)
 
 	if(launchFiles)
 	{
-		TSSTManagedSession * session;
-//		if (optionHeldAtlaunch)
-//		{
-//			NSMutableArray * looseImages = [NSMutableArray array];
-//			for(NSString * path in launchFiles)
-//			{
-//				if([[TSSTManagedArchive archiveExtensions] containsObject: [[path pathExtension] lowercaseString]])
-//				{
-//					session = [self newSessionWithFiles: [NSArray arrayWithObject: path]];
-//					[self windowForSession: session];
-//				}
-//				else {
-//					[looseImages addObject: path];
-//				}
-//				
-//				if ([looseImages count]> 0) {
-//					session = [self newSessionWithFiles: looseImages];
-//					[self windowForSession: session];
-//				}
-//				
-//			}
-//		}
-//		else
-//		{
-			session = [self newSessionWithFiles: launchFiles];
-			[self windowForSession: session];
-//		}
+        TSSTManagedSession * session;
+        session = [self newSessionWithFiles: launchFiles];
+        [self windowForSession: session];
 		
 		[launchFiles release];
 		launchFiles = nil;
@@ -335,7 +310,7 @@ static NSArray * allAvailableStringEncodings(void)
 		autoSave = nil;
 		if([[userDefaults valueForKey: TSSTSessionRestore] boolValue])
 		{
-			autoSave = [NSTimer scheduledTimerWithTimeInterval: 30.0 target: self selector: @selector(saveContext) userInfo: nil repeats: YES];
+//			autoSave = [NSTimer scheduledTimerWithTimeInterval: 30.0 target: self selector: @selector(saveContext) userInfo: nil repeats: YES];
 		}
 	}
 }
@@ -376,49 +351,6 @@ static NSArray * allAvailableStringEncodings(void)
 ////		launchFiles = [filenames retain];
 ////	}
 //}
-
-
-//- (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
-//{	
-//	BOOL option = (GetCurrentKeyModifiers()&(optionKey) != 0);
-//	if(!launchInProgress)
-//	{
-//		TSSTManagedSession * session;
-//		if (option)
-//		{
-//			NSMutableArray * looseImages = [NSMutableArray array];
-//			for(NSString * path in filenames)
-//			{
-//				if([[TSSTManagedArchive archiveExtensions] containsObject: [[path pathExtension] lowercaseString]])
-//				{
-//					session = [self newSessionWithFiles: [NSArray arrayWithObject: path]];
-//					[self windowForSession: session];
-//				}
-//				else
-//				{
-//					[looseImages addObject: path];
-//				}
-//				
-//				if ([looseImages count]> 0) {
-//					session = [self newSessionWithFiles: looseImages];
-//					[self windowForSession: session];
-//				}
-//				
-//			}
-//		}
-//		else
-//		{
-//			session = [self newSessionWithFiles: filenames];
-//			[self windowForSession: session];
-//		}
-//	}
-//	else
-//	{
-//		launchFiles = [filenames retain];
-//		optionHeldAtlaunch = option;
-//	}
-//}
-
 
 
 #pragma mark -
@@ -641,21 +573,21 @@ static NSArray * allAvailableStringEncodings(void)
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"ImageGroup" inManagedObjectContext: [self managedObjectContext]];
 				[fileDescription setValue: path forKey: @"path"];
 				[fileDescription setValue: [path lastPathComponent] forKey: @"name"];
-				[(TSSTManagedGroup *)fileDescription nestedFolderContents];
+				[(ImageGroup *)fileDescription nestedFolderContents];
 			}
-			else if([[TSSTManagedArchive archiveExtensions] containsObject: fileExtension])
+			else if([[Archive archiveExtensions] containsObject: fileExtension])
 			{
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Archive" inManagedObjectContext: [self managedObjectContext]];
 				[fileDescription setValue: path forKey: @"path"];
 				[fileDescription setValue: [path lastPathComponent] forKey: @"name"];
-				[(TSSTManagedArchive *)fileDescription nestedArchiveContents];
+				[(Archive *)fileDescription nestedArchiveContents];
 			}
 			else if([fileExtension isEqualToString: @"pdf"])
 			{
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"PDF" inManagedObjectContext: [self managedObjectContext]];
 				[fileDescription setValue: path forKey: @"path"];
 				[fileDescription setValue: [path lastPathComponent] forKey: @"name"];
-				[(TSSTManagedPDF *)fileDescription pdfContents];
+				[(PDF *)fileDescription pdfContents];
 			}
 			else if([[Image imageExtensions] containsObject: fileExtension] || [[Image textExtensions] containsObject: fileExtension])
 			{
@@ -663,9 +595,9 @@ static NSArray * allAvailableStringEncodings(void)
 				[fileDescription setValue: path forKey: @"imagePath"];
 			}
 			
-			if([fileDescription class] == [TSSTManagedGroup class] || [fileDescription superclass] == [TSSTManagedGroup class])
+			if([fileDescription class] == [ImageGroup class] || [fileDescription superclass] == [ImageGroup class])
 			{
-				[pageSet unionSet: [(TSSTManagedGroup *)fileDescription nestedImages]];
+				[pageSet unionSet: [(ImageGroup *)fileDescription nestedImages]];
 				[fileDescription setValue: session forKey: @"session"];
 			}
 			else if ([fileDescription class] == [Image class])
@@ -703,7 +635,7 @@ static NSArray * allAvailableStringEncodings(void)
 	NSURL * fileURL;
     NSString * filePath;
     
-	NSMutableArray * allAllowedFilesExtensions = [NSMutableArray arrayWithArray: [TSSTManagedArchive archiveExtensions]];
+	NSMutableArray * allAllowedFilesExtensions = [NSMutableArray arrayWithArray: [Archive archiveExtensions]];
 	[allAllowedFilesExtensions addObjectsFromArray: [Image imageExtensions]];
     [addPagesModal setAllowedFileTypes:allAllowedFilesExtensions];
 

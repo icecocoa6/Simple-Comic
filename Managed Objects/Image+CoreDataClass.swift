@@ -133,19 +133,12 @@ public class Image: NSManagedObject {
         }
     }
     
-    var thumbnail: NSImage? {
-        var thumbnailData = self.thumbnailData
-        
-        if thumbnailData == nil
+    @objc var thumbnail: NSImage? {
+        if self.thumbnailData == nil
         {
-            thumbnailData = self.prepThumbnail
-            self.thumbnailData = thumbnailData
-            return NSImage.init(data: thumbnailData!)
+            self.thumbnailData = self.prepThumbnail
         }
-        else
-        {
-            return NSImage.init(data: thumbnailData!)
-        }
+        return NSImage.init(data: self.thumbnailData!)
     }
     
     var prepThumbnail: Data? {
@@ -236,7 +229,7 @@ public class Image: NSManagedObject {
     @objc var pageData: Data? {
         if let index = self.index
         {
-            return self.group?.data(forPageIndex: index.int32Value)
+            return self.group?.dataFor(pageIndex: index.intValue)
         }
         else if let imagePath = self.imagePath
         {

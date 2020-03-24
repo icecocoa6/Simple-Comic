@@ -35,7 +35,6 @@
 #import "TSSTPageView.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
-#import "TSSTManagedGroup.h"
 #import "TSSTManagedSession.h"
 #import "DTWindowCategory.h"
 #import "Simple_Comic-Swift.h"
@@ -806,9 +805,9 @@
 	NSInteger index = [pageController selectionIndex];
 	index += selection;
 	Image * selectedPage = [pageController arrangedObjects][index];
-	TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
+	ImageGroup * selectedGroup = [selectedPage valueForKey: @"group"];
 	/* Makes sure that the group is both an archive and not nested */
-	if([selectedGroup class] == [TSSTManagedArchive class] && 
+	if([selectedGroup class] == [Archive class] &&
 	   selectedGroup == [selectedGroup topLevelGroup] &&
 	   ![[selectedPage valueForKey: @"text"] boolValue])
 	{
@@ -899,14 +898,14 @@
 		NSUInteger index = [pageController selectionIndex];
 		index += selection;
 		Image * selectedPage = [pageController arrangedObjects][index];
-		TSSTManagedGroup * selectedGroup = [selectedPage valueForKey: @"group"];
+		ImageGroup * selectedGroup = [selectedPage valueForKey: @"group"];
 		/* Makes sure that the group is both an archive and not nested */
-		if([selectedGroup class] == [TSSTManagedArchive class] && 
+		if([selectedGroup class] == [Archive class] && 
 		   selectedGroup == [selectedGroup topLevelGroup] &&
 		   ![[selectedPage valueForKey: @"text"] boolValue])
 		{
 			NSString * archivePath = [[selectedGroup valueForKey: @"path"] stringByStandardizingPath];
-			if([(TSSTManagedArchive *)selectedGroup quicklookCompatible])
+			if([(Archive *)selectedGroup quicklookCompatible])
 			{
 				int coverIndex = [[selectedPage valueForKey: @"index"] intValue];
 				XADPath * coverName = [(XADArchive *)[selectedGroup instance] rawNameOfEntry: coverIndex];
@@ -1486,6 +1485,15 @@ images are currently visible and then skips over them.
     [NSCursor unhide];
     [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 	
+    [progressBar removeObserver:self forKeyPath: @"currentValue"];
+    [progressBar unbind: @"currentValue"];
+    [progressBar unbind: @"maxValue"];
+    [progressBar unbind: @"leftToRight"];
+       
+    [pageView unbind: TSSTViewRotation];
+    
+    [pageController unbind: @"currentValue"];
+    
     [session removeObserver: self forKeyPath: TSSTPageOrder];
     [session removeObserver: self forKeyPath: TSSTPageScaleOptions];
     [session removeObserver: self forKeyPath: TSSTTwoPageSpread];
