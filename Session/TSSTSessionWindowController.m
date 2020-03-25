@@ -32,7 +32,6 @@
 #import "UKXattrMetadataStore.h"
 #import "SimpleComicAppDelegate.h"
 #import "TSSTSessionWindowController.h"
-#import "TSSTPageView.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
 #import "Simple_Comic-Swift.h"
@@ -1207,7 +1206,7 @@ images are currently visible and then skips over them.
     }
     
 	NSUInteger selectionIndex = [pageController selectionIndex];
-	if((selectionIndex - 2) >= 0)
+	if(selectionIndex >= 2)
 	{
         NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
 
@@ -1224,7 +1223,7 @@ images are currently visible and then skips over them.
 		return;
 	}
 	
-	if((selectionIndex - 1) >= 0)
+	if(selectionIndex >= 1)
 	{
 		[pageController setSelectionIndex: (selectionIndex - 1)];
 	}

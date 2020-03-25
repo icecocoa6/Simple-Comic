@@ -17,7 +17,6 @@
 		284348140DA95C4A00F602E2 /* XADMaster.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 284348060DA95C4300F602E2 /* XADMaster.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		284348CE0DA95C5300F602E2 /* XADMaster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 284348060DA95C4300F602E2 /* XADMaster.framework */; };
 		2851C5A00FC8651C002927E0 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2851C59F0FC8651C002927E0 /* dsa_pub.pem */; };
-		285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */ = {isa = PBXBuildFile; fileRef = FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */; };
 		285FE3300F945E2300CD8F96 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 285FE32F0F945E2300CD8F96 /* Carbon.framework */; };
 		286236020AADDB6200B83E77 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 286236010AADDB6200B83E77 /* QuartzCore.framework */; };
 		286AB66A1159838C0087BA97 /* quicklook.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 286AB6691159838C0087BA97 /* quicklook.tiff */; };
@@ -68,6 +67,7 @@
 		52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611941242A406500958E3F /* Session+CoreDataProperties.swift */; };
 		52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611944242A434200958E3F /* NSWindow+SimpleComic.swift */; };
 		52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611946242A44CF00958E3F /* ToolbarItem.swift */; };
+		52611949242A48A900958E3F /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611948242A48A900958E3F /* PageView.swift */; };
 		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -165,7 +165,6 @@
 		2886931B0FED554E002C6BF7 /* win_scale.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = win_scale.tiff; sourceTree = "<group>"; };
 		28A2662E1285C73200ED6391 /* DTPreferencesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DTPreferencesController.h; sourceTree = "<group>"; };
 		28A2662F1285C73200ED6391 /* DTPreferencesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DTPreferencesController.m; sourceTree = "<group>"; };
-		28A8EAB00B412DE5006C036D /* TSSTPageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TSSTPageView.h; path = Session/TSSTPageView.h; sourceTree = "<group>"; };
 		28BD08E50C9836E600BD7EAF /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		28C1D55F0DF1FE37003392B4 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = /System/Library/Frameworks/QuickLook.framework; sourceTree = "<absolute>"; };
 		28EF3FBE0E9970BD002AD2EE /* UKXattrMetadataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKXattrMetadataStore.h; sourceTree = "<group>"; };
@@ -203,13 +202,13 @@
 		52611941242A406500958E3F /* Session+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Session+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		52611944242A434200958E3F /* NSWindow+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+SimpleComic.swift"; sourceTree = "<group>"; };
 		52611946242A44CF00958E3F /* ToolbarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ToolbarItem.swift; path = Session/ToolbarItem.swift; sourceTree = "<group>"; };
+		52611948242A48A900958E3F /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PageView.swift; path = Session/PageView.swift; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
 		77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleComicAppDelegate.m; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Simple Comic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Simple Comic.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B75D0BBB1E4C1AD900BEAAAF /* images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = images.xcassets; sourceTree = "<group>"; };
-		FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TSSTPageView.m; path = Session/TSSTPageView.m; sourceTree = "<group>"; };
 		FA9FB53408AADA270085AA55 /* TSSTCustomValueTransformers.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TSSTCustomValueTransformers.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -458,10 +457,9 @@
 			children = (
 				28FA4FA40B8AA28000496668 /* TSSTSessionWindowController.h */,
 				28FA4FA50B8AA28000496668 /* TSSTSessionWindowController.m */,
-				28A8EAB00B412DE5006C036D /* TSSTPageView.h */,
-				FA7257EF08A6CE2E006A2A19 /* TSSTPageView.m */,
 				52611944242A434200958E3F /* NSWindow+SimpleComic.swift */,
 				52611946242A44CF00958E3F /* ToolbarItem.swift */,
+				52611948242A48A900958E3F /* PageView.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -595,12 +593,12 @@
 				77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */,
 				5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */,
 				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
+				52611949242A48A900958E3F /* PageView.swift in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
 				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
 				52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */,
 				526119102427438F00958E3F /* ImageView.swift in Sources */,
 				286BA1110C4D5F3100E9D06D /* TSSTSessionWindowController.m in Sources */,
-				285B4A700B9B9F23006A4727 /* TSSTPageView.m in Sources */,
 				5261192B2427DFB800958E3F /* Image+CoreDataProperties.swift in Sources */,
 				5261191624279D1000958E3F /* ThumbnailView.swift in Sources */,
 				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,

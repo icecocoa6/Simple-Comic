@@ -28,9 +28,8 @@
 
 
 #import <Cocoa/Cocoa.h>
-#import "TSSTPageView.h"
 
-@class TSSTPageView;
+@class PageView;
 @class TSSTKeyWindow;
 @class Image;
 @class PolishedProgressBar;
@@ -44,6 +43,16 @@ enum PageSelectionMode {
 	Extract
 };
 
+
+@protocol DTPageSelection_Protocol
+
+- (BOOL)pageSelectionInProgress;
+- (BOOL)pageSelectionCanCrop;
+- (void)selectedPage:(NSInteger)index withCropRect:(NSRect)crop;
+- (BOOL)canSelectPageIndex:(NSInteger)index;
+- (void)cancelPageSelection;
+
+@end
 
 /*	This class deals with an unholy crapload of functionality
 	- First and most importantly it controls the navigation 
@@ -64,7 +73,7 @@ enum PageSelectionMode {
     IBOutlet NSArrayController * pageController;
     
     /* Where the pages are composited.  Handles all of the drawing logic */
-    IBOutlet TSSTPageView  * pageView;
+    IBOutlet PageView  * pageView;
 	/* There is an outlet to this so that the visibility of the 
 		scrollers can be manually controlled. */
     IBOutlet NSScrollView  * pageScrollView;
