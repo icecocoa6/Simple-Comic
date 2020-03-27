@@ -151,7 +151,7 @@
     [progressBar bind: @"maxValue" toObject: pageController withKeyPath: @"arrangedObjects.@count" options: nil];
     [progressBar bind: @"leftToRight" toObject: session withKeyPath: TSSTPageOrder options: nil];
 	   
-    [pageView bind: TSSTViewRotation toObject: session withKeyPath: TSSTViewRotation options: nil];
+    [pageView bind: @"rotationValue" toObject: session withKeyPath: TSSTViewRotation options: nil];
 	NSTrackingArea * newArea = [[NSTrackingArea alloc] initWithRect: [progressBar progressRect]
 															options: NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingActiveInKeyWindow | NSTrackingActiveInActiveApp 
 															  owner: self
@@ -806,7 +806,7 @@
 	/* Makes sure that the group is both an archive and not nested */
 	if([selectedGroup class] == [Archive class] &&
 	   selectedGroup == [selectedGroup topLevelGroup] &&
-	   ![[selectedPage valueForKey: @"text"] boolValue])
+	   ![selectedPage.text boolValue])
 	{
 		return YES;
 	}
@@ -985,7 +985,7 @@
     [loupeWindow setFrame:NSMakeRect(0,0, loupeDiameter, loupeDiameter) display: NO];
     NSColor * color = [NSKeyedUnarchiver unarchivedObjectOfClass:[NSColor class] fromData:[defaults valueForKey: TSSTBackgroundColor] error:NULL];
 	[pageScrollView setBackgroundColor: color];
-    [pageView setRotation: [[session valueForKey: TSSTViewRotation] intValue]];
+    [pageView setRotationValue: [session.rotation intValue]];
     NSValue * positionValue;
     NSData * posData = [session valueForKey: @"position"];
 	
@@ -1047,7 +1047,11 @@
 	[[self window] setRepresentedFilename: representationPath];
 
     [self setValue: titleString forKey: @"pageNames"];
-    [pageView setFirstPage: [pageOne valueForKey: @"pageImage"] secondPageImage: [pageTwo valueForKey: @"pageImage"]];
+    
+    if ([pageOne imageSource])
+    {
+        [pageView setSourceWithFirst:[pageOne imageSource] :NSMakeSize(pageOne.width.floatValue, pageOne.height.floatValue) second:[pageTwo imageSource] :NSMakeSize([[pageTwo width] floatValue], [[pageTwo height] floatValue])];
+    }
     
     [self scaleToWindow];
 	[pageView correctViewPoint];
@@ -1101,7 +1105,7 @@
 		break;
 	case  2:
 		[session setValue: @1.0f forKey: TSSTZoomLevel];
-		if([pageView rotation] == 1 || [pageView rotation] == 3)
+		if([pageView rotationValue] == 1 || [pageView rotationValue] == 3)
 		{
 			hasHor = YES;
 		}

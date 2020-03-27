@@ -247,9 +247,3 @@ extension CGSize {
         }
     }
 }
-
-extension Comparable {
-    fileprivate func clamp(_ limits: ClosedRange<Self>) -> Self {
-        return min(max(limits.lowerBound, self), limits.upperBound)
-    }
-}

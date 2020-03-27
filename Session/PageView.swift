@@ -35,54 +35,90 @@
 
 import Cocoa
 
-class PageView: NSView {
-    let NOTURN = 0
-    let LEFTTURN = 1
-    let RIGHTTURN = 2
-    let UNKTURN = 3
+class PageView: NSView, CALayerDelegate {
+    enum Side: Int {
+        case left = 0
+        case right = 1
+    }
+    
+    struct ArrowFlags: OptionSet {
+        let rawValue: Int
+        
+        static let up = ArrowFlags(rawValue: 1 << 0)
+        static let down = ArrowFlags(rawValue: 1 << 1)
+        static let left = ArrowFlags(rawValue: 1 << 2)
+        static let right = ArrowFlags(rawValue: 1 << 3)
+        
+        init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+        
+        init(rawValues: [Int]) {
+            self.rawValue = rawValues.reduce(0) { $0 | (1 << $1) }
+        }
+    }
     
     @objc var imageBounds: NSRect = NSZeroRect
-    var firstPageRect: NSRect = NSZeroRect
-    var secondPageRect: NSRect = NSZeroRect
-    var firstPageImage: NSImage?
-    var secondPageImage: NSImage?
+    
+    var firstPage: CALayer = CALayer.init()
+    var secondPage: CALayer = CALayer.init()
+    var overlayLayer: CALayer = CALayer.init()
+    private var firstPageImage: NSImage?
+    private var secondPageImage: NSImage?
+    var firstImageSize: NSSize?
+    var secondImageSize: NSSize?
+    var firstPageSource: CGImageSource?
+    var secondPageSource: CGImageSource?
+    var isTwoPageSpreaded: Bool { secondImageSize != nil }
     
     // Stores which arrow keys are currently depressed this enables multi axis keyboard scrolling.
-    var scrollKeys: Int = 0
+    var scrollKeys: ArrowFlags = []
     // Timer that fires in between each keydown event to smooth out the scrolling.
     var scrollTimer: Timer? = nil
     var interfaceDelay: NSDate?
     
-    @objc var rotation: Int = 0 {
+    var rotation: OrthogonalRotation = .r0_4 {
         didSet {
             self.resizeView()
+            self.updateRotation()
         }
     }
     
-    @objc var sessionController: TSSTSessionWindowController?
+    @objc dynamic var rotationValue: Int = OrthogonalRotation.r0_4.rawValue
+        {
+        didSet { rotation = OrthogonalRotation.init(rawValue: rotationValue)! }
+    }
+    
+    @IBOutlet @objc var sessionController: TSSTSessionWindowController!
     
     
     // This controls the drawing of the accepting drag-drop border highlighting
     var acceptingDrag: Bool = false
     
-    /*    While page selection is in progress this method has a value of 1 or 2.
+    /*    While page selection is in progress this method has a value.
      The selection number coresponds to a highlighted page. */
-    var pageSelection: Int = -1
+    var pageSelection: Side? = nil
     /* This is the rect describing the users page selection. */
     var cropRect: NSRect = NSZeroRect
     
     override func awakeFromNib() {
         /* Doing this so users can drag archives into the view. */
         self.registerForDraggedTypes([.fileURL])
-    }
-    
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
         
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        self.layer = CALayer.init()
+        self.layer!.sublayers = [self.firstPage, self.secondPage, self.overlayLayer]
+        self.firstPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
+        self.secondPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
+        self.overlayLayer.delegate = self
+
+        
+        if BuildConfiguration.current == .debug {
+            self.firstPage.borderColor = CGColor.init(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
+            self.firstPage.borderWidth = 2
+            self.secondPage.borderColor = CGColor.init(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.5)
+            self.secondPage.borderWidth = 2
+            self.overlayLayer.backgroundColor = CGColor.init(gray: 0.0, alpha: 0.1)
+        }
     }
     
     deinit {
@@ -91,72 +127,79 @@ class PageView: NSView {
     
     override var acceptsFirstResponder: Bool { true }
     
-    @objc func setFirstPage(_ first: NSImage, secondPageImage second: NSImage) {
-        scrollKeys = 0
-        if first != firstPageImage
-        {
-            firstPageImage = first
-            self.startAnimation(forImage: firstPageImage)
-        }
+    func setFirstPage(_ first: NSImage, secondPageImage second: NSImage?) {
+        scrollKeys = []
         
-        if second != secondPageImage
-        {
-            secondPageImage = second
-            self.startAnimation(forImage: secondPageImage)
-        }
+        firstPageImage = first
+        firstImageSize = first.size
+        secondPageImage = second
+        secondImageSize = second?.size
         
         self.resizeView()
     }
     
-    // MARK: - Animations
-    
-    func startAnimation(forImage image: NSImage?)
-    {
-        guard image != nil else { return }
+    @objc func setSource(first: CGImageSource, _ firstSize: NSSize, second: CGImageSource?, _ secondSize: NSSize) {
+        assert(CGImageSourceGetCount(first) > 0)
+        assert(second == nil || CGImageSourceGetCount(second!) > 0)
         
-        let testImageRep = image!.bestRepresentation(for: NSZeroRect, context: NSGraphicsContext.current, hints: nil)
-        if let imgRep = testImageRep as? NSBitmapImageRep
+        firstPageSource = first
+        secondPageSource = second
+        let img = second != nil ? NSImage.init(cgImage: CGImageSourceCreateImageAtIndex(second!, 0, nil)!, size: secondSize) : nil
+        setFirstPage(NSImage.init(cgImage: CGImageSourceCreateImageAtIndex(first, 0, nil)!, size: firstSize),
+                     secondPageImage: img)
+        
+        if self.firstPageSource != nil
         {
-            let frameCount = (imgRep.value(forProperty: .frameCount) as! NSNumber?)?.intValue ?? 0
-            guard frameCount > 1 else { return }
-            
-            let loopCount = imgRep.value(forProperty: .loopCount) as! NSNumber?
-            let frameDuration = (imgRep.value(forProperty: .currentFrameDuration) as! NSNumber?)?.floatValue ?? 0.0
-            Timer.scheduledTimer(withTimeInterval: TimeInterval(max(frameDuration, 0.1)), repeats: false) { _ in
-                self.animateImage(imageNumber: 1, page: self.firstPageImage, loopCount: loopCount?.intValue ?? 0)
-            }
+            firstPage.contents = CGImageSourceCreateImageAtIndex(first, 0, nil)
+            self.startAnimation(forImage: self.firstPageSource!)
+        }
+        
+        if self.secondPageSource != nil
+        {
+            secondPage.contents = CGImageSourceCreateImageAtIndex(second!, 0, nil)
+            self.startAnimation(forImage: self.secondPageSource!)
         }
     }
     
-    func animateImage(imageNumber: Int, page: NSImage?, loopCount: Int)
+    // MARK: - Animations
+    
+    func startAnimation(forImage image: CGImageSource)
     {
-        let pageImage = imageNumber == 1 ? firstPageImage : secondPageImage
-        if page != pageImage || sessionController == nil
-        {
-            return
-        }
-        let testImageRep = pageImage?.bestRepresentation(for: NSZeroRect, context: NSGraphicsContext.current, hints: nil) as! NSBitmapImageRep?
-        let frameCount = (testImageRep?.value(forProperty: .frameCount) as! NSNumber?)?.intValue ?? 0
-        var currentFrame = (testImageRep?.value(forProperty: .currentFrame) as! NSNumber?)?.intValue ?? 0
-        currentFrame = currentFrame < frameCount ? (currentFrame + 1) : 0
+        let numFrames = CGImageSourceGetCount(image)
+        guard numFrames > 1 else { return }
+        guard CGImageSourceCreateImageAtIndex(image, 0, nil) != nil else { return }
         
-        var loop = loopCount
-        if currentFrame == 0 && loop > 1
-        {
-            loop -= 1
-        }
-        testImageRep?.setProperty(.currentFrame, withValue: currentFrame)
-        if loop != 1
-        {
-            let frameDuration = (testImageRep?.value(forProperty: .currentFrameDuration) as! NSNumber?)?.floatValue ?? 0.0
-            Timer.scheduledTimer(withTimeInterval: TimeInterval(max(frameDuration, 0.1)), repeats: false) { _ in
-                self.animateImage(imageNumber: imageNumber, page: page, loopCount: loop)
-            }
+        let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as! [CFString : Any]
+        
+        let layer = CALayer.init()
+        self.layer = layer
+        
+        var duration: CFTimeInterval = 0.0
+        for i in 0 ..< numFrames {
+            let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
+            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.1
+            duration += frameDuration
         }
         
-        DispatchQueue.main.async {
-            self.needsDisplay = true
+        let anim = CAKeyframeAnimation.init(keyPath: "contents")
+        anim.duration = duration
+        anim.calculationMode = .discrete
+        anim.values = []
+        anim.keyTimes = []
+        anim.timingFunctions = []
+        
+        var elapsedSeconds: CFTimeInterval = 0.0
+        for i in 0 ..< numFrames {
+            let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
+            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.1
+            anim.values!.append(CGImageSourceCreateImageAtIndex(image, i, nil) as Any)
+            anim.keyTimes!.append((elapsedSeconds / duration) as NSNumber)
+            anim.timingFunctions!.append(CAMediaTimingFunction.init(name: CAMediaTimingFunctionName.linear))
+            elapsedSeconds += frameDuration
         }
+        anim.keyTimes?.append(1.0)
+        anim.repeatCount = (properties[kCGImagePropertyGIFLoopCount] as! NSNumber?)?.floatValue ?? .greatestFiniteMagnitude
+        layer.add(anim, forKey: "contents")
     }
     
     // MARK: - Drag and Drop
@@ -167,6 +210,7 @@ class PageView: NSView {
         {
             acceptingDrag = true
             self.needsDisplay = true
+            self.overlayLayer.setNeedsDisplay()
             return .generic
         }
         return []
@@ -184,16 +228,19 @@ class PageView: NSView {
     override func draggingExited(_ sender: NSDraggingInfo?) {
         acceptingDrag = false
         self.needsDisplay = true
+        self.overlayLayer.setNeedsDisplay()
     }
     
     override func draggingEnded(_ sender: NSDraggingInfo) {
         acceptingDrag = false
         self.needsDisplay = true
+        self.overlayLayer.setNeedsDisplay()
     }
     
     override func concludeDragOperation(_ sender: NSDraggingInfo?) {
         acceptingDrag = false
         self.needsDisplay = true
+        self.overlayLayer.setNeedsDisplay()
     }
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -201,9 +248,9 @@ class PageView: NSView {
         if pboard.types?.contains(.fileURL) ?? false
         {
             let filePaths = pboard.propertyList(forType: .fileURL)!
-            sessionController?.updateSessionObject()
+            sessionController.updateSessionObject()
             let app = NSApp.delegate as! SimpleComicAppDelegate
-            app.addFiles([filePaths], to: sessionController?.session()!)
+            app.addFiles([filePaths], to: sessionController.session()!)
             return true
         }
         return false
@@ -216,26 +263,12 @@ class PageView: NSView {
     
     // MARK: - Drawing
     
-    override func draw(_ dirtyRect: NSRect) {
-        guard let firstPageImg = self.firstPageImage else { return }
-        
+    func draw(_ layer: CALayer, in ctx: CGContext) {
+        NSGraphicsContext.current = NSGraphicsContext.init(cgContext: ctx, flipped: false)
         NSGraphicsContext.saveGraphicsState()
         self.rotationTransform(frame: self.frame)
-        let interpolation = (self.inLiveResize || scrollKeys != 0) ? NSImageInterpolation.low : NSImageInterpolation.high
+        let interpolation = (self.inLiveResize || !scrollKeys.isEmpty) ? NSImageInterpolation.low : NSImageInterpolation.high
         NSGraphicsContext.current?.imageInterpolation = interpolation
-        
-        firstPageImg.draw(in: self.centerScanRect(firstPageRect),
-                          from: NSZeroRect,
-                          operation: .sourceOver,
-                          fraction: 1.0)
-        
-        if secondPageImage?.isValid ?? false
-        {
-            secondPageImage!.draw(in: self.centerScanRect(secondPageRect),
-                                  from: NSZeroRect,
-                                  operation: .sourceOver,
-                                  fraction: 1.0)
-        }
         
         NSColor.init(calibratedWhite: 0.2, alpha: 0.5).set()
         
@@ -243,13 +276,13 @@ class PageView: NSView {
         if self.cropRect != NSZeroRect
         {
             let selection: NSRect
-            if self.pageSelection == 0
+            if self.pageSelection == .left
             {
-                selection = rectFromNegativeRect(self.cropRect).intersection(firstPageRect)
+                selection = rectFromNegativeRect(self.cropRect).intersection(self.firstPage.frame)
             }
             else
             {
-                selection = rectFromNegativeRect(self.cropRect).intersection(secondPageRect)
+                selection = rectFromNegativeRect(self.cropRect).intersection(self.secondPage.frame)
             }
             
             highlight = NSBezierPath.init(rect: selection)
@@ -258,20 +291,20 @@ class PageView: NSView {
             NSBezierPath.defaultLineWidth = 2.0
             NSBezierPath.stroke(selection)
         }
-        else if self.pageSelection == 0
+        else if self.pageSelection == .left
         {
-            highlight = NSBezierPath.init(rect: firstPageRect)
+            highlight = NSBezierPath.init(rect: self.firstPage.frame)
             highlight.fill()
         }
-        else if self.pageSelection == 1
+        else if self.pageSelection == .right
         {
-            highlight = NSBezierPath.init(rect: secondPageRect)
+            highlight = NSBezierPath.init(rect: self.secondPage.frame)
             highlight.fill()
         }
         
         NSColor.init(calibratedWhite: 0.2, alpha: 0.8).set()
         
-        if sessionController?.pageSelectionInProgress() ?? false
+        if sessionController.pageSelectionInProgress()
         {
             let style = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
             style.alignment = .center
@@ -281,7 +314,7 @@ class PageView: NSView {
                 NSAttributedString.Key.paragraphStyle: style
             ]
             var selectionText: NSString = "Click to select page"
-            if self.sessionController?.pageSelectionCanCrop() ?? false
+            if self.sessionController.pageSelectionCanCrop()
             {
                 selectionText = selectionText.appending("\nDrag to crop") as NSString
             }
@@ -302,96 +335,80 @@ class PageView: NSView {
         }
     }
     
-    @objc func image(inRect rect: NSRect) -> NSImage?
+    fileprivate func calcFragment(center: CGPoint, size: CGSize, scale: CGFloat) -> CGRect {
+        let power: CGFloat = CGFloat((UserDefaults.standard.value(forKey: TSSTLoupePower) as! NSNumber?)?.floatValue ?? 0.0)
+        let zoomSize = size.scaleBy(s: 1.0 / (power * scale))
+        return NSRect.init(x: center.x / scale - zoomSize.width / 2,
+                          y: center.y / scale - zoomSize.height / 2,
+                          width: zoomSize.width,
+                          height: zoomSize.height)
+    }
+    
+    fileprivate func convertBoundsToFrameParts(bounds size: CGSize, left: CGSize, right: CGSize?, into rect: CGRect) -> (CGRect, CGRect) {
+        let fst = calcFragment(center: rect.origin,
+                               size: rect.size,
+                               scale: size.height / left.height)
+        let remainder = fst.maxX - left.width
+        
+        guard remainder > 0 else { return (fst, NSRect.zero) }
+        guard let img = right else { return (fst, NSRect.zero) }
+        
+        let snd = calcFragment(center: CGPoint.init(x: rect.origin.x - left.width * size.height / left.height, y: rect.origin.y),
+                               size: rect.size,
+                               scale: size.height / img.height)
+        
+        return (fst, snd)
+    }
+    
+    @objc func image(inRect _rect: NSRect) -> NSImage?
     {
         guard self.firstPageImage?.isValid ?? false else { return nil }
         
-        var imageRect = imageBounds
-        var cursorPoint = NSZeroPoint
+        var size = imageBounds.size
+        var rect = _rect
         /* Re-orients the rectangle based on the current page rotation */
         switch rotation {
-        case 0:
-            cursorPoint = NSMakePoint(NSMinX(rect) - NSMinX(imageBounds), NSMinY(rect) - NSMinY(imageBounds));
-            break;
-        case 1:
-            cursorPoint = NSMakePoint(NSMaxY(imageBounds) - NSMinY(rect), NSMinX(rect) - NSMinX(imageBounds));
-            imageRect.size.width = NSHeight(imageBounds);
-            imageRect.size.height = NSWidth(imageBounds);
-            break;
-        case 2:
-            cursorPoint = NSMakePoint(NSMaxX(imageBounds) - NSMinX(rect), NSMaxY(imageBounds) - NSMinY(rect));
-            break;
-        case 3:
-            cursorPoint = NSMakePoint(NSMinY(rect) - NSMinY(imageBounds), NSMaxX(imageBounds) - NSMinX(rect));
-            imageRect.size.width = NSHeight(imageBounds);
-            imageRect.size.height = NSWidth(imageBounds);
-            break;
-        default:
-            break;
+        case .r0_4:
+            rect.origin = rect.offsetBy(dx: -imageBounds.minX, dy: -imageBounds.minY).origin
+        case .r1_4:
+            rect.origin = NSMakePoint(rect.minY - imageBounds.minY, imageBounds.maxX - rect.minX);
+            size.width = NSHeight(imageBounds);
+            size.height = NSWidth(imageBounds);
+        case .r2_4:
+            rect.origin = NSMakePoint(NSMaxX(imageBounds) - NSMinX(rect), NSMaxY(imageBounds) - NSMinY(rect));
+        case .r3_4:
+            rect.origin = NSMakePoint(imageBounds.maxY - rect.minY, rect.minX - imageBounds.minX);
+            size.width = NSHeight(imageBounds);
+            size.height = NSWidth(imageBounds);
         }
         
-        let power: CGFloat = CGFloat((UserDefaults.standard.value(forKey: TSSTLoupePower) as! NSNumber?)?.floatValue ?? 0.0)
-        var firstFragment = NSZeroRect
-        var secondFragment = NSZeroRect
-        if (sessionController?.session()?.pageOrder!.boolValue)! || !secondPageImage!.isValid
+        let firstRect: CGRect
+        let secondRect: CGRect
+        if (sessionController.session()?.pageOrder!.boolValue)! || !(secondPageImage?.isValid ?? false)
         {
-            let scale = imageRect.height / firstPageImage!.size.height
-            let zoomSize = NSSize.init(width: rect.width / (power * scale), height: rect.height / (power * scale))
-            firstFragment = NSRect.init(x: cursorPoint.x / scale - zoomSize.width / 2,
-                                        y: cursorPoint.y / scale - zoomSize.height / 2,
-                                        width: zoomSize.width,
-                                        height: zoomSize.height)
-            let remainder = firstFragment.maxX - firstPageImage!.size.width
-            
-            if secondPageImage!.isValid && remainder > 0
-            {
-                cursorPoint.x -= firstPageImage!.size.width * scale
-                let scale = imageRect.height / secondPageImage!.size.height
-                let zoomSize = NSSize.init(width: rect.width / (power * scale), height: rect.height / (power * scale))
-                secondFragment = NSRect.init(x: cursorPoint.x / scale - zoomSize.width / 2,
-                                             y: cursorPoint.y / scale - zoomSize.height / 2,
-                                             width: zoomSize.width,
-                                             height: zoomSize.height)
-            }
+            (firstRect, secondRect) = convertBoundsToFrameParts(bounds: size, left: firstImageSize!, right: secondImageSize, into: rect)
         }
         else
         {
-            let scale = imageRect.height / firstPageImage!.size.height
-            let zoomSize = NSSize.init(width: rect.width / (power * scale), height: rect.height / (power * scale))
-            secondFragment = NSRect.init(x: cursorPoint.x / scale - zoomSize.width / 2,
-                                         y: cursorPoint.y / scale - zoomSize.height / 2,
-                                         width: zoomSize.width,
-                                         height: zoomSize.height)
-            let remainder = secondFragment.maxX - secondPageImage!.size.width
-            
-            if remainder > 0
-            {
-                cursorPoint.x -= secondPageImage!.size.width * scale
-                let scale = imageRect.height / firstPageImage!.size.height
-                let zoomSize = NSSize.init(width: rect.width / (power * scale), height: rect.height / (power * scale))
-                secondFragment = NSRect.init(x: cursorPoint.x / scale - zoomSize.width / 2,
-                                             y: cursorPoint.y / scale - zoomSize.height / 2,
-                                             width: zoomSize.width,
-                                             height: zoomSize.height)
-            }
+            (secondRect, firstRect) = convertBoundsToFrameParts(bounds: size, left: secondImageSize!, right: firstImageSize, into: rect)
         }
         
         let imageFragment = NSImage.init(size: rect.size)
         imageFragment.lockFocus()
         self.rotationTransform(frame: NSRect.init(origin: CGPoint.zero, size: rect.size))
         
-        if firstFragment != NSZeroRect
+        if firstRect != NSZeroRect
         {
             firstPageImage?.draw(in: NSRect.init(origin: CGPoint.zero, size: rect.size),
-                                 from: firstFragment,
+                                 from: firstRect,
                                  operation: .sourceOver,
                                  fraction: 1.0)
         }
         
-        if secondFragment != NSZeroRect
+        if secondRect != NSZeroRect
         {
             secondPageImage?.draw(in: NSRect.init(origin: CGPoint.zero, size: rect.size),
-                                  from: secondFragment,
+                                  from: secondRect,
                                   operation: .sourceOver,
                                   fraction: 1.0)
         }
@@ -402,24 +419,38 @@ class PageView: NSView {
     
     // MARK: - Geometry handling
     
+    func updateRotation() {
+        let transform: CATransform3D
+        switch rotation {
+        case .r0_4:
+            transform = CATransform3DIdentity
+        case .r1_4:
+            transform = CATransform3DMakeRotation(.pi / 2, 0, 0, 1)
+        case .r2_4:
+            transform = CATransform3DMakeRotation(.pi, 0, 0, 1)
+        case .r3_4:
+            transform = CATransform3DMakeRotation(-.pi / 2, 0, 0, 1)
+        }
+        
+        firstPage.transform = transform
+        secondPage.transform = transform
+    }
+    
     func rotationTransform(frame: NSRect)
     {
         let transform = NSAffineTransform.init()
         switch rotation {
-        case 1:
+        case .r0_4:
+            break
+        case .r3_4:
             transform.rotate(byDegrees: 270)
             transform.translateX(by: -frame.height, yBy: 0)
-            break
-        case 2:
+        case .r2_4:
             transform.rotate(byDegrees: 180)
             transform.translateX(by: -frame.width, yBy: -frame.height)
-            break
-        case 3:
+        case .r1_4:
             transform.rotate(byDegrees: 90)
             transform.translateX(by: 0, yBy: -frame.width)
-            break
-        default:
-            break
         }
         transform.concat()
     }
@@ -432,7 +463,7 @@ class PageView: NSView {
         
         guard frameSize != NSZeroSize else { return }
         
-        if sessionController!.pageTurn == 1
+        if sessionController.pageTurn == 1
         {
             correctOrigin.x = frameSize.width > viewSize.width ? (frameSize.width - viewSize.width) : 0
         }
@@ -445,144 +476,165 @@ class PageView: NSView {
         scrollView?.reflectScrolledClipView(clipView)
     }
     
+    func combinedImageSize() -> CGSize {
+        guard firstImageSize != nil || secondImageSize != nil else { return CGSize.zero }
+        let firstSize = firstImageSize ?? CGSize.zero
+        let secondSize = secondImageSize ?? CGSize.zero
+        
+        let height = max(firstSize.height, secondSize.height)
+        let width = firstSize.scaleTo(height: height).width + secondSize.scaleTo(height: height).width
+        let result = CGSize.init(width: width, height: height)
+        
+        return (rotation == .r3_4 || rotation == .r1_4) ?
+            result.transposed : result
+    }
+    
     @objc func combinedImageSize(forZoom zoom: CGFloat) -> NSSize
     {
-        var firstSize = firstPageImage?.size ?? NSZeroSize;
-        var secondSize = secondPageImage?.size ?? NSZeroSize;
-        
-        if firstSize.height > secondSize.height
+        return combinedImageSize().scaleBy(s: zoom)
+    }
+    
+    fileprivate func calcViewSize(_ imageSize: NSSize, _ visibleRect: NSRect) -> CGSize {
+        var viewSize: CGSize = CGSize.zero
+        var scaling = sessionController.session()?.pageScaling ?? .noScale
+        scaling = sessionController.currentPageIsText() ? .fitToWidth : scaling
+        switch (scaling)
         {
-            secondSize = scaleSize(secondSize , Float(firstSize.height / secondSize.height))
-        }
-        else if firstSize.height < secondSize.height
-        {
-            firstSize = scaleSize(firstSize , Float(secondSize.height / firstSize.height))
+        case .noScale:
+            viewSize.width = max(imageSize.width, visibleRect.width)
+            viewSize.height = max(imageSize.height, visibleRect.height)
+        case .fitToWindow:
+            viewSize = visibleRect.size
+        case .fitToWidth:
+            var scaleToFit: CGFloat
+            if(rotation == .r3_4 || rotation == .r1_4)
+            {
+                scaleToFit = visibleRect.height / imageSize.height;
+            }
+            else
+            {
+                scaleToFit = visibleRect.width / imageSize.width;
+            }
+            
+            if UserDefaults.standard.isImageScaleConstrained
+            {
+                scaleToFit = min(scaleToFit, 1)
+            }
+            
+            let s = imageSize.scaleBy(s: scaleToFit)
+            viewSize.width = max(s.width, visibleRect.width)
+            viewSize.height = max(s.height, visibleRect.height)
         }
         
-        firstSize.width += secondSize.width
-        
-        if(rotation == 1 || rotation == 3)
-        {
-            firstSize = NSSize.init(width: firstSize.height, height: firstSize.width)
-        }
-        
-        let zoomedSize = scaleSize(firstSize, Float(zoom))
-        return zoomedSize
+        return viewSize
     }
     
     @objc func resizeView() {
-        firstPageRect = NSZeroRect
-        secondPageRect = NSZeroRect
+        self.firstPage.frame = NSZeroRect
+        self.secondPage.frame = NSZeroRect
         let visibleRect = self.enclosingScrollView!.documentVisibleRect
         let frameRect = self.frame
-        var xpercent = NSMidX(visibleRect) / frameRect.size.width
-        if frameRect.size.width == 0 {
-            xpercent = 1.0
-        }
-        var ypercent = NSMidY(visibleRect) / frameRect.size.height
-        if frameRect.size.height == 0 {
-            ypercent = 1.0
-        }
-        var imageSize = self.combinedImageSize(forZoom: CGFloat((sessionController!.session().value(forKey: TSSTZoomLevel)! as! NSNumber).floatValue))
         
-        var viewSize = NSZeroSize
-        var scaleToFit: CGFloat
-        var scaling = (sessionController!.session().value(forKey: TSSTPageScaleOptions)! as! NSNumber).intValue
-        scaling = sessionController!.currentPageIsText() ? 2 : scaling
-        switch (scaling)
-        {
-        case 0:
-            viewSize.width = imageSize.width > NSWidth(visibleRect) ? imageSize.width : NSWidth(visibleRect);
-            viewSize.height = imageSize.height > NSHeight(visibleRect) ? imageSize.height : NSHeight(visibleRect);
-            break;
-        case 1:
-            viewSize = visibleRect.size;
-            break;
-        case 2:
-            if(rotation == 1 || rotation == 3)
-            {
-                scaleToFit = NSHeight(visibleRect) / imageSize.height;
-            }
-            else
-            {
-                scaleToFit = NSWidth(visibleRect) / imageSize.width;
-            }
-            
-            if (UserDefaults.standard.value(forKey: TSSTConstrainScale)! as! NSNumber).boolValue
-            {
-                scaleToFit = scaleToFit > 1 ? 1 : scaleToFit;
-            }
-            viewSize = scaleSize(imageSize, Float(scaleToFit));
-            viewSize.width = viewSize.width > NSWidth(visibleRect) ? viewSize.width : NSWidth(visibleRect);
-            viewSize.height = viewSize.height > NSHeight(visibleRect) ? viewSize.height : NSHeight(visibleRect);
-            break;
-        default:
-            break;
-        }
         
-        viewSize = NSMakeSize(CGFloat(roundf(Float(viewSize.width))), CGFloat(roundf(Float(viewSize.height))))
+        var imageSize = self.combinedImageSize().scaleBy(s: CGFloat(sessionController.session()?.zoomLevel?.floatValue ?? 1.0))
+        let viewSize = calcViewSize(imageSize, visibleRect)
         self.frame.size = viewSize
         
-        if !(UserDefaults.standard.value(forKey: TSSTConstrainScale)! as! NSNumber).boolValue &&
-            sessionController!.session()?.scaleOptions?.intValue != 0
+        if !UserDefaults.standard.isImageScaleConstrained &&
+            sessionController.session()!.pageScaling != .noScale
         {
             if( viewSize.width / viewSize.height < imageSize.width / imageSize.height)
             {
-                scaleToFit = viewSize.width / imageSize.width;
+                imageSize = imageSize.scaleTo(width: viewSize.width)
             }
             else
             {
-                scaleToFit = viewSize.height / imageSize.height;
+                imageSize = imageSize.scaleTo(height: viewSize.height)
             }
-            imageSize = scaleSize(imageSize, Float(scaleToFit))
         }
         
         imageBounds = rectWithSizeCenteredInRect(imageSize, NSMakeRect(0,0,viewSize.width, viewSize.height));
-        var imageRect = imageBounds
-        if rotation == 1 || rotation == 3
+        let imageRect: CGRect
+        if rotation == .r3_4 || rotation == .r1_4
         {
-            imageRect = rectWithSizeCenteredInRect(NSMakeSize( NSHeight(imageRect), NSWidth(imageRect)),
-                                                   NSMakeRect( 0, 0, NSHeight(self.frame), NSWidth(self.frame)));
+            imageRect = rectWithSizeCenteredInRect(imageBounds.size,
+                                                   NSRect.init(origin: CGPoint.zero, size: self.frame.size))
         }
-        firstPageRect.size = scaleSize(firstPageImage!.size , Float(NSHeight(imageRect) / firstPageImage!.size.height));
-        if secondPageImage?.isValid ?? false
+        else
         {
-            secondPageRect.size = scaleSize(secondPageImage!.size , Float(NSHeight(imageRect) / secondPageImage!.size.height));
-            if (sessionController!.session()?.pageOrder!.boolValue)!
+            imageRect = imageBounds
+        }
+        
+        if isTwoPageSpreaded
+        {
+            switch rotation
             {
-                firstPageRect.origin = imageRect.origin;
-                secondPageRect.origin = NSMakePoint(NSMaxX(firstPageRect), NSMinY(imageRect));
-            }
-            else
-            {
-                secondPageRect.origin = imageRect.origin;
-                firstPageRect.origin = NSMakePoint(NSMaxX(secondPageRect), NSMinY(imageRect));
+            case .r0_4:
+                fallthrough
+            case .r2_4:
+                let size = CGSize.init(width: imageRect.width / 2, height: imageRect.height)
+                self.firstPage.frame.size = size
+                self.secondPage.frame.size = size
+            case .r1_4:
+                fallthrough
+            case .r3_4:
+                let size = CGSize.init(width: imageRect.width, height: imageRect.height / 2)
+                self.firstPage.frame.size = size
+                self.secondPage.frame.size = size
             }
         }
         else
         {
-            firstPageRect.origin = imageRect.origin;
+            self.firstPage.frame.size = imageRect.size
         }
         
-        let xOrigin = viewSize.width * xpercent;
-        let yOrigin = viewSize.height * ypercent;
-        let recenter = NSMakePoint(xOrigin - visibleRect.size.width / 2, yOrigin - visibleRect.size.height / 2);
-        self.scroll(recenter)
+        if isTwoPageSpreaded
+        {
+            let reversed = !(sessionController.session()?.pageOrder?.boolValue ?? false)
+            let fst: CALayer = reversed ? self.secondPage : self.firstPage
+            let snd: CALayer = reversed ? self.firstPage : self.secondPage
+            
+            switch rotation
+            {
+            case .r0_4:
+                fst.frame.origin = imageRect.origin;
+                snd.frame.origin = NSMakePoint(fst.frame.maxX, imageRect.minY);
+            case .r1_4:
+                fst.frame.origin = imageRect.origin;
+                snd.frame.origin = NSMakePoint(imageRect.minX, fst.frame.maxY);
+            case .r2_4:
+                snd.frame.origin = imageRect.origin;
+                fst.frame.origin = NSMakePoint(snd.frame.maxX, imageRect.minY);
+            case .r3_4:
+                snd.frame.origin = imageRect.origin;
+                fst.frame.origin = NSMakePoint(imageRect.minX, snd.frame.maxY);
+            }
+        }
+        else
+        {
+            self.firstPage.frame.origin = imageRect.origin;
+        }
+        
+        let xratio = (frameRect.size.width > 0) ? (visibleRect.midX / frameRect.size.width) : 1.0
+        let yratio = (frameRect.size.height > 0) ? (visibleRect.midY / frameRect.size.height) : 1.0
+        let origin = CGPoint.init(x: viewSize.width * xratio, y: viewSize.height * yratio)
+        let rect = CGRect.init(origin: origin, size: visibleRect.size)
+        self.scroll(rect.center)
         self.needsDisplay = true
+        self.overlayLayer.frame = self.bounds
+        self.overlayLayer.setNeedsDisplay()
     }
     
-    func pageSelectionRect(selection: Int) -> NSRect
+    func pageSelectionRect(selection: Side) -> NSRect
     {
-        guard selection == 1 || selection == 2 else { return NSZeroRect }
-        
         if !secondPageImage!.isValid
         {
-            return selection == 1 ? self.bounds : NSZeroRect
+            return selection == .left ? self.bounds : NSZeroRect
         }
         
-        let left2right = sessionController!.session()!.pageOrder!.boolValue
-        let pages = left2right ? [firstPageRect, secondPageRect] : [secondPageRect, firstPageRect]
-        let leftSelected = (left2right && selection == 1) || (!left2right && selection == 2)
+        let left2right = sessionController.session()!.pageOrder!.boolValue
+        let pages = left2right ? [self.firstPage.frame, self.secondPage.frame] : [self.secondPage.frame, self.firstPage.frame]
+        let leftSelected = (left2right && selection == .left) || (!left2right && selection == .right)
         let left = NSRect.init(x: 0, y: 0, width: pages[0].maxX, height: self.bounds.height)
         let right = NSRect.init(x: pages[1].minX, y: 0, width: self.bounds.width - pages[1].minX, height: self.bounds.height)
         
@@ -596,64 +648,60 @@ class PageView: NSView {
             return NSZeroRect;
         }
         
-        var selection: NSRect
-        if (pageSelection == 0) {
-            selection = NSIntersectionRect(rectFromNegativeRect(cropRect), firstPageRect);
-        }
-        else {
-            selection = NSIntersectionRect(rectFromNegativeRect(cropRect), secondPageRect);
-        }
+        let selection = (pageSelection == .left) ?
+            rectFromNegativeRect(cropRect).intersection(self.firstPage.frame) :
+            rectFromNegativeRect(cropRect).intersection(self.secondPage.frame)
         
         let center = centerPointOfRect(selection)
         var pageRect = NSZeroRect
-        var originalSize = NSZeroSize
-        if NSPointInRect(center, firstPageRect)
+        let originalSize: NSSize
+        
+        if self.firstPage.hitTest(center) != nil
         {
-            pageRect = firstPageRect
-            originalSize = firstPageImage!.size
+            pageRect = self.firstPage.frame
+            originalSize = firstImageSize!
         }
-        else if NSPointInRect(center, secondPageRect)
+        else if self.secondPage.hitTest(center) != nil
         {
-            pageRect = secondPageRect;
-            originalSize = secondPageImage!.size
+            pageRect = self.secondPage.frame
+            originalSize = secondImageSize!
+        }
+        else
+        {
+            return NSZeroRect
         }
         
-        pageRect.origin = NSMakePoint(selection.origin.x - pageRect.origin.x, selection.origin.y - pageRect.origin.y);
+        pageRect.origin = selection.offsetBy(dx: -pageRect.origin.x, dy: -pageRect.origin.y).origin
         let scaling = originalSize.height / pageRect.size.height;
-        pageRect = NSMakeRect(pageRect.origin.x * scaling,
-                              pageRect.origin.y * scaling,
-                              selection.size.width * scaling,
-                              selection.size.height * scaling);
-        return pageRect;
+        return NSRect.init(x: pageRect.origin.x * scaling,
+                           y: pageRect.origin.y * scaling,
+                           width: selection.size.width * scaling,
+                           height: selection.size.height * scaling)
     }
     
     // MARK: - Event handling
     
     override func scrollWheel(with event: NSEvent) {
-        guard !sessionController!.pageSelectionInProgress() else
+        guard !sessionController.pageSelectionInProgress() else
         {
             return
         }
         
         let modifier = event.modifierFlags
-        var scaling = sessionController!.session()!.scaleOptions!.intValue
-        scaling = sessionController!.currentPageIsText() ? 2 : scaling
+        var scaling = sessionController.session()!.scaleOptions!.intValue
+        scaling = sessionController.currentPageIsText() ? 2 : scaling
         
         if modifier.contains(.command) && event.deltaY != 0
         {
             var loupeDiameter = (UserDefaults.standard.value(forKey: TSSTLoupeDiameter)! as! NSNumber).intValue
             loupeDiameter += event.deltaY > 0 ? 30 : -30;
-            loupeDiameter = loupeDiameter < 150 ? 150 : loupeDiameter;
-            loupeDiameter = loupeDiameter > 500 ? 500 : loupeDiameter;
-            UserDefaults.standard.setValue(loupeDiameter, forKey: TSSTLoupeDiameter)
+            UserDefaults.standard.setValue(loupeDiameter.clamp(150 ... 500), forKey: TSSTLoupeDiameter)
         }
         else if modifier.contains(.option) && event.deltaY != 0
         {
             var loupePower = (UserDefaults.standard.value(forKey: TSSTLoupePower)! as! NSNumber).intValue
             loupePower += event.deltaY > 0 ? 1 : -1;
-            loupePower = loupePower < 2 ? 2 : loupePower;
-            loupePower = loupePower > 6 ? 6 : loupePower;
-            UserDefaults.standard.setValue(loupePower, forKey: TSSTLoupePower)
+            UserDefaults.standard.setValue(loupePower.clamp(2 ... 6), forKey: TSSTLoupePower)
         }
         else if(scaling == 1)
         {
@@ -667,11 +715,11 @@ class PageView: NSView {
             
             if (deltaX > 0.0)
             {
-                sessionController!.pageLeft(self)
+                sessionController.pageLeft(self)
             }
             else if (deltaX < 0.0)
             {
-                sessionController!.pageRight(self)
+                sessionController.pageRight(self)
             }
             
         }
@@ -682,16 +730,17 @@ class PageView: NSView {
             self.scroll(scrollPoint)
         }
         
-        sessionController?.refreshLoupePanel()
+        sessionController.refreshLoupePanel()
     }
     
     override func keyDown(with event: NSEvent) {
-        if sessionController!.pageSelectionInProgress()
+        if sessionController.pageSelectionInProgress()
         {
-            sessionController!.cancelPageSelection()
-            pageSelection = -1
+            sessionController.cancelPageSelection()
+            pageSelection = nil
             cropRect = NSZeroRect
             self.needsDisplay = true
+            self.overlayLayer.setNeedsDisplay()
             return
         }
         
@@ -708,11 +757,11 @@ class PageView: NSView {
         case NSUpArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController!.previousPage()
+                sessionController.previousPage()
             }
             else
             {
-                scrollKeys |= 1;
+                scrollKeys = scrollKeys.union(.up)
                 scrollPoint.y += delta
                 scrolling = true
             }
@@ -720,11 +769,11 @@ class PageView: NSView {
         case NSDownArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController!.nextPage()
+                sessionController.nextPage()
             }
             else
             {
-                scrollKeys |= 2;
+                scrollKeys = scrollKeys.union(.down)
                 scrollPoint.y -= delta
                 scrolling = true
             }
@@ -732,11 +781,11 @@ class PageView: NSView {
         case NSLeftArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                sessionController!.pageLeft(self)
+                sessionController.pageLeft(self)
             }
             else
             {
-                scrollKeys |= 4;
+                scrollKeys = scrollKeys.union(.left)
                 scrollPoint.x -= delta
                 scrolling = true;
             }
@@ -744,11 +793,11 @@ class PageView: NSView {
         case NSRightArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                sessionController!.pageRight(self)
+                sessionController.pageRight(self)
             }
             else
             {
-                scrollKeys |= 8
+                scrollKeys = scrollKeys.union(.right)
                 scrollPoint.x += delta
                 scrolling = true
             }
@@ -770,7 +819,7 @@ class PageView: NSView {
             }
             break;
         case 27:
-            sessionController!.killTopOptionalUIElement()
+            sessionController.killTopOptionalUIElement()
             break;
         case 127:
             self.pageUp()
@@ -783,7 +832,7 @@ class PageView: NSView {
         if scrolling && scrollTimer != nil
         {
             self.scroll(scrollPoint)
-            sessionController!.refreshLoupePanel()
+            sessionController.refreshLoupePanel()
             let userInfo = [
                 "lastTime": Date.init(),
                 "accelerate": shiftKey,
@@ -799,32 +848,30 @@ class PageView: NSView {
         let visible = self.enclosingScrollView!.documentVisibleRect
         var scrollPoint = visible.origin
         
-        if NSMaxY(self.bounds) <= NSMaxY(visible)
+        if self.bounds.maxY <= visible.maxY
         {
-            if sessionController!.session()!.pageOrder!.boolValue
+            if sessionController.session()!.pageOrder!.boolValue
             {
-                if(NSMinX(visible) > 0)
+                if visible.minX > 0
                 {
-                    scrollPoint = NSMakePoint(NSMinX(visible) - NSWidth(visible), 0)
-                    self.scroll(scrollPoint)
+                    self.scroll(NSPoint.init(x: visible.minX - visible.width, y: 0))
                 }
                 else
                 {
-                    sessionController!.pageTurn = 1
-                    sessionController!.previousPage()
+                    sessionController.pageTurn = 1
+                    sessionController.previousPage()
                 }
             }
             else
             {
-                if NSMaxX(visible) < NSWidth(self.bounds)
+                if visible.maxX < self.bounds.width
                 {
-                    scrollPoint = NSMakePoint(NSMaxX(visible), 0)
-                    self.scroll(scrollPoint)
+                    self.scroll(NSPoint.init(x: visible.maxX, y: 0))
                 }
                 else
                 {
-                    sessionController!.pageTurn = 2
-                    sessionController!.previousPage()
+                    sessionController.pageTurn = 2
+                    sessionController.previousPage()
                 }
             }
         }
@@ -837,34 +884,32 @@ class PageView: NSView {
     
     func pageDown() {
         let visible = self.enclosingScrollView!.documentVisibleRect
-        var scrollPoint = visible.origin;
+        var scrollPoint = visible.origin
         
         if scrollPoint.y <= 0
         {
-            if sessionController!.session().pageOrder!.boolValue
+            if sessionController.session().pageOrder!.boolValue
             {
-                if NSMaxX(visible) < NSWidth(self.bounds)
+                if visible.maxX < self.bounds.width
                 {
-                    scrollPoint = NSMakePoint(NSMaxX(visible), NSHeight(self.bounds) - NSHeight(visible))
-                    self.scroll(scrollPoint)
+                    self.scroll(NSPoint.init(x: visible.maxX, y: self.bounds.height - visible.height))
                 }
                 else
                 {
-                    sessionController!.pageTurn =  2
-                    sessionController!.nextPage()
+                    sessionController.pageTurn =  2
+                    sessionController.nextPage()
                 }
             }
             else
             {
-                if NSMinX(visible) > 0
+                if visible.minX > 0
                 {
-                    scrollPoint = NSMakePoint(NSMinX(visible) - NSWidth(visible), NSHeight(self.bounds) - NSHeight(visible))
-                    self.scroll(scrollPoint)
+                    self.scroll(NSPoint.init(x: visible.minX - visible.width, y: self.bounds.height - visible.height))
                 }
                 else
                 {
-                    sessionController!.pageTurn = 1
-                    sessionController!.nextPage()
+                    sessionController.pageTurn = 1
+                    sessionController.nextPage()
                 }
             }
         }
@@ -880,37 +925,34 @@ class PageView: NSView {
         switch Int(charNumber.value)
         {
         case NSUpArrowFunctionKey:
-            scrollKeys &= 14;
-            break;
+            scrollKeys = scrollKeys.subtracting(.up)
         case NSDownArrowFunctionKey:
-            scrollKeys &= 13;
-            break;
+            scrollKeys = scrollKeys.subtracting(.down)
         case NSLeftArrowFunctionKey:
-            scrollKeys &= 11;
-            break;
+            scrollKeys = scrollKeys.subtracting(.left)
         case NSRightArrowFunctionKey:
-            scrollKeys &= 7;
-            break;
+            scrollKeys = scrollKeys.subtracting(.right)
         default:
             break;
         }
     }
     
     override func flagsChanged(with event: NSEvent) {
-        if (event.type.rawValue & NSEvent.EventType.keyDown.rawValue) != 0 && event.modifierFlags.contains(.command)
+        if event.type == NSEvent.EventType.keyDown && event.modifierFlags.contains(.command)
         {
-            scrollKeys = 0;
+            scrollKeys = []
         }
     }
     
     @objc func scroll(timer: Timer) {
-        if scrollKeys == 0
+        if scrollKeys.isEmpty
         {
             scrollTimer?.invalidate()
             scrollTimer = nil;
             // This is to reset the interpolation.
             self.needsDisplay = true
-            return;
+            self.overlayLayer.setNeedsDisplay()
+            return
         }
         
         let pageTurnAllowed = (UserDefaults.standard.value(forKey: TSSTAutoPageTurn)! as! NSNumber).boolValue
@@ -922,51 +964,51 @@ class PageView: NSView {
         (timer.userInfo! as! NSMutableDictionary)["lastTime"] = currentDate
         var scrollPoint = visible.origin
         let delta = CGFloat(1000 * difference * Double(multiplier))
-        var turn = NOTURN
+        var turn: Side? = nil
         var directionString: NSString? = nil
-        let turnDirection = sessionController!.session().pageOrder?.boolValue
+        let turnDirection = sessionController.session().pageOrder?.boolValue
         var finishTurn = false
-        if scrollKeys & 1 != 0
+        if scrollKeys.contains(.up)
         {
             scrollPoint.y += delta;
             if(NSMaxY(visible) >= NSMaxY(self.frame) && pageTurnAllowed)
             {
-                turn = turnDirection! ? LEFTTURN : RIGHTTURN;
+                turn = turnDirection! ? .left : .right
             }
         }
         
-        if (scrollKeys & 2) != 0
+        if scrollKeys.contains(.down)
         {
             scrollPoint.y -= delta;
             if(scrollPoint.y <= 0 && pageTurnAllowed)
             {
-                turn = turnDirection! ? RIGHTTURN : LEFTTURN;
+                turn = turnDirection! ? .right : .left
             }
         }
         
-        if (scrollKeys & 4) != 0
+        if scrollKeys.contains(.left)
         {
             scrollPoint.x -= delta;
             if(scrollPoint.x <= 0 && pageTurnAllowed)
             {
-                turn = LEFTTURN;
+                turn = .left;
             }
         }
         
-        if (scrollKeys & 8) != 0
+        if scrollKeys.contains(.right)
         {
             scrollPoint.x += delta;
             if(NSMaxX(visible) >= NSMaxX(self.frame) && pageTurnAllowed)
             {
-                turn = RIGHTTURN;
+                turn = .right;
             }
         }
         
-        if(turn != NOTURN)
+        if let t = turn
         {
             var difference = 0;
             
-            if(turn == RIGHTTURN)
+            if t == .right
             {
                 directionString = "rightTurnStart";
             }
@@ -986,17 +1028,15 @@ class PageView: NSView {
             
             if difference >= Int(delay)
             {
-                if(turn == LEFTTURN)
+                if t == .left
                 {
-                    sessionController!.pageLeft(self)
-                    finishTurn = true
+                    sessionController.pageLeft(self)
                 }
-                else if(turn == RIGHTTURN)
+                else if t == .right
                 {
-                    sessionController!.pageRight(self)
-                    finishTurn = true
+                    sessionController.pageRight(self)
                 }
-                
+                finishTurn = true
                 scrollTimer?.invalidate()
                 scrollTimer = nil;
             }
@@ -1015,16 +1055,16 @@ class PageView: NSView {
             scrollView?.reflectScrolledClipView(clipView)
         }
         
-        sessionController?.refreshLoupePanel()
+        sessionController.refreshLoupePanel()
     }
     
     override func rightMouseDown(with event: NSEvent) {
-        let loupe = sessionController!.session().loupe!.boolValue
-        sessionController!.session().loupe = !loupe as NSNumber
+        let loupe = sessionController.session().loupe!.boolValue
+        sessionController.session().loupe = !loupe as NSNumber
     }
     
     override func mouseDown(with event: NSEvent) {
-        if sessionController!.pageSelectionInProgress() {
+        if sessionController.pageSelectionInProgress() {
             let cursor = self.convert(event.locationInWindow, from: nil)
             cropRect.origin = cursor;
         }
@@ -1035,47 +1075,47 @@ class PageView: NSView {
     }
     
     override func mouseMoved(with event: NSEvent) {
-        if sessionController!.pageSelectionInProgress()
+        guard sessionController.pageSelectionInProgress() else {
+            super.mouseMoved(with: event)
+            return
+        }
+        
+        let cursor = self.convert(event.locationInWindow, from: nil)
+        if sessionController.canSelectPageIndex(Side.left.rawValue) && self.firstPage.frame.contains(cursor)
         {
-            let cursor = self.convert(event.locationInWindow, from: nil)
-            if NSPointInRect(cursor, firstPageRect) && (sessionController?.canSelectPageIndex(0))!
-            {
-                pageSelection = 0;
-            }
-            else if NSPointInRect(cursor, secondPageRect) && sessionController!.canSelectPageIndex(1)
-            {
-                pageSelection = 1;
-            }
-            else
-            {
-                pageSelection = -1;
-            }
-            self.needsDisplay = true
+            pageSelection = .left
+        }
+        else if sessionController.canSelectPageIndex(Side.right.rawValue) && self.secondPage.frame.contains(cursor)
+        {
+            pageSelection = .right
         }
         else
         {
-            super.mouseMoved(with: event)
+            pageSelection = nil
         }
+        self.needsDisplay = true
+        self.overlayLayer.setNeedsDisplay()
     }
     
     override func mouseDragged(with event: NSEvent) {
         let viewOrigin = self.enclosingScrollView!.documentVisibleRect.origin
         var cursor = event.locationInWindow
         var currentPoint: NSPoint
-        if sessionController!.pageSelectionInProgress()
+        if sessionController.pageSelectionInProgress()
         {
             cursor = self.convert(cursor, from: nil)
             cropRect.size.width = cursor.x - cropRect.origin.x;
             cropRect.size.height = cursor.y - cropRect.origin.y;
-            if NSPointInRect(cropRect.origin, self.pageSelectionRect(selection: 1))
+            if self.pageSelectionRect(selection: .left).contains(cropRect.origin)
             {
-                pageSelection = 0;
+                pageSelection = .left
             }
-            else if NSPointInRect(cropRect.origin, self.pageSelectionRect(selection: 2))
+            else if self.pageSelectionRect(selection: .right).contains(cropRect.origin)
             {
-                pageSelection = 1;
+                pageSelection = .right
             }
             self.needsDisplay = true
+            self.overlayLayer.setNeedsDisplay()
         }
         else if self.dragIsPossible
         {
@@ -1086,7 +1126,7 @@ class PageView: NSView {
                 {
                     currentPoint = e.locationInWindow
                     self.scroll(NSMakePoint(viewOrigin.x + cursor.x - currentPoint.x,viewOrigin.y + cursor.y - currentPoint.y))
-                    sessionController!.refreshLoupePanel()
+                    sessionController.refreshLoupePanel()
                 }
                 e = (self.window?.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]))!
             }
@@ -1095,13 +1135,14 @@ class PageView: NSView {
     }
     
     override func mouseUp(with event: NSEvent) {
-        if sessionController!.pageSelectionInProgress()
+        if sessionController.pageSelectionInProgress()
         {
-            sessionController!.selectedPage(pageSelection, withCropRect: self.imageCropRectangle())
-            pageSelection = -1;
+            sessionController.selectedPage(pageSelection?.rawValue ?? -1, withCropRect: self.imageCropRectangle())
+            pageSelection = nil
             cropRect = NSZeroRect;
             
             self.needsDisplay = true
+            self.overlayLayer.setNeedsDisplay()
             return;
         }
         
@@ -1142,11 +1183,11 @@ class PageView: NSView {
     override func swipe(with event: NSEvent) {
         if event.deltaX > 0.0
         {
-            sessionController!.pageLeft(self)
+            sessionController.pageLeft(self)
         }
         else if event.deltaX < 0.0
         {
-            sessionController!.pageRight(self)
+            sessionController.pageRight(self)
         }
     }
     
@@ -1157,18 +1198,18 @@ class PageView: NSView {
         // Prevent more than one rotation in the same direction per second
         if event.rotation > 0.5 && event.timestamp > PageView.nextValidRight
         {
-            sessionController!.rotateLeft(self)
+            sessionController.rotateLeft(self)
             PageView.nextValidRight = event.timestamp + 0.75
         }
         else if event.rotation < -0.5 && event.timestamp > PageView.nextValidLeft
         {
-            sessionController!.rotateRight(self)
+            sessionController.rotateRight(self)
             PageView.nextValidLeft = event.timestamp + 0.75;
         }
     }
     
     override func magnify(with event: NSEvent) {
-        let session = sessionController!.session()
+        let session = sessionController.session()
         let scalingOption = session!.scaleOptions!.intValue
         var previousZoom = CGFloat(session!.zoomLevel!.floatValue)
         
@@ -1190,7 +1231,7 @@ class PageView: NSView {
         return
             self.horizontalScrollIsPossible ||
                 self.verticalScrollIsPossible &&
-                !sessionController!.pageSelectionInProgress()
+                !sessionController.pageSelectionInProgress()
     }
     
     var horizontalScrollIsPossible: Bool {
@@ -1215,4 +1256,55 @@ class PageView: NSView {
             super.resetCursorRects();
         }
     }
+}
+
+extension CGSize {
+    fileprivate func scaleBy(x sx: CGFloat, y sy: CGFloat) -> CGSize
+    {
+        return self.applying(CGAffineTransform.init(scaleX: sx, y: sy))
+    }
+    
+    fileprivate func scaleBy(s: CGFloat) -> CGSize
+    {
+        return self.scaleBy(x: s, y: s)
+    }
+    
+    fileprivate var transposed: CGSize {
+        return Self.init(width: height, height: width)
+    }
+    
+    fileprivate func scaleTo(width: CGFloat) -> CGSize {
+        guard self.width > 0 else { return CGSize.zero }
+        return self.scaleBy(s: width / self.width)
+    }
+    
+    fileprivate func scaleTo(height: CGFloat) -> CGSize {
+        guard self.height > 0 else { return CGSize.zero }
+        return self.scaleBy(s: height / self.height)
+    }
+}
+
+extension CGRect {
+    fileprivate var center: CGPoint {
+        CGPoint.init(x: midX, y: midY)
+    }
+}
+
+extension UserDefaults {
+    // If true a page scale is constrained by its resolution.
+    var isImageScaleConstrained: Bool {
+        return UserDefaults.standard.bool(forKey: TSSTConstrainScale)
+    }
+}
+
+enum OrthogonalRotation: Int {
+    case r0_4 = 0
+    case r1_4 = 3
+    case r2_4 = 2
+    case r3_4 = 1
+    static let r4_4 = r0_4
+}
+
+func * (lhs: OrthogonalRotation, rhs: OrthogonalRotation) -> OrthogonalRotation {
+    return OrthogonalRotation.init(rawValue: (lhs.rawValue + rhs.rawValue) % 4)!
 }

@@ -193,6 +193,18 @@ public class Image: NSManagedObject {
         return imageFromData
     }
     
+    @objc var imageSource: CGImageSource? {
+        guard text == nil || !text!.boolValue else { return nil }
+        guard let img = self.pageData else { return nil }
+        
+        self.setOwnSizeInfoWithData(imageData: img)
+        guard let source = CGImageSourceCreateWithData(NSData.init(data: img) as CFData, nil) else { return nil }
+        guard CGImageSourceGetStatus(source) == .statusComplete else { return nil }
+        guard CGImageSourceGetCount(source) > 0 else { return nil }
+        
+        return source
+    }
+    
     var textPage: NSImage? {
         let textData = self.pageData
         var lossyConversion: ObjCBool = false;

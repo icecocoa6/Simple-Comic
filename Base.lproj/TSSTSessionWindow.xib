@@ -97,15 +97,9 @@
                             <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="selectOne" id="516">
                                 <font key="font" metaFont="system"/>
                                 <segments>
-                                    <segment toolTip="Original Size" image="equal">
-                                        <nil key="label"/>
-                                    </segment>
-                                    <segment toolTip="Scale to Window" image="win_scale" width="22" tag="1">
-                                        <nil key="label"/>
-                                    </segment>
-                                    <segment toolTip="Horizontal Scaling" image="hor_scale" width="22" tag="2">
-                                        <nil key="label"/>
-                                    </segment>
+                                    <segment toolTip="Original Size" image="equal"/>
+                                    <segment toolTip="Scale to Window" image="win_scale" width="22" tag="1"/>
+                                    <segment toolTip="Horizontal Scaling" image="hor_scale" width="22" tag="2"/>
                                 </segments>
                             </segmentedCell>
                             <connections>

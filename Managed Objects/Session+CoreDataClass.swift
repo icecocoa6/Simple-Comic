@@ -25,4 +25,15 @@ public class Session: NSManagedObject {
             _ = grp.path
         }
     }
+    
+    var pageScaling: PageScaling {
+        get { PageScaling.init(rawValue: scaleOptions?.intValue ?? 0) ?? .noScale }
+        set(value) { scaleOptions = value.rawValue as NSNumber }
+    }
+}
+
+enum PageScaling: Int {
+    case noScale = 0
+    case fitToWindow = 1
+    case fitToWidth = 2
 }

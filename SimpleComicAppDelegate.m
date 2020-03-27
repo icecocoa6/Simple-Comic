@@ -546,6 +546,8 @@ static NSArray * allAvailableStringEncodings(void)
 		exists = [fileManager fileExistsAtPath: path isDirectory: &isDirectory];
 		if(exists && ![[[path lastPathComponent] substringToIndex: 1] isEqualToString: @"."])
 		{
+            NSString *uti = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)fileExtension, nil);
+            [uti autorelease];
 			if(isDirectory)
 			{
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"ImageGroup" inManagedObjectContext: [self managedObjectContext]];
@@ -567,7 +569,7 @@ static NSArray * allAvailableStringEncodings(void)
 				[fileDescription setValue: [path lastPathComponent] forKey: @"name"];
 				[(PDF *)fileDescription pdfContents];
 			}
-			else if([[Image imageExtensions] containsObject: fileExtension] || [[Image textExtensions] containsObject: fileExtension])
+			else if([[Image imageExtensions] containsObject: uti] || [[Image textExtensions] containsObject: fileExtension])
 			{
 				fileDescription = [NSEntityDescription insertNewObjectForEntityForName: @"Image" inManagedObjectContext: [self managedObjectContext]];
 				[fileDescription setValue: path forKey: @"imagePath"];
