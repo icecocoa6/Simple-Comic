@@ -36,6 +36,32 @@
 @class InfoWindow;
 @class Session;
 
+extern NSString * TSSTPageOrder;
+extern NSString * TSSTPageZoomRate;
+extern NSString * TSSTFullscreen;
+extern NSString * TSSTSavedSelection;
+extern NSString * TSSTThumbnailSize;
+extern NSString * TSSTTwoPageSpread;
+extern NSString * TSSTPageScaleOptions;
+extern NSString * TSSTIgnoreDonation;
+extern NSString * TSSTScrollPosition;
+extern NSString * TSSTConstrainScale;
+extern NSString * TSSTZoomLevel;
+extern NSString * TSSTViewRotation;
+extern NSString * TSSTBackgroundColor;
+extern NSString * TSSTSessionRestore;
+extern NSString * TSSTScrollersVisible;
+extern NSString * TSSTAutoPageTurn;
+extern NSString * TSSTWindowAutoResize;
+extern NSString * TSSTLoupeDiameter;
+extern NSString * TSSTLoupePower;
+extern NSString * TSSTStatusbarVisible;
+extern NSString * TSSTLonelyFirstPage;
+extern NSString * TSSTNestedArchives;
+extern NSString * TSSTUpdateSelection;
+extern NSString * TSSTSessionEndNotification;
+
+
 enum PageSelectionMode {
 	None,
 	Icon,

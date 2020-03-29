@@ -247,10 +247,10 @@ class PageView: NSView, CALayerDelegate {
         let pboard = sender.draggingPasteboard
         if pboard.types?.contains(.fileURL) ?? false
         {
-            let filePaths = pboard.propertyList(forType: .fileURL)!
+            let filePaths = pboard.propertyList(forType: .fileURL)! as! String
             sessionController.updateSessionObject()
             let app = NSApp.delegate as! SimpleComicAppDelegate
-            app.addFiles([filePaths], to: sessionController.session()!)
+            app.addFiles(paths: [filePaths], toSession: sessionController.session()!)
             return true
         }
         return false

@@ -30,11 +30,36 @@
 
 #import <XADMaster/XADArchive.h>
 #import "UKXattrMetadataStore.h"
-#import "SimpleComicAppDelegate.h"
 #import "TSSTSessionWindowController.h"
 #import "TSSTSortDescriptor.h"
 #import "TSSTImageUtilities.h"
 #import "Simple_Comic-Swift.h"
+
+NSString * TSSTPageOrder =         @"pageOrder";
+NSString * TSSTPageZoomRate =      @"pageZoomRate";
+NSString * TSSTFullscreen =        @"fullscreen";
+NSString * TSSTSavedSelection =    @"savedSelection";
+NSString * TSSTThumbnailSize =     @"thumbnailSize";
+NSString * TSSTTwoPageSpread =     @"twoPageSpread";
+NSString * TSSTPageScaleOptions =  @"scaleOptions";
+NSString * TSSTIgnoreDonation =    @"ignoreDonation";
+NSString * TSSTScrollPosition =    @"scrollPosition";
+NSString * TSSTConstrainScale =    @"constrainScale";
+NSString * TSSTZoomLevel =         @"zoomLevel";
+NSString * TSSTViewRotation =      @"rotation";
+NSString * TSSTBackgroundColor =   @"pageBackgroundColor";
+NSString * TSSTSessionRestore =    @"sessionRestore";
+NSString * TSSTScrollersVisible =  @"scrollersVisible";
+NSString * TSSTAutoPageTurn =      @"autoPageTurn";
+NSString * TSSTWindowAutoResize =  @"windowAutoResize";
+NSString * TSSTLoupeDiameter =     @"loupeDiameter";
+NSString * TSSTLoupePower =           @"loupePower";
+NSString * TSSTStatusbarVisible =  @"statusBarVisisble";
+NSString * TSSTLonelyFirstPage =   @"lonelyFirstPage";
+NSString * TSSTNestedArchives =       @"nestedArchives";
+NSString * TSSTUpdateSelection =   @"updateSelection";
+
+NSString * TSSTSessionEndNotification = @"sessionEnd";
 
 @implementation TSSTSessionWindowController
 

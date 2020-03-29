@@ -6,4 +6,4 @@
 
 #import "TSSTImageUtilities.h"
 #import "TSSTSessionWindowController.h"
-#import "SimpleComicAppDelegate.h"
+#import "DTPreferencesController.h"

@@ -70,7 +70,7 @@
 		52611949242A48A900958E3F /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611948242A48A900958E3F /* PageView.swift */; };
 		52B4DD1A242BCA1D00B94227 /* Comparable+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */; };
 		52F52C77242E4C080020D911 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C76242E4C080020D911 /* Configuration.swift */; };
-		77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */; };
+		52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		B75D0BBC1E4C1AD900BEAAAF /* images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75D0BBB1E4C1AD900BEAAAF /* images.xcassets */; };
@@ -207,10 +207,9 @@
 		52611948242A48A900958E3F /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PageView.swift; path = Session/PageView.swift; sourceTree = "<group>"; };
 		52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+SimpleComic.swift"; sourceTree = "<group>"; };
 		52F52C76242E4C080020D911 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleComicAppDelegate.swift; sourceTree = "<group>"; };
 		770B37EC0679A11B001EADE2 /* Sessions_DataModel.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.xcdatamodel; path = Sessions_DataModel.xcdatamodel; sourceTree = "<group>"; };
 		77C82804067257F0000B614F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
-		77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleComicAppDelegate.h; sourceTree = "<group>"; };
-		77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleComicAppDelegate.m; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Simple Comic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Simple Comic.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B75D0BBB1E4C1AD900BEAAAF /* images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = images.xcassets; sourceTree = "<group>"; };
 		FA9FB53408AADA270085AA55 /* TSSTCustomValueTransformers.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = TSSTCustomValueTransformers.m; sourceTree = "<group>"; };
@@ -236,8 +235,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				77C8280B06725ACE000B614F /* SimpleComicAppDelegate.h */,
-				77C8280C06725ACE000B614F /* SimpleComicAppDelegate.m */,
+				52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */,
 				526119012426832000958E3F /* Simple Comic-Bridging-Header.h */,
 				FAA1C3E808BAB158006F7EC4 /* Session */,
 				288C0C420DCDAB7200EAFF46 /* Thumbnail View */,
@@ -596,7 +594,6 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				526119312428CC8600958E3F /* ImageGroup+CoreDataProperties.swift in Sources */,
 				52611912242759FA00958E3F /* InfoWindow.swift in Sources */,
-				77C8280E06725ACE000B614F /* SimpleComicAppDelegate.m in Sources */,
 				5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */,
 				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
 				52F52C77242E4C080020D911 /* Configuration.swift in Sources */,
@@ -610,6 +607,7 @@
 				5261191624279D1000958E3F /* ThumbnailView.swift in Sources */,
 				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,
 				286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */,
+				52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */,
 				5261193C242911BC00958E3F /* Archive+CoreDataClass.swift in Sources */,
 				283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */,
 				281C0D700CEE6FBA009A9696 /* TSSTBezelWindow.m in Sources */,

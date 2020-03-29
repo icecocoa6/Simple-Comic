@@ -352,7 +352,7 @@ DQ
             </connections>
             <point key="canvasLocation" x="149" y="77"/>
         </menu>
-        <customObject id="205" userLabel="Application Delegate" customClass="SimpleComicAppDelegate">
+        <customObject id="205" userLabel="Application Delegate" customClass="SimpleComicAppDelegate" customModule="Simple_Comic">
             <connections>
                 <outlet property="encodingPanel" destination="1080" id="1091"/>
                 <outlet property="encodingPopup" destination="1082" id="1868"/>
