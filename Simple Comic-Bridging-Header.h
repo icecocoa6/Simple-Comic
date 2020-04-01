@@ -5,5 +5,6 @@
 #import <XADMaster/XADArchive.h>
 
 #import "TSSTImageUtilities.h"
-#import "TSSTSessionWindowController.h"
 #import "DTPreferencesController.h"
+#import "UKXattrMetadataStore.h"
+#import "TSSTSortDescriptor.h"

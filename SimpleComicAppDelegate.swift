@@ -58,13 +58,29 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     var preferences: DTPreferencesController?
 
     /*  This is the array that maintains all of the session window managers. */
-    var sessions: [TSSTSessionWindowController] = []
+    var sessions: [SessionWindowController] = []
 
     /*    Vars to delay the loading of files from an app launch until the core data store
      has finished initializing */
     var launchInProgress: Bool = false
     var optionHeldAtlaunch: Bool = false
     var launchFiles: [String]? = nil
+
+    class func setupTemplateImages() {
+        NSImage.init(named: "org_size")?.isTemplate = true
+        NSImage.init(named: "Loupe")?.isTemplate = true
+        NSImage.init(named: "rotate_l")?.isTemplate = true
+        NSImage.init(named: "rotate_r")?.isTemplate = true
+        NSImage.init(named: "win_scale")?.isTemplate = true
+        NSImage.init(named: "hor_scale")?.isTemplate = true
+        NSImage.init(named: "one_page")?.isTemplate = true
+        NSImage.init(named: "two_page")?.isTemplate = true
+        NSImage.init(named: "rl_order")?.isTemplate = true
+        NSImage.init(named: "lr_order")?.isTemplate = true
+        NSImage.init(named: "equal")?.isTemplate = true
+        NSImage.init(named: "thumbnails")?.isTemplate = true
+        NSImage.init(named: "extract")?.isTemplate = true
+    }
 
     // MARK: - Application Delegate
 
@@ -100,11 +116,13 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
         UserDefaults.standard.register(defaults: inits)
 
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.TSSTSessionEnd, object: nil, queue: nil) {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: TSSTSessionEndNotification), object: nil, queue: nil) {
             self.endSession($0)
         }
         UserDefaults.standard.addObserver(self, forKeyPath: TSSTUpdateSelection, options: [], context: nil)
         UserDefaults.standard.addObserver(self, forKeyPath: TSSTSessionRestore, options: [], context: nil)
+        
+        Self.setupTemplateImages()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -227,7 +245,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
     func saveContext() -> Bool {
         for controller in sessions {
-            (controller as AnyObject).updateSessionObject()
+            controller.updateSessionObject()
         }
 
         let context = self.managedObjectContext;
@@ -252,20 +270,20 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Session Management
 
     func windowForSession(_ settings: Session) {
-        let s = sessions.map { $0.session() }
+        let s = sessions.map { $0.session }
         if settings.images!.count > 0 && !s.contains(settings) {
-            let comicWindow = TSSTSessionWindowController.init(session: settings)!
+            let comicWindow = SessionWindowController.init(window: nil, session: settings)
             sessions.append(comicWindow)
             comicWindow.showWindow(self)
         }
     }
 
     func endSession(_ notification: Notification) {
-        let controller = notification.object as! TSSTSessionWindowController
+        let controller = notification.object as! SessionWindowController
         if let index = sessions.firstIndex(of: controller) {
             sessions.remove(at: index)
         }
-        self.managedObjectContext.delete(controller.session())
+        self.managedObjectContext.delete(controller.session!)
     }
 
     func sessionRelaunch() {

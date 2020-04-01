@@ -278,7 +278,7 @@ DQ
 </string>
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="launchJumpPanel:" target="-1" id="1281"/>
+                                    <action selector="launchJumpPanel:" target="-1" id="PPh-Cb-I2S"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="1161">
@@ -390,7 +390,7 @@ DQ
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="474">
                         <rect key="frame" x="29" y="79" width="242" height="14"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Archive will not open without a password" id="1695">
-                            <font key="font" metaFont="label" size="11"/>
+                            <font key="font" metaFont="controlContent" size="11"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -468,7 +468,7 @@ Gw
                         <rect key="frame" x="87" y="80" width="242" height="22"/>
                         <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" autoenablesItems="NO" selectedItem="1086" id="1707">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="label" size="11"/>
+                            <font key="font" metaFont="controlContent" size="11"/>
                             <menu key="menu" title="OtherViews" autoenablesItems="NO" id="1083">
                                 <items>
                                     <menuItem title="Item1" state="on" id="1086"/>
@@ -517,7 +517,7 @@ DQ
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1101">
                         <rect key="frame" x="129" y="62" width="199" height="14"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="filename" id="1711">
-                            <font key="font" metaFont="label" size="11"/>
+                            <font key="font" metaFont="controlContent" size="11"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>

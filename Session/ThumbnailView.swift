@@ -12,7 +12,7 @@ import Cocoa
 
 public class ThumbnailView: NSView {
     @objc
-    @IBOutlet var dataSource: TSSTSessionWindowController?
+    @IBOutlet var dataSource: SessionWindowController?
     @IBOutlet var pageController: NSArrayController?
     
     @IBOutlet var thumbnailView: ImageView?
@@ -47,7 +47,7 @@ public class ThumbnailView: NSView {
         
         for counter in 0 ..< limit
         {
-            let thumbnail = dataSource?.imageForPage(at: counter)
+            let thumbnail = dataSource?.imageForPageAtIndex(counter)
             var drawRect = self.rectFor(index: counter)
             drawRect = rectWithSizeCenteredInRect(thumbnail!.size, drawRect.insetBy(dx: 2, dy: 2))
             thumbnail?.draw(in: drawRect, from: NSZeroRect, operation: .sourceOver, fraction: 1.0)
@@ -74,7 +74,7 @@ public class ThumbnailView: NSView {
         let charNumber = event.charactersIgnoringModifiers!.first
         switch charNumber?.asciiValue {
         case 27:
-            let wc = self.window?.windowController as! TSSTSessionWindowController
+            let wc = self.window?.windowController as! SessionWindowController
             wc.killTopOptionalUIElement()
             break
         default:
@@ -152,9 +152,9 @@ public class ThumbnailView: NSView {
         let pageCount = contents?.count ?? 0
         
         limit = 0
-        while (limit < pageCount) && (localIdent == threadIdent) && (dataSource?.responds(to: #selector(TSSTSessionWindowController.imageForPage(at:))) ?? false)
+        while (limit < pageCount) && (localIdent == threadIdent) && (dataSource?.responds(to: #selector(SessionWindowController.imageForPageAtIndex(_:))) ?? false)
         {
-            dataSource?.imageForPage(at: limit)
+            _ = dataSource?.imageForPageAtIndex(limit)
             
             if limit % 5 == 0
             {
@@ -186,7 +186,7 @@ public class ThumbnailView: NSView {
         let horSide = bounds.width / CGFloat(horCount)
         let horGridPos = CGFloat(index % horCount);
         let vertGridPos = CGFloat((index / horCount) % vertCount)
-        let pageOrder = dataSource?.session()?.value(forKey: "pageOrder") as! NSNumber?
+        let pageOrder = dataSource?.session?.value(forKey: "pageOrder") as! NSNumber?
         
         if pageOrder?.boolValue ?? false
         {

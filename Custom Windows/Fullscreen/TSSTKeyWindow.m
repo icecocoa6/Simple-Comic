@@ -29,7 +29,6 @@
 
 
 #import "TSSTKeyWindow.h"
-#import "TSSTSessionWindowController.h"
 
 
 

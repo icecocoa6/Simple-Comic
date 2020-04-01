@@ -12,7 +12,7 @@ import Cocoa
 
 class ToolbarItem: NSToolbarItem {
     override func validate() {
-        let toolbarDelegate = self.toolbar?.delegate as! TSSTSessionWindowController
+        let toolbarDelegate = self.toolbar?.delegate as! SessionWindowController
         let control = self.view as! NSControl
         control.isEnabled = !toolbarDelegate.pageSelectionInProgress()
     }
@@ -20,10 +20,10 @@ class ToolbarItem: NSToolbarItem {
 
 class PageTurnToolbarItem: ToolbarItem {
     override func validate() {
-        let toolbarDelegate = self.toolbar?.delegate as! TSSTSessionWindowController
+        let toolbarDelegate = self.toolbar?.delegate as! SessionWindowController
         let control = self.view as! NSSegmentedControl
-        control.setEnabled(toolbarDelegate.canTurnPageLeft(), forSegment: 0)
-        control.setEnabled(toolbarDelegate.canTurnPageRight(), forSegment: 1)
+        control.setEnabled(toolbarDelegate.canTurnPageLeft, forSegment: 0)
+        control.setEnabled(toolbarDelegate.canTurnPageRight, forSegment: 1)
         super.validate()
     }
 }

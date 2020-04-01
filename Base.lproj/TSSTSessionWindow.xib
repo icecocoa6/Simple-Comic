@@ -5,7 +5,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="TSSTSessionWindowController">
+        <customObject id="-2" userLabel="File's Owner" customClass="SessionWindowController" customModule="Simple_Comic" customModuleProvider="target">
             <connections>
                 <outlet property="exposeBezel" destination="373" id="375"/>
                 <outlet property="exposeView" destination="378" id="380"/>
