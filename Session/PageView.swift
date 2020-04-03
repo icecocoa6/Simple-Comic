@@ -463,7 +463,7 @@ class PageView: NSView, CALayerDelegate {
         
         guard frameSize != NSZeroSize else { return }
         
-        if sessionController.pageTurn == 1
+        if sessionController.pageTurn == .left
         {
             correctOrigin.x = frameSize.width > viewSize.width ? (frameSize.width - viewSize.width) : 0
         }
@@ -496,11 +496,11 @@ class PageView: NSView, CALayerDelegate {
     
     fileprivate func calcViewSize(_ imageSize: NSSize, _ visibleRect: NSRect) -> CGSize {
         var viewSize: CGSize = CGSize.zero
-        var scaling = sessionController.session?.pageScaling ?? .noScale
+        var scaling = sessionController.session?.adjustmentMode ?? .none
         scaling = sessionController.currentPageIsText() ? .fitToWidth : scaling
         switch (scaling)
         {
-        case .noScale:
+        case .none:
             viewSize.width = max(imageSize.width, visibleRect.width)
             viewSize.height = max(imageSize.height, visibleRect.height)
         case .fitToWindow:
@@ -541,7 +541,7 @@ class PageView: NSView, CALayerDelegate {
         self.frame.size = viewSize
         
         if !UserDefaults.standard.isImageScaleConstrained &&
-            sessionController.session!.pageScaling != .noScale
+            sessionController.session!.adjustmentMode != .none
         {
             if( viewSize.width / viewSize.height < imageSize.width / imageSize.height)
             {
@@ -688,8 +688,8 @@ class PageView: NSView, CALayerDelegate {
         }
         
         let modifier = event.modifierFlags
-        var scaling = sessionController.session!.scaleOptions!.intValue
-        scaling = sessionController.currentPageIsText() ? 2 : scaling
+        var scaling = sessionController.session!.adjustmentMode
+        scaling = sessionController.currentPageIsText() ? .fitToWidth : scaling
         
         if modifier.contains(.command) && event.deltaY != 0
         {
@@ -703,7 +703,7 @@ class PageView: NSView, CALayerDelegate {
             loupePower += event.deltaY > 0 ? 1 : -1;
             UserDefaults.standard.setValue(loupePower.clamp(2 ... 6), forKey: TSSTLoupePower)
         }
-        else if(scaling == 1)
+        else if(scaling == .fitToWindow)
         {
             let deltaX = event.deltaX
             if deltaX != 0.0
@@ -757,7 +757,7 @@ class PageView: NSView, CALayerDelegate {
         case NSUpArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController.previousPage()
+                sessionController.turnPage(to: .prev)
             }
             else
             {
@@ -769,7 +769,7 @@ class PageView: NSView, CALayerDelegate {
         case NSDownArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController.nextPage()
+                sessionController.turnPage(to: .next)
             }
             else
             {
@@ -858,8 +858,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = 1
-                    sessionController.previousPage()
+                    sessionController.pageTurn = .left
+                    sessionController.turnPage(to: .prev)
                 }
             }
             else
@@ -870,8 +870,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = 2
-                    sessionController.previousPage()
+                    sessionController.pageTurn = .right
+                    sessionController.turnPage(to: .prev)
                 }
             }
         }
@@ -896,8 +896,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn =  2
-                    sessionController.nextPage()
+                    sessionController.pageTurn =  .right
+                    sessionController.turnPage(to: .next)
                 }
             }
             else
@@ -908,8 +908,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = 1
-                    sessionController.nextPage()
+                    sessionController.pageTurn = .left
+                    sessionController.turnPage(to: .next)
                 }
             }
         }
@@ -1210,19 +1210,18 @@ class PageView: NSView, CALayerDelegate {
     
     override func magnify(with event: NSEvent) {
         let session = sessionController.session
-        let scalingOption = session!.scaleOptions!.intValue
         var previousZoom = CGFloat(session!.zoomLevel!.floatValue)
         
-        if scalingOption != 0
+        if session!.adjustmentMode != .none
         {
-            previousZoom = NSWidth(self.imageBounds) / self.combinedImageSize(forZoom: 1).width
+            previousZoom = self.imageBounds.width / self.combinedImageSize(forZoom: 1).width
         }
         
         previousZoom += event.magnification * 2;
         previousZoom = previousZoom < 5 ? previousZoom : 5;
         previousZoom = previousZoom > 0.25 ? previousZoom : 0.25;
         session!.zoomLevel = previousZoom as NSNumber
-        session!.scaleOptions = 0
+        session!.adjustmentMode = .none
         
         self.resizeView()
     }

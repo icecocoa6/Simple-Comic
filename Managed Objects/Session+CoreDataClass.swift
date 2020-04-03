@@ -16,7 +16,7 @@ import CoreData
 public class Session: NSManagedObject {
     override public func awakeFromFetch() {
         super.awakeFromFetch()
-        
+
         /* By calling path for all children, groups with unresolved bookmarks
         are deleted. */
         for group in self.groups!
@@ -25,15 +25,19 @@ public class Session: NSManagedObject {
             _ = grp.path
         }
     }
-    
-    var pageScaling: PageScaling {
-        get { PageScaling.init(rawValue: scaleOptions?.intValue ?? 0) ?? .noScale }
-        set(value) { scaleOptions = value.rawValue as NSNumber }
+
+    var adjustmentMode: PageAdjustmentMode {
+        get { PageAdjustmentMode(rawValue: rawAdjustmentMode?.intValue ?? 0) ?? .none }
+        set(value) {
+            self.willChangeValue(for: \.rawAdjustmentMode)
+            rawAdjustmentMode = value.rawValue as NSNumber
+            self.didChangeValue(for: \.rawAdjustmentMode)
+        }
     }
 }
 
-enum PageScaling: Int {
-    case noScale = 0
+@objc enum PageAdjustmentMode: Int, Codable {
+    case none = 0
     case fitToWindow = 1
     case fitToWidth = 2
 }

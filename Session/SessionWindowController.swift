@@ -31,31 +31,55 @@
 
 import Cocoa
 
-let TSSTPageOrder =         "pageOrder"
-let TSSTPageZoomRate =      "pageZoomRate"
-let TSSTFullscreen =        "fullscreen"
-let TSSTSavedSelection =    "savedSelection"
-let TSSTThumbnailSize =     "thumbnailSize"
-let TSSTTwoPageSpread =     "twoPageSpread"
-let TSSTPageScaleOptions =  "scaleOptions"
-let TSSTIgnoreDonation =    "ignoreDonation"
-let TSSTScrollPosition =    "scrollPosition"
-let TSSTConstrainScale =    "constrainScale"
-let TSSTZoomLevel =         "zoomLevel"
-let TSSTViewRotation =      "rotation"
-let TSSTBackgroundColor =   "pageBackgroundColor"
-let TSSTSessionRestore =    "sessionRestore"
-let TSSTScrollersVisible =  "scrollersVisible"
-let TSSTAutoPageTurn =      "autoPageTurn"
-let TSSTWindowAutoResize =  "windowAutoResize"
-let TSSTLoupeDiameter =     "loupeDiameter"
-let TSSTLoupePower =           "loupePower"
-let TSSTStatusbarVisible =  "statusBarVisisble"
-let TSSTLonelyFirstPage =   "lonelyFirstPage"
-let TSSTNestedArchives =       "nestedArchives"
-let TSSTUpdateSelection =   "updateSelection"
+let TSSTPageOrder = "pageOrder"
+let TSSTPageZoomRate = "pageZoomRate"
+let TSSTFullscreen = "fullscreen"
+let TSSTSavedSelection = "savedSelection"
+let TSSTThumbnailSize = "thumbnailSize"
+let TSSTTwoPageSpread = "twoPageSpread"
+let TSSTIgnoreDonation = "ignoreDonation"
+let TSSTScrollPosition = "scrollPosition"
+let TSSTConstrainScale = "constrainScale"
+let TSSTZoomLevel = "zoomLevel"
+let TSSTViewRotation = "rotation"
+let TSSTBackgroundColor = "backgroundColor"
+let TSSTSessionRestore = "sessionRestore"
+let TSSTScrollersVisible = "scrollersVisible"
+let TSSTAutoPageTurn = "autoPageTurn"
+let TSSTWindowAutoResize = "windowAutoResize"
+let TSSTLoupeDiameter = "loupeDiameter"
+let TSSTLoupePower = "loupePower"
+let TSSTStatusbarVisible = "statusBarVisisble"
+let TSSTLonelyFirstPage = "lonelyFirstPage"
+let TSSTNestedArchives = "nestedArchives"
+let TSSTUpdateSelection = "updateSelection"
 
 let TSSTSessionEndNotification = "sessionEnd"
+
+class NotificationObservation : NSObject {
+    let center: NotificationCenter
+    let observer: NSObjectProtocol
+    
+    init(center: NotificationCenter, observer: NSObjectProtocol) {
+        self.center = center
+        self.observer = observer
+    }
+    
+    func invalidate() {
+        center.removeObserver(observer)
+    }
+    
+    deinit {
+        self.invalidate()
+    }
+}
+
+extension NotificationCenter {
+    func observe(forName name: NSNotification.Name?, object obj: Any?, queue: OperationQueue?, using block: @escaping (Notification) -> Void) -> NotificationObservation {
+        return NotificationObservation(center: self,
+                                       observer: self.addObserver(forName: name, object: obj, queue: queue, using: block))
+    }
+}
 
 class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuItemValidation {
     // MARK: - Properties
@@ -93,7 +117,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     /* This var is bound to the session window name */
     @objc dynamic var pageNames: String?
-    var pageTurn: Int = 0
+    var pageTurn: PageView.Side? = nil
 
     /* Exactly what it sounds like */
     @objc dynamic var pageSortDescriptor: NSArray?
@@ -105,6 +129,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     var savedZoom: Float = 0.0
 
+    var observers: [Any] = []
+
     enum PageSelectionMode: Int {
         case None = 0
         case Icon = 1
@@ -113,10 +139,11 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     };
     var _pageSelectionInProgress: PageSelectionMode = .None
 
+
     init(window: NSWindow?, session: Session) {
         super.init(window: window)
 
-        self.pageTurn = 0
+        self.pageTurn = nil
         self._pageSelectionInProgress = .None
         self.mouseMovedTimer = nil
         self.session = session
@@ -142,43 +169,102 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.window?.acceptsMouseMovedEvents = true
         self.pageController.setSelectionIndex(self.session!.selection!.intValue)
 
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTConstrainScale, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTStatusbarVisible, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTScrollersVisible, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTBackgroundColor, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTLoupeDiameter, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTLoupePower, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTPageOrder, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTPageScaleOptions, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTTwoPageSpread, options: [], context: nil)
-        self.session?.addObserver(self, forKeyPath: TSSTPageOrder, options: [], context: nil)
-        self.session?.addObserver(self, forKeyPath: TSSTPageScaleOptions, options: [], context: nil)
-        self.session?.addObserver(self, forKeyPath: TSSTTwoPageSpread, options: [], context: nil)
-        self.session?.addObserver(self, forKeyPath: "loupe", options: [], context: nil)
-        self.session?.bind(NSBindingName(rawValue: "selection"), to: pageController!, withKeyPath: "selectionIndex", options: nil)
+        self.observers.removeAll()
+        let defaults = UserDefaults.standard
+        self.observers += [
+            defaults.observe(\.constrainScale) { (_, _) in
+                self.changeViewImages()
+            },
+            defaults.observe(\.statusBarVisible) { (_, _) in
+                self.adjustStatusBar()
+            },
+            defaults.observe(\.scrollersVisible) { (_, _) in
+                self.scaleToWindow()
+            },
+            defaults.observe(\.backgroundColor, options: .new) { (_, change) in
+                let color = try! NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: change.newValue!)
+                self.pageScrollView.backgroundColor = color!
+            },
+            defaults.observe(\.loupeDiameter, options: .new) { (_, change) in
+                self.loupeWindow!.resize(toDiameter: CGFloat(change.newValue!))
+            },
+            defaults.observe(\.loupePower) { (_, _) in
+                self.refreshLoupePanel()
+            },
+            defaults.observe(\.pageOrder) { (_, _) in
+                self.exposeView.needsDisplay = true
+                self.exposeView.buildTrackingRects()
+                self.changeViewImages()
+            },
+            defaults.observe(\.rawAdjustmentMode) { (_, _) in
+                self.scaleToWindow()
+            },
+            defaults.observe(\.twoPageSpread) { (_, _) in
+                self.changeViewImages()
+            }
+        ]
 
-        self.pageScrollView.postsFrameChangedNotifications = true
-        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: self.pageScrollView, queue: nil) { (_) in
-            self.resizeView()
+        if let session = self.session {
+            self.observers += [
+                session.observe(\.pageOrder, options: .new) { _, change in
+                    UserDefaults.standard[keyPath: \.pageOrder] = change.newValue!!.boolValue
+                },
+                session.observe(\.rawAdjustmentMode, options: .new) { _, change in
+                    UserDefaults.standard[keyPath: \.rawAdjustmentMode] = change.newValue!!.intValue
+                },
+                session.observe(\.twoPageSpread, options: .new) { _, change in
+                    UserDefaults.standard[keyPath: \.twoPageSpread] = change.newValue!!.boolValue
+                },
+                session.observe(\Session.loupe) { _, _ in self.refreshLoupePanel() }
+            ]
+
+            session.bind(NSBindingName(rawValue: "selection"), to: pageController!, withKeyPath: "selectionIndex", options: nil)
         }
-        self.pageController.addObserver(self, forKeyPath: "selectionIndex", options: [], context: nil)
-        self.pageController.addObserver(self, forKeyPath: "arrangedObjects.@count", options: [], context: nil)
+        self.pageScrollView.postsFrameChangedNotifications = true
+        self.observers += [
+            NotificationCenter.default.observe(forName: NSView.frameDidChangeNotification, object: self.pageScrollView, queue: nil) { (_) in
+                self.resizeView()
+            }
+        ]
 
-        self.progressBar.addObserver(self, forKeyPath: "currentValue", options: [], context: nil)
+        self.observers += [
+            self.pageController.observe(\.selectionIndex) { _, _ in
+                self.changeViewImages()
+            },
+            self.pageController.observe(\.arrangedObjects, options: .new) { (_, change) in
+                let objs = change.newValue as? [Image]
+                if objs != nil && objs!.count <= 0 {
+                    self.close()
+                } else {
+                    DispatchQueue.global().async {
+                        self.exposeView.processThumbs()
+                    }
+                    self.changeViewImages()
+                }
+            }
+        ]
+
+        self.observers += [
+            self.progressBar.observe(\.currentValue, options: .new) { (_, change) in
+                self.pageController.setSelectionIndex(change.newValue!)
+            }
+        ]
         self.progressBar.bind(NSBindingName(rawValue: "currentValue"), to: self.pageController!, withKeyPath: "selectionIndex", options: nil)
-        self.progressBar.bind(NSBindingName(rawValue: "maxValue"), to: self.pageController!, withKeyPath: "arrangedObjects.@count", options: nil)
+        self.progressBar.bind(NSBindingName.maxValue, to: self.pageController!, withKeyPath: "arrangedObjects.@count", options: nil)
         self.progressBar.bind(NSBindingName(rawValue: "leftToRight"), to: session!, withKeyPath: TSSTPageOrder, options: nil)
 
         self.pageView.bind(NSBindingName(rawValue: "rotationValue"), to: self.session!, withKeyPath: TSSTViewRotation, options: nil)
         let newArea = NSTrackingArea.init(rect: self.progressBar.progressRect,
                                           options: [.mouseEnteredAndExited, .activeInKeyWindow, .activeInActiveApp],
                                           owner: self,
-                                          userInfo: ["purpose" : "normalProgress"])
+                                          userInfo: ["purpose": "normalProgress"])
         self.progressBar.addTrackingArea(newArea)
         self.jumpField.delegate = self
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "SCMouseDragNotification"), object: self, queue: nil) {
-            self.handleMouseDragged($0)
-        }
+        self.observers += [
+            NotificationCenter.default.observe(forName: NSNotification.Name(rawValue: "SCMouseDragNotification"), object: self, queue: nil) {
+                self.handleMouseDragged($0)
+            }
+        ]
         self.restoreSession()
     }
 
@@ -186,75 +272,13 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     deinit {
         self.exposeView.dataSource = nil
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTStatusbarVisible)
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTScrollersVisible)
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTBackgroundColor)
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTConstrainScale)
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTLoupeDiameter)
-        UserDefaults.standard.removeObserver(self, forKeyPath: TSSTLoupePower)
-        self.pageController.removeObserver(self, forKeyPath: "selectionIndex")
-        self.pageController.removeObserver(self, forKeyPath: "arrangedObjects.@count")
         NotificationCenter.default.removeObserver(self)
 
-        self.progressBar.removeObserver(self, forKeyPath: "currentValue")
         self.progressBar.unbind(NSBindingName(rawValue: "currentvalue"))
         self.progressBar.unbind(NSBindingName(rawValue: "maxValue"))
         self.progressBar.unbind(NSBindingName(rawValue: "leftToRight"))
 
         self.pageView.sessionController = nil
-    }
-
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        let contents = self.pageController.arrangedObjects as! [Any]
-        if (contents.count <= 0) {
-            self.close()
-            return
-        }
-
-        switch keyPath {
-        case TSSTScrollersVisible:
-            self.scaleToWindow()
-        case "currentValue":
-            if object as? PolishedProgressBar == self.progressBar {
-                self.pageController.setSelectionIndex(self.progressBar.currentValue)
-            }
-        case "arrangedObjects.@count":
-            DispatchQueue.global().async {
-                self.exposeView.processThumbs()
-            }
-            self.changeViewImages()
-        case TSSTPageOrder:
-            if object as? UserDefaults != UserDefaults.standard {
-                UserDefaults.standard.set(self.session?.pageOrder, forKey: TSSTPageOrder)
-            }
-            self.exposeView.needsDisplay = true
-            self.exposeView.buildTrackingRects()
-            self.changeViewImages()
-        case TSSTPageScaleOptions:
-            if object as? UserDefaults != UserDefaults.standard {
-                UserDefaults.standard.set(self.session?.scaleOptions, forKey: TSSTPageScaleOptions)
-            }
-            self.scaleToWindow()
-        case TSSTTwoPageSpread:
-            if object as? UserDefaults != UserDefaults.standard {
-                UserDefaults.standard.set(self.session?.twoPageSpread, forKey: TSSTTwoPageSpread)
-            }
-            self.changeViewImages()
-        case TSSTBackgroundColor:
-            let color = try! NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: UserDefaults.standard.data(forKey: TSSTBackgroundColor)!)
-            self.pageScrollView.backgroundColor = color!
-        case TSSTStatusbarVisible:
-            self.adjustStatusBar()
-        case TSSTLoupeDiameter:
-            let diameter = UserDefaults.standard.integer(forKey: TSSTLoupePower)
-            self.loupeWindow.resize(toDiameter: CGFloat(diameter))
-        case "loupe":
-            self.refreshLoupePanel()
-        case TSSTLoupePower:
-            self.refreshLoupePanel()
-        default:
-            self.changeViewImages()
-        }
     }
 
     // MARK: - Progress bar
@@ -268,7 +292,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     // MARK: - Event handling
     override func mouseEntered(with event: NSEvent) {
-        let dict = event.trackingArea?.userInfo as? [String : String]
+        let dict = event.trackingArea?.userInfo as? [String: String]
         let purpose = dict?["purpose"]
         if purpose == "normalProgress" {
             self.infoPanelSetupAtPoint(event.locationInWindow)
@@ -306,24 +330,18 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         if NSMouseInRect(scrollPoint, self.pageScrollView.bounds, self.pageScrollView.isFlipped)
             && loupe
             && self.window?.isKeyWindow ?? false
-            && self._pageSelectionInProgress == .None
-            {
-            if !self.loupeWindow.isVisible
-                {
+            && self._pageSelectionInProgress == .None {
+            if !self.loupeWindow.isVisible {
                 self.window?.addChildWindow(loupeWindow, ordered: .above)
                 NSCursor.hide()
             }
 
-            let localPoint = self.pageView.convert((self.window?.convertFromScreen(point).origin)!, from: nil)
-            var zoomRect = self.zoomView.frame
+            let localPoint = self.pageView.convert(self.window!.convertFromScreen(point).origin, from: nil)
+            let zoomRect = CGRect(origin: localPoint, size: self.zoomView.frame.size)
             self.loupeWindow.center(atPoint: mouse)
-            zoomRect.origin = localPoint
             self.zoomView.image = self.pageView.image(inRect: zoomRect)
-        }
-        else
-        {
-            if self.loupeWindow.isVisible
-                {
+        } else {
+            if self.loupeWindow.isVisible {
                 self.loupeWindow.parent?.removeChildWindow(self.loupeWindow)
                 self.loupeWindow.orderOut(self)
             }
@@ -373,7 +391,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     @IBAction
     func changeScaling(_ sender: Any) {
         let scaleType = (sender as AnyObject).tag % 400
-        session?.scaleOptions = scaleType as NSNumber
+        session?.adjustmentMode = PageAdjustmentMode(rawValue: scaleType)!
     }
 
     @IBAction
@@ -394,13 +412,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     */
     @IBAction
     func pageRight(_ sender: Any) {
-        self.pageTurn = 2
-
-        if (self.session?.pageOrder!.boolValue)! {
-            self.nextPage()
-        } else {
-            self.previousPage()
-        }
+        self.pageTurn = .right
+        self.turnPage(to: orderTo(side: .right))
     }
 
     /*! Method flips the page to the left calling nextPage or previousPage
@@ -408,58 +421,28 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     */
     @IBAction
     func pageLeft(_ sender: Any) {
-        self.pageTurn = 1
-
-        if (self.session?.pageOrder!.boolValue)! {
-            self.previousPage()
-        } else {
-            self.nextPage()
-        }
+        self.pageTurn = .left
+        self.turnPage(to: orderTo(side: .left))
     }
 
     @IBAction
     func shiftPageRight(_ sender: Any) {
-        if self.session?.pageOrder?.boolValue ?? false {
-            self.pageController.selectNext(sender)
-        } else {
-            self.pageController.selectPrevious(sender)
-        }
+        self.pageController.select(orderTo(side: .right), sender: sender)
     }
 
     @IBAction
     func shiftPageLeft(_ sender: Any) {
-        if self.session?.pageOrder?.boolValue ?? false {
-            self.pageController.selectPrevious(sender)
-        } else {
-            self.pageController.selectNext(sender)
-        }
-
+        self.pageController.select(orderTo(side: .left), sender: sender)
     }
 
     @IBAction
     func skipRight(_ sender: Any) {
-        var index: Int
-        if self.session?.pageOrder?.boolValue ?? false {
-            let contents = self.pageController.content as! [Any]
-            index = min(self.pageController.selectionIndex + 10, contents.count - 1)
-        } else {
-            index = max(self.pageController.selectionIndex - 10, 0)
-        }
-
-        self.pageController.setSelectionIndex(index)
+        self.pageController.moveSelection(to: orderTo(side: .right), by: 10, sender: sender)
     }
 
     @IBAction
     func skipLeft(_ sender: Any) {
-        var index: Int
-        if self.session?.pageOrder?.boolValue ?? false {
-            index = max(self.pageController.selectionIndex - 10, 0)
-        } else {
-            let contents = self.pageController.content as! [Any]
-            index = min(self.pageController.selectionIndex + 10, contents.count - 1)
-        }
-
-        self.pageController.setSelectionIndex(index)
+        self.pageController.moveSelection(to: orderTo(side: .left), by: 10, sender: sender)
     }
 
     @IBAction
@@ -487,42 +470,34 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             self.zoomReset(self)
         }
     }
+    
+    func zoom(by scale: CGFloat) {
+        var previousZoom = CGFloat(self.session!.zoomLevel!.floatValue)
 
-    @IBAction
-    func zoomIn(_ sender: Any) {
-        let option: Int = (self.session?.scaleOptions!.intValue)!
-        var previousZoom: Float = (self.session?.zoomLevel!.floatValue)!
-
-        if option != 0 {
-            previousZoom = Float(self.pageView.imageBounds.width / self.pageView.combinedImageSize().width)
+        if self.session!.adjustmentMode != .none {
+            previousZoom = self.pageView.imageBounds.width / self.pageView.combinedImageSize().width
         }
 
-        self.session?.zoomLevel = previousZoom + 0.1 as NSNumber
-        self.session?.scaleOptions = 0
+        self.session?.zoomLevel = previousZoom + scale as NSNumber
+        self.session?.adjustmentMode = .none
 
         self.pageView.resizeView()
         self.refreshLoupePanel()
+    }
+
+    @IBAction
+    func zoomIn(_ sender: Any) {
+        self.zoom(by: 0.1)
     }
 
     @IBAction
     func zoomOut(_ sender: Any) {
-        let option: Int = (self.session?.scaleOptions!.intValue)!
-        var previousZoom: Float = (self.session?.zoomLevel!.floatValue)!
-
-        if option != 0 {
-            previousZoom = Float(self.pageView.imageBounds.width / self.pageView.combinedImageSize().width)
-        }
-
-        self.session?.zoomLevel = previousZoom - 0.1 as NSNumber
-        self.session?.scaleOptions = 0
-
-        self.pageView.resizeView()
-        self.refreshLoupePanel()
+        self.zoom(by: -0.1)
     }
 
     @IBAction
     func zoomReset(_ sender: Any) {
-        self.session?.scaleOptions = 0
+        self.session?.adjustmentMode = .none
         self.session?.zoomLevel = 1.0
         self.pageView.resizeView()
         self.refreshLoupePanel()
@@ -645,14 +620,9 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         scrollerBounds.width -= 20
         scrollerBounds.height -= 20
 
-        let factor: CGFloat
-        if imageSize.width / imageSize.height > scrollerBounds.width / scrollerBounds.height {
-            factor = scrollerBounds.width / imageSize.width
-        } else {
-            factor = scrollerBounds.height / imageSize.height
-        }
-
+        let factor = max(scrollerBounds.width / imageSize.width, scrollerBounds.height / imageSize.height)
         self.session?.zoomLevel = factor as NSNumber
+
         self.pageView.resizeView()
     }
 
@@ -680,14 +650,14 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     func selectedPage(_ selection: Int, withCropRect crop: NSRect) {
         switch _pageSelectionInProgress {
+        case .None:
+            break
         case .Icon:
             self.setIconWithSelection(selection, andCropRect: crop)
         case .Delete:
             self.deletePageWithSelection(selection)
         case .Extract:
             self.extractPageWithSelection(selection)
-        default:
-            break
         }
 
         self.session?.zoomLevel = self.savedZoom as NSNumber
@@ -725,6 +695,45 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         }
     }
 
+    fileprivate func saveQuickLookMetadataOfFile(atPath archivePath: String, name coverString: String, rect cropRect: CGRect) {
+        UKXattrMetadataStore.setString(coverString,
+                                       forKey: "QCCoverName",
+                                       atPath: archivePath,
+                                       traverseLink: false)
+        UKXattrMetadataStore.setString(NSStringFromRect(cropRect),
+                                       forKey: "QCCoverRect",
+                                       atPath: archivePath,
+                                       traverseLink: false)
+
+        Process.launchedProcess(launchPath: "/usr/bin/touch", arguments: [archivePath])
+    }
+
+    fileprivate func createIcon(from source: NSImage, in cropRect: CGRect) -> NSImage {
+        let size = cropRect.size == CGSize.zero ? source.size : cropRect.size
+        let shadowImage = NSImage.init(size: CGSize.init(width: 512, height: 512))
+        var drawRect = CGRect.init(x: 0, y: 0, width: 496, height: 496)
+        let iconImage = NSImage.init(size: drawRect.size)
+        drawRect = rectWithSizeCenteredInRect(size, drawRect)
+
+        iconImage.lockFocus()
+        NSGraphicsContext.current?.imageInterpolation = .high
+        source.draw(in: drawRect, from: CGRect.init(origin: cropRect.origin, size: size), operation: .sourceOver, fraction: 1)
+        iconImage.unlockFocus()
+
+
+        let thumbShadow = NSShadow.init()
+        thumbShadow.shadowOffset = CGSize.init(width: 0.0, height: -8.0)
+        thumbShadow.shadowBlurRadius = 25.0
+        thumbShadow.shadowColor = NSColor.init(calibratedWhite: 0.2, alpha: 1.0)
+
+        shadowImage.lockFocus()
+        thumbShadow.set()
+        iconImage.draw(in: CGRect.init(x: 16, y: 16, width: 496, height: 496), from: CGRect.zero, operation: .sourceOver, fraction: 1)
+        shadowImage.unlockFocus()
+
+        return shadowImage
+    }
+
     func setIconWithSelection(_ selection: Int, andCropRect cropRect: CGRect) {
         self.session?.zoomLevel = self.savedZoom as NSNumber
 
@@ -743,45 +752,13 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             let archivePath = URL.init(fileURLWithPath: selectedGroup!.path!).standardizedFileURL.path
 
             if archive.quicklookCompatible() {
-                let coverIndex = selectedPage.index!.intValue
                 let xad = selectedGroup?.instance as! XADArchive
+                let coverIndex = selectedPage.index!.intValue
                 let coverName = xad.rawName(ofEntry: Int32(coverIndex))
-
-                UKXattrMetadataStore.setString(coverName?.string(withEncoding: String.Encoding.nonLossyASCII.rawValue),
-                                               forKey: "QCCoverName",
-                                               atPath: archivePath,
-                                               traverseLink: false)
-                UKXattrMetadataStore.setString(NSStringFromRect(cropRect),
-                                               forKey: "QCCoverRect",
-                                               atPath: archivePath,
-                                               traverseLink: false)
-
-                Process.launchedProcess(launchPath: "/usr/bin/touch", arguments: [archivePath])
-            } else {
-                var drawRect = CGRect.init(x: 0, y: 0, width: 496, height: 496)
-                let iconImage = NSImage.init(size: drawRect.size)
-                let size = cropRect.size == CGSize.zero
-                    ? CGSize.init(width: CGFloat(selectedPage.width!.floatValue),
-                                  height: CGFloat(selectedPage.height!.floatValue))
-                    : cropRect.size
-                drawRect = rectWithSizeCenteredInRect(size, drawRect)
-
-                iconImage.lockFocus()
-                NSGraphicsContext.current?.imageInterpolation = .high
-                selectedPage.pageImage?.draw(in: drawRect, from: CGRect.init(origin: cropRect.origin, size: size), operation: .sourceOver, fraction: 1)
-                iconImage.unlockFocus()
-
-                let shadowImage = NSImage.init(size: CGSize.init(width: 512, height: 512))
-                let thumbShadow = NSShadow.init()
-                thumbShadow.shadowOffset = CGSize.init(width: 0.0, height: -8.0)
-                thumbShadow.shadowBlurRadius = 25.0
-                thumbShadow.shadowColor = NSColor.init(calibratedWhite: 0.2, alpha: 1.0)
-
-                shadowImage.lockFocus()
-                thumbShadow.set()
-                iconImage.draw(in: CGRect.init(x: 16, y: 16, width: 496, height: 496), from: CGRect.zero, operation: .sourceOver, fraction: 1)
-                shadowImage.unlockFocus()
-
+                let coverString = coverName!.string(withEncoding: String.Encoding.nonLossyASCII.rawValue)!
+                self.saveQuickLookMetadataOfFile(atPath: archivePath, name: coverString, rect: cropRect)
+            } else if let source = selectedPage.pageImage {
+                let shadowImage = self.createIcon(from: source, in: cropRect)
                 NSWorkspace.shared.setIcon(shadowImage, forFile: archivePath, options: [])
             }
         }
@@ -887,30 +864,33 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         }
     }
 
+    fileprivate var pageScaleMode: PageAdjustmentMode {
+        if _pageSelectionInProgress != .None || !UserDefaults.standard.bool(forKey: TSSTScrollersVisible) {
+            return .fitToWindow
+        } else if self.currentPageIsText() {
+            return .fitToWidth
+        }
+
+        return self.session?.adjustmentMode ?? .none
+    }
+
     func scaleToWindow() {
         var hasVert = false
         var hasHor = false
-        var scaling = session?.scaleOptions?.intValue ?? 0
 
-        if _pageSelectionInProgress != .None || !UserDefaults.standard.bool(forKey: TSSTScrollersVisible) {
-            scaling = 1
-        } else if self.currentPageIsText() {
-            scaling = 2
-        }
-
-        switch scaling {
-        case 0:
+        switch self.pageScaleMode {
+        case .none:
             hasVert = true
             hasHor = true
-        case 2:
+        case .fitToWindow:
             self.session?.zoomLevel = 1.0
-            if self.pageView.rotationValue == 1 || self.pageView.rotationValue == 3 {
+        case .fitToWidth:
+            self.session?.zoomLevel = 1.0
+            if self.pageView.rotation == .r1_4 || self.pageView.rotation == .r3_4 {
                 hasHor = true
             } else {
                 hasVert = true
             }
-        default:
-            self.session?.zoomLevel = 1.0
         }
 
         self.pageScrollView.hasVerticalScroller = hasVert
@@ -933,71 +913,42 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
                                          y: scrollViewRect.minY + 23,
                                          width: scrollViewRect.width,
                                          height: scrollViewRect.height - 23)
-
-            self.window?.setContentBorderThickness(23, for: .minY)
             self.pageScrollView.frame = scrollViewRect
+            self.window?.setContentBorderThickness(23, for: .minY)
             self.progressBar.isHidden = false
-            self.resizeWindow()
         } else {
             let scrollViewRect = self.window!.contentView!.frame
-            self.progressBar.isHidden = true
             self.pageScrollView.frame = scrollViewRect
             self.window?.setContentBorderThickness(0, for: .minY)
-            self.resizeWindow()
+            self.progressBar.isHidden = true
         }
+
+        self.resizeWindow()
     }
 
-    /*! Selects the next non visible page.  Logic looks figures out which
-    images are currently visible and then skips over them.
-    */
-    func nextPage() {
-        if !(self.session?.twoPageSpread?.boolValue ?? true) {
-            self.pageController.selectNext(self)
-            return
-        }
+    func hasTwoPagesSpreadableFrom(index: Int) -> Bool {
+        guard self.session?.twoPageSpread?.boolValue ?? false else { return false }
 
         let contents = self.pageController.arrangedObjects as! [Image]
-        let numberOfImages = contents.count
-        let selectionIndex = self.pageController.selectionIndex
-        if numberOfImages <= selectionIndex + 1 {
-            return
-        }
+        guard (0 ..< contents.count - 1).contains(index) else { return false }
 
-        let current = !contents[selectionIndex].shouldDisplayAlone() && !(selectionIndex == 0 && UserDefaults.standard.bool(forKey: TSSTLonelyFirstPage))
-        let next = !contents[selectionIndex + 1].shouldDisplayAlone()
-
-        if (!current || !next) && (selectionIndex + 1 < numberOfImages) {
-            self.pageController.setSelectionIndex(selectionIndex + 1)
-        } else if selectionIndex + 2 < numberOfImages {
-            self.pageController.setSelectionIndex(selectionIndex + 2)
-        } else if (selectionIndex + 1 < numberOfImages) && !next {
-            self.pageController.setSelectionIndex(selectionIndex + 1)
+        if index == 0 && UserDefaults.standard.bool(forKey: TSSTLonelyFirstPage) {
+            return false
+        } else {
+            let fst = contents[index]
+            let snd = contents[index + 1]
+            return !fst.shouldDisplayAlone() && !snd.shouldDisplayAlone()
         }
     }
 
-    /*! Selects the previous non visible page.  Logic looks figures out which
-    images are currently visible and then skips over them.
-    */
-    func previousPage() {
-        if !(self.session?.twoPageSpread?.boolValue ?? true) {
-            self.pageController.selectPrevious(self)
-            return
-        }
-
+    func turnPage(to order: Order) {
         let selectionIndex = self.pageController.selectionIndex
-        if selectionIndex >= 2 {
-            let contents = self.pageController.arrangedObjects as! [Image]
-            let previousPage = !contents[selectionIndex - 1].shouldDisplayAlone()
-            let pageBeforeLast = !contents[selectionIndex - 2].shouldDisplayAlone()
-                && !(selectionIndex - 2 == 0 && UserDefaults.standard.bool(forKey: TSSTLonelyFirstPage))
+        let base = order == .prev ? selectionIndex - 2: selectionIndex
 
-            if !previousPage || !pageBeforeLast {
-                self.pageController.setSelectionIndex(selectionIndex - 1)
-            } else {
-                self.pageController.setSelectionIndex(selectionIndex - 2)
-            }
-        } else if 1 <= selectionIndex {
-            self.pageController.setSelectionIndex(selectionIndex - 1)
+        if hasTwoPagesSpreadableFrom(index: base) {
+            self.pageController.select(order, by: 2, sender: self)
+        } else {
+            self.pageController.select(order, sender: self)
         }
     }
 
@@ -1046,42 +997,44 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         (NSApp.delegate as! SimpleComicAppDelegate).managedObjectContext
     }
 
-    var canTurnPageLeft: Bool {
-        if self.session!.pageOrder!.boolValue {
-            return self.canTurnPreviousPage
-        } else {
-            return self.canTurnPageNext
-        }
-    }
-    var canTurnPageRight: Bool {
-        if self.session!.pageOrder!.boolValue {
-            return self.canTurnPageNext
-        } else {
-            return self.canTurnPreviousPage
-        }
+    enum Order {
+        case prev
+        case next
     }
 
-    /*    TODO: make the following a bit smarter.  Also the next/previous page turn logic
-    ie. Should not be able to turn the page if 2 pages from the end */
-    var canTurnPreviousPage: Bool { pageController.selectionIndex > 0 }
-    var canTurnPageNext: Bool {
-        let selectionIndex = self.pageController.selectionIndex
-        let contents = self.pageController.content as! [Any]
-        if selectionIndex >= (contents.count - 1) {
-            return false
+    func orderTo(side: PageView.Side) -> Order {
+        switch side {
+        case .left:
+            return self.session!.pageOrder!.boolValue ? .prev : .next
+        case .right:
+            return self.session!.pageOrder!.boolValue ? .next : .prev
         }
+    }
 
-        if (selectionIndex + 1) == (contents.count - 1) && self.session!.twoPageSpread!.boolValue {
-            let arrangedPages = self.pageController.arrangedObjects as! [Image]
-            let displayCurrentAlone = arrangedPages[selectionIndex].shouldDisplayAlone()
-            let displayNextAlone = arrangedPages[selectionIndex + 1].shouldDisplayAlone()
+    func canTurnTo(_ side: PageView.Side) -> Bool {
+        return canTurnTo(orderTo(side: side))
+    }
 
-            if !displayCurrentAlone && !displayNextAlone {
+    func canTurnTo(_ side: Order) -> Bool {
+        switch side {
+        case .prev:
+            return pageController.selectionIndex > 0
+        case .next:
+            let selectionIndex = self.pageController.selectionIndex
+            let contents = self.pageController.content as! [Any]
+            if selectionIndex + 1 >= contents.count {
                 return false
             }
-        }
 
-        return true
+            let lastTwoPages =
+                selectionIndex == contents.count - 2 &&
+                self.hasTwoPagesSpreadableFrom(index: selectionIndex)
+            if lastTwoPages {
+                return false
+            }
+
+            return true
+        }
     }
 
     // MARK: - Menus
@@ -1095,10 +1048,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             menuItem.state = state
             return true
         } else if menuItem.action == #selector(changeTwoPage(_:)) {
-            let state = self.session!.pageOrder!.boolValue
-                ? NSControl.StateValue.on
-                : NSControl.StateValue.off;
-            menuItem.state = state
+            menuItem.state = self.session!.pageOrder!.boolValue ? .on : .off
             return true
         } else if menuItem.action == #selector(changePageOrder(_:)) {
             if self.session!.pageOrder!.boolValue {
@@ -1108,23 +1058,23 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             }
             return true
         } else if menuItem.action == #selector(pageRight(_:)) {
-            return self.canTurnPageRight
+            return self.canTurnTo(.right)
         }
         else if menuItem.action == #selector(pageLeft(_:)) {
-            return self.canTurnPageLeft
+            return self.canTurnTo(.left)
         } else if menuItem.action == #selector(firstPage(_:)) {
             return self.pageController.selectionIndex > 0
         } else if menuItem.action == #selector(lastPage(_:)) {
             let contents = self.pageController.content as! [Any]
             return self.pageController.selectionIndex < (contents.count - 1)
         } else if menuItem.action == #selector(shiftPageRight(_:)) {
-            return self.canTurnPageRight
+            return self.canTurnTo(.right)
         } else if menuItem.action == #selector(shiftPageLeft(_:)) {
-            return self.canTurnPageLeft
+            return self.canTurnTo(.left)
         } else if menuItem.action == #selector(skipRight(_:)) {
-            return self.canTurnPageRight
+            return self.canTurnTo(.right)
         } else if menuItem.action == #selector(skipLeft(_:)) {
-            return self.canTurnPageLeft
+            return self.canTurnTo(.left)
         } else if menuItem.action == #selector(setArchiveIcon(_:)) {
             return self.session!.rotation!.intValue == 0
         } else if menuItem.action == #selector(extractPage(_:)) {
@@ -1132,22 +1082,13 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         } else if menuItem.action == #selector(removePages(_:)) {
             return self.session!.rotation!.intValue == 0
         } else if menuItem.tag == 400 {
-            let state = self.session!.scaleOptions!.intValue == 0
-                ? NSControl.StateValue.on
-                : NSControl.StateValue.off
-            menuItem.state = state
+            menuItem.state = self.pageScaleMode == .none ? .on : .off
             return true
         } else if menuItem.tag == 401 {
-            let state = self.session!.scaleOptions!.intValue == 1
-                ? NSControl.StateValue.on
-                : NSControl.StateValue.off
-            menuItem.state = state
+            menuItem.state = self.pageScaleMode == .fitToWindow ? .on : .off
             return true
         } else if menuItem.tag == 402 {
-            let state = self.session!.scaleOptions!.intValue == 2
-                ? NSControl.StateValue.on
-                : NSControl.StateValue.off
-            menuItem.state = state
+            menuItem.state = self.pageScaleMode == .fitToWidth ? .on : .off
             return true
         } else if menuItem.action == #selector(launchJumpPanel(_:)) {
             return true
@@ -1191,10 +1132,11 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.mouseMovedTimer?.invalidate()
         self.mouseMovedTimer = nil
 
+        self.observers.removeAll()
+
         NSCursor.unhide()
         NSApp.presentationOptions = NSApplication.PresentationOptions.init()
 
-        self.progressBar.removeObserver(self, forKeyPath: "currentValue")
         self.progressBar.unbind(NSBindingName(rawValue: "currentValue"))
         self.progressBar.unbind(NSBindingName(rawValue: "maxValue"))
         self.progressBar.unbind(NSBindingName(rawValue: "leftToRight"))
@@ -1203,15 +1145,70 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
         self.pageController.unbind(NSBindingName(rawValue: "currentValue"))
 
-        self.session?.removeObserver(self, forKeyPath: TSSTPageOrder)
-        self.session?.removeObserver(self, forKeyPath: TSSTPageScaleOptions)
-        self.session?.removeObserver(self, forKeyPath: TSSTTwoPageSpread)
-        self.session?.removeObserver(self, forKeyPath: "loupe")
         self.session?.unbind(NSBindingName(rawValue: TSSTViewRotation))
         self.session?.unbind(NSBindingName(rawValue: "selection"))
     }
 
-    func windowShouldClose(_ sender: Any) -> Bool {
+    func optimalPageViewRectForRect(_ boundingRect: CGRect) -> CGRect {
+        let maxImageSize = self.pageView.combinedImageSize(forZoom: CGFloat(self.session!.zoomLevel!.floatValue))
+        var vertOffset = self.window!.contentBorderThickness(for: .minY) + self.window!.toolbarHeight()
+
+        if self.pageScrollView.hasHorizontalScroller {
+            vertOffset += self.pageScrollView.horizontalScroller!.frame.height
+        }
+        let horOffset = self.pageScrollView.hasVerticalScroller
+            ? self.pageScrollView.verticalScroller!.frame.width
+            : 0
+        let minSize = self.window!.minSize
+        var correctedFrame = boundingRect.size
+        correctedFrame.width = max(boundingRect.width, minSize.width) - horOffset
+        correctedFrame.height = max(boundingRect.height, minSize.height) - vertOffset
+
+        let newSize: CGSize
+        if self.pageScaleMode == .fitToWindow {
+            let wratio = correctedFrame.width / maxImageSize.width
+            let hratio = correctedFrame.height / maxImageSize.height
+            newSize = maxImageSize.scaleBy(min(wratio, hratio, 1.0))
+        } else {
+            newSize = CGSize(width: min(maxImageSize.width, correctedFrame.width),
+                             height: min(maxImageSize.height, correctedFrame.height))
+        }
+
+        let size = CGSize(width: max(minSize.width, newSize.width + horOffset),
+                          height: max(minSize.height, newSize.height + vertOffset))
+        return CGRect.init(x: boundingRect.minX, y: boundingRect.maxY - size.height, width: size.width, height: size.height)
+    }
+
+    func resizeView() {
+        self.pageView.resizeView()
+    }
+
+    func currentPageIsText() -> Bool {
+        let set = self.pageController.selectionIndexes
+        if set.count == 0 {
+            return false
+        }
+        let page = self.pageController.selectedObjects[0] as! Image
+        return page.text!.boolValue
+    }
+
+    func toolbarWillAddItem(_ notification: Notification) {
+        let item = notification.userInfo!["item"] as! NSToolbarItem
+
+        if item.label == "Page Scaling" {
+            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.rawAdjustmentMode", options: nil)
+        } else if item.label == "Page Order" {
+            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.pageOrder", options: nil)
+        } else if item.label == "Page Layout" {
+            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.twoPageSpread", options: nil)
+        } else if item.label == "Loupe" {
+            item.view?.bind(NSBindingName(rawValue: "value"), to: self, withKeyPath: "session.loupe", options: nil)
+        }
+    }
+}
+
+extension SessionWindowController: NSWindowDelegate {
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
         self.prepareToEnd()
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: TSSTSessionEndNotification), object: self)
         return true
@@ -1272,71 +1269,6 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             : defaultFrame
     }
 
-    func optimalPageViewRectForRect(_ boundingRect: CGRect) -> CGRect {
-        let maxImageSize = self.pageView.combinedImageSize(forZoom: CGFloat(self.session!.zoomLevel!.floatValue))
-        var vertOffset = self.window!.contentBorderThickness(for: .minY) + self.window!.toolbarHeight()
-
-        if self.pageScrollView.hasHorizontalScroller {
-            vertOffset += self.pageScrollView.horizontalScroller!.frame.height
-        }
-        let horOffset = self.pageScrollView.hasVerticalScroller
-            ? self.pageScrollView.verticalScroller!.frame.width
-            : 0
-        let minSize = self.window!.minSize
-        var correctedFrame = boundingRect
-        correctedFrame.size.width = max(correctedFrame.width, minSize.width) - horOffset
-        correctedFrame.size.height = max(correctedFrame.height, minSize.height) - vertOffset
-        var newSize: CGSize = CGSize.zero
-
-        if self.session!.scaleOptions!.intValue == 1 && !self.currentPageIsText() {
-            var scale: CGFloat
-            if maxImageSize.width < correctedFrame.width && maxImageSize.height < correctedFrame.height {
-                scale = 1
-            } else if correctedFrame.width / correctedFrame.height < maxImageSize.width / maxImageSize.height {
-                scale = correctedFrame.width / maxImageSize.width
-            } else {
-                scale = correctedFrame.height / maxImageSize.height
-            }
-
-            newSize = maxImageSize.scaleBy(scale)
-        } else {
-            newSize.width = min(maxImageSize.width, correctedFrame.width)
-            newSize.height = min(maxImageSize.height, correctedFrame.height)
-        }
-
-        newSize.width = max(minSize.width, newSize.width + horOffset)
-        newSize.height = max(minSize.height, newSize.height + vertOffset)
-
-        return CGRect.init(x: boundingRect.minX, y: boundingRect.maxY - newSize.height, width: newSize.width, height: newSize.height)
-    }
-
-    func resizeView() {
-        self.pageView.resizeView()
-    }
-
-    func currentPageIsText() -> Bool {
-        let set = self.pageController.selectionIndexes
-        if set.count == 0 {
-            return false
-        }
-        let page = self.pageController.selectedObjects[0] as! Image
-        return page.text!.boolValue
-    }
-
-    func toolbarWillAddItem(_ notification: Notification) {
-        let item = notification.userInfo!["item"] as! NSToolbarItem
-
-        if item.label == "Page Scaling" {
-            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.scaleOptions", options: nil)
-        } else if item.label == "Page Order" {
-            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.pageOrder", options: nil)
-        } else if item.label == "Page Layout" {
-            item.view?.bind(NSBindingName(rawValue: "selectedIndex"), to: self, withKeyPath: "session.twoPageSpread", options: nil)
-        } else if item.label == "Loupe" {
-            item.view?.bind(NSBindingName(rawValue: "value"), to: self, withKeyPath: "session.loupe", options: nil)
-        }
-    }
-
     // MARK: - Fullscreen Delegate Methods
 
     func window(_ window: NSWindow, willUseFullScreenPresentationOptions: NSApplication.PresentationOptions) -> NSApplication.PresentationOptions {
@@ -1347,43 +1279,55 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         return []
     }
 
-    func windowWillEnterFullScreen(_ notification: NSNotification) {
+    func windowWillEnterFullScreen(_ notification: Notification) {
     }
 
-    func windowDidEnterFullScreen(_ notification: NSNotification) {
+    func windowDidEnterFullScreen(_ notification: Notification) {
         self.refreshLoupePanel()
     }
 
-    func windowDidExitFullScreen(_ notification: NSNotification) {
+    func windowDidExitFullScreen(_ notification: Notification) {
         self.resizeWindow()
     }
+}
 
-    func window(_ window: NSWindow, startCustomAnimationToEnterFullScreenWithDuration duration: TimeInterval) {
-        self.invalidateRestorableState()
-
-        let screenFrame = self.window!.screen!.visibleFrame
-        let propsedFrame = screenFrame
-
-        // The center frame for each window is used during the 1st half of the fullscreen animation and is
-        // the window at its original size but moved to the center of its eventual full screen frame.
-        //    NSRect centerWindowFrame = rectWithSizeCenteredInRect(startingFrame.size, screenFrame);
-
-        // Our animation will be broken into two stages.
-        // First, we'll move the window to the center of the primary screen and then we'll enlarge
-        // it its full screen size.
-        //
-        NSAnimationContext.runAnimationGroup({ (context) in
-            context.duration = duration / 4
-            window.animator().setFrame(propsedFrame, display: true)
-        }) {
-            NSAnimationContext.runAnimationGroup { (context) in
-                context.duration = duration / 4
-                window.animator().setFrame(propsedFrame, display: true)
-            }
+extension NSArrayController {
+    func select(_ order: SessionWindowController.Order, sender: Any?) {
+        switch order {
+        case .prev:
+            self.selectPrevious(sender)
+        case .next:
+            self.selectNext(sender)
         }
     }
 
-    func customWindowsToEnterFullScreenForWindow(_ window: NSWindow) -> [NSWindow] {
-        return [self.window!]
+    /// selects a page next/previous to the current page by `diff` pages, but **does nothing when it exceeds its boundary**.
+    func select(_ order: SessionWindowController.Order, by diff: Int, sender: Any?) {
+        let contents = self.content as? [Any?]
+        let count = contents?.count ?? 0
+        let index: Int
+        switch order {
+        case .prev:
+            index = self.selectionIndex - diff
+        case .next:
+            index = self.selectionIndex + diff
+        }
+        if (0 ..< count).contains(index) {
+            self.setSelectionIndex(index)
+        }
+    }
+
+    /// selects a page next/previous to the current page by `diff` pages, and it **stops at its boundary**.
+    func moveSelection(to order: SessionWindowController.Order, by diff: Int, sender: Any?) {
+        let contents = self.content as? [Any?]
+        let count = contents?.count ?? 0
+        let index: Int
+        switch order {
+        case .prev:
+            index = self.selectionIndex - diff
+        case .next:
+            index = self.selectionIndex + diff
+        }
+        self.setSelectionIndex(index.clamp(0 ... (count - 1)))
     }
 }

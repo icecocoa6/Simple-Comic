@@ -92,29 +92,8 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         launchInProgress = true
         preferences = nil;
         optionHeldAtlaunch = false
-
-        let inits = [
-            TSSTPageOrder: false,
-            TSSTPageZoomRate: 0.1,
-            TSSTPageScaleOptions: 1,
-            TSSTThumbnailSize: 100,
-            TSSTTwoPageSpread: true,
-            TSSTIgnoreDonation: false,
-            TSSTConstrainScale: true,
-            TSSTScrollersVisible: true,
-            TSSTSessionRestore: true,
-            TSSTAutoPageTurn: true,
-            TSSTBackgroundColor: try! NSKeyedArchiver.archivedData(withRootObject: NSColor.white, requiringSecureCoding: true),
-            TSSTWindowAutoResize: true,
-            TSSTLoupeDiameter: 500,
-            TSSTLoupePower: 2.0,
-            TSSTStatusbarVisible: true,
-            TSSTLonelyFirstPage: true,
-            TSSTNestedArchives: true,
-            TSSTUpdateSelection: 0
-        ] as [String: Any]
-
-        UserDefaults.standard.register(defaults: inits)
+        
+        UserDefaults.standard.setupDefaults()
 
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: TSSTSessionEndNotification), object: nil, queue: nil) {
             self.endSession($0)
@@ -208,9 +187,9 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let url = self.applicationSupportFolder.appendingPathComponent("SimpleComic.sql")
-        let storeInfo = try! NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: NSSQLiteStoreType, at: url, options: nil)
+        let storeInfo = try? NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: NSSQLiteStoreType, at: url, options: nil)
 
-        if storeInfo["viewVersion"] as! String != "Version 1708" {
+        if storeInfo != nil && storeInfo!["viewVersion"] as? String != "Version 1708" {
             try! FileManager.default.removeItem(at: url)
         }
         self._persistentStoreCoordinator = NSPersistentStoreCoordinator.init(managedObjectModel: self.managedObjectModel!)
@@ -301,9 +280,9 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
     func newSessionWithFiles(_ files: [String]) -> Session {
         let session = Session.init(context: self.managedObjectContext)
-        session.scaleOptions = UserDefaults.standard.integer(forKey: TSSTPageScaleOptions) as NSNumber
-        session.pageOrder = UserDefaults.standard.bool(forKey: TSSTPageOrder) as NSNumber
-        session.twoPageSpread = UserDefaults.standard.bool(forKey: TSSTTwoPageSpread) as NSNumber
+        session.rawAdjustmentMode = UserDefaults.standard.rawAdjustmentMode as NSNumber
+        session.pageOrder = UserDefaults.standard.pageOrder as NSNumber
+        session.twoPageSpread = UserDefaults.standard.twoPageSpread as NSNumber
 
         self.addFiles(paths: files, toSession: session)
         return session

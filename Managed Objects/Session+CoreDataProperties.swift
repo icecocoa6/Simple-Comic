@@ -2,7 +2,7 @@
 //  Session+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by 冨岡太一 on 2020/03/27.
+//  Created by 冨岡太一 on 2020/04/03.
 //
 //
 
@@ -16,7 +16,7 @@ extension Session {
         return NSFetchRequest<Session>(entityName: "Session")
     }
 
-    @NSManaged public var scaleOptions: NSNumber?
+    @NSManaged public var rawAdjustmentMode: NSNumber?
     @NSManaged public var rotation: NSNumber?
     @NSManaged public var position: Data?
     @NSManaged public var fullscreen: NSNumber?

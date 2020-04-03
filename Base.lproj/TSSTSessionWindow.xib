@@ -103,7 +103,7 @@
                                 </segments>
                             </segmentedCell>
                             <connections>
-                                <binding destination="-2" name="selectedIndex" keyPath="session.scaleOptions" id="530"/>
+                                <binding destination="-2" name="selectedIndex" keyPath="session.rawAdjustmentMode" id="uIA-xK-mff"/>
                             </connections>
                         </segmentedControl>
                     </toolbarItem>

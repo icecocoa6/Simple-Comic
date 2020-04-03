@@ -22,8 +22,8 @@ class PageTurnToolbarItem: ToolbarItem {
     override func validate() {
         let toolbarDelegate = self.toolbar?.delegate as! SessionWindowController
         let control = self.view as! NSSegmentedControl
-        control.setEnabled(toolbarDelegate.canTurnPageLeft, forSegment: 0)
-        control.setEnabled(toolbarDelegate.canTurnPageRight, forSegment: 1)
+        control.setEnabled(toolbarDelegate.canTurnTo(.left), forSegment: 0)
+        control.setEnabled(toolbarDelegate.canTurnTo(.right), forSegment: 1)
         super.validate()
     }
 }
