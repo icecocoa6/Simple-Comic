@@ -51,7 +51,6 @@ let TSSTLoupeDiameter = "loupeDiameter"
 let TSSTLoupePower = "loupePower"
 let TSSTStatusbarVisible = "statusBarVisisble"
 let TSSTLonelyFirstPage = "lonelyFirstPage"
-let TSSTNestedArchives = "nestedArchives"
 
 let TSSTSessionEndNotification = "sessionEnd"
 
@@ -751,7 +750,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             let archivePath = URL.init(fileURLWithPath: selectedGroup!.path!).standardizedFileURL.path
 
             if archive.quicklookCompatible() {
-                let xad = selectedGroup?.instance as! XADArchive
+                let xad = archive.instance!
                 let coverIndex = selectedPage.index!.intValue
                 let coverName = xad.rawName(ofEntry: Int32(coverIndex))
                 let coverString = coverName!.string(withEncoding: String.Encoding.nonLossyASCII.rawValue)!

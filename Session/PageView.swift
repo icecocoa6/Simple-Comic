@@ -246,8 +246,7 @@ class PageView: NSView, CALayerDelegate {
                                         switch item.item {
                                         case let url as URL:
                                             self.sessionController.updateSessionObject()
-                                            let app = NSApp.delegate as! SimpleComicAppDelegate
-                                            app.addFile(atURL: url, toSession: self.sessionController.session!)
+                                            self.sessionController.session?.addFile(atURL: url)
                                         default:
                                             break
                                         }

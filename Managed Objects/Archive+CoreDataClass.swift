@@ -22,6 +22,18 @@ public class Archive: ImageGroup {
         "cbr", "cbz"
     ]
     
+    private lazy var tempDir: URL = {
+        let pwd = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        return try! FileManager.default.url(for: .itemReplacementDirectory,
+                                in: .userDomainMask,
+                                appropriateFor: pwd,
+                                create: true)
+    }()
+    
+    deinit {
+        try? FileManager.default.removeItem(atPath: tempDir.path)
+    }
+    
     override public func awakeFromInsert() {
         super.awakeFromInsert()
         self._instance = nil
@@ -41,15 +53,10 @@ public class Archive: ImageGroup {
         {
             try! FileManager.default.removeItem(atPath: self.path!)
         }
-        
-        if let solid = self.solidDirectory
-        {
-            try! FileManager.default.removeItem(atPath: solid)
-        }
     }
     
     private var _instance: XADArchive?
-    override public var instance: Any? {
+    public var instance: XADArchive? {
         guard _instance == nil else { return _instance; }
         guard FileManager.default.fileExists(atPath: self.path!) else { return nil; }
         
@@ -62,28 +69,23 @@ public class Archive: ImageGroup {
     }
     
     override func dataFor(pageIndex: Int) -> Data? {
-        let instance = self.instance! as! XADArchive
-        
-        if let solidDirectory = self.solidDirectory
-        {
-            let name = URL.init(fileURLWithPath: (instance.name(ofEntry: Int32(pageIndex)))!)
-            let filename = String.init(format: "%li.%@", pageIndex, name.pathExtension)
-            let url = URL.init(fileURLWithPath: filename, relativeTo: URL.init(fileURLWithPath: solidDirectory))
-            
-            if FileManager.default.fileExists(atPath: url.path)
-            {
-                return try! Data.init(contentsOf: url)
-            }
-            
-            groupLock.lock()
-            let imageData = instance.contents(ofEntry: Int32(pageIndex))
-            groupLock.unlock()
-            try! imageData!.write(to: url)
-            return imageData
-        }
+        let source = self.instance!
+
         groupLock.lock()
-        let imageData = instance.contents(ofEntry: Int32(pageIndex))
-        groupLock.unlock()
+        defer { groupLock.unlock() }
+        
+        let imageData = source.contents(ofEntry: Int32(pageIndex))
+        
+        if source.isSolid() {
+            let url = self.url(forDataAt: Int32(pageIndex), in: source)
+
+            if FileManager.default.fileExists(atPath: url.path) {
+                return try! Data(contentsOf: url)
+            }
+
+            try! imageData!.write(to: url, options: .atomicWrite)
+        }
+        
         return imageData
     }
     
@@ -100,25 +102,25 @@ public class Archive: ImageGroup {
         return parent!
     }
     
-    @objc func nestedArchiveContents()
+    fileprivate func url(forDataAt index: Int32, in imageArchive: XADArchive) -> URL {
+        let fileName = URL.init(fileURLWithPath: imageArchive.name(ofEntry: index)!)
+        let archivePath = tempDir.appendingPathComponent("\(index)").appendingPathComponent("\(fileName.lastPathComponent)")
+        return archivePath
+    }
+    
+    fileprivate func write(dataAt index: Int32, in imageArchive: XADArchive) throws -> URL {
+        let archivePath = url(forDataAt: index, in: imageArchive)
+        try FileManager.default.createDirectory(at: archivePath.deletingLastPathComponent(),
+                                                 withIntermediateDirectories: true,
+                                                 attributes: nil)
+        let fileData = imageArchive.contents(ofEntry: index)
+        try fileData?.write(to: archivePath, options: .atomicWrite)
+        return archivePath
+    }
+    
+    func nestedArchiveContents()
     {
-        let imageArchive = self.instance as! XADArchive?
-        var collision = 0
-        
-        if imageArchive?.isSolid() ?? false
-        {
-            var archivePath: URL? = nil
-            repeat {
-                let name = String.init(format: "SC-images-%i", collision)
-                archivePath = URL.init(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name)
-                collision += 1
-                if (try? FileManager.default.createDirectory(at: archivePath!, withIntermediateDirectories: true)) != nil
-                {
-                    break
-                }
-            } while true
-            self.solidDirectory = archivePath?.path
-        }
+        let imageArchive = self.instance
         
         let numOfEntries = imageArchive?.numberOfEntries() ?? 0
         for counter in 0 ..< numOfEntries
@@ -127,33 +129,22 @@ public class Archive: ImageGroup {
             guard fileName.lastPathComponent != "" && fileName.lastPathComponent.first != "." else { continue }
             
             let ext = fileName.pathExtension.lowercased()
-            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext as CFString, nil)?.takeRetainedValue()
+            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext as CFString, nil)!.takeRetainedValue()
             
-            if Image.imageExtensions.contains(uti! as String)
+            if Image.imageExtensions.contains(uti as String)
             {
                 let entity = Image.init(context: self.managedObjectContext!)
                 entity.imagePath = fileName.lastPathComponent
                 entity.index = counter as NSNumber
                 entity.group = self
             }
-            else if ((UserDefaults.standard.value(forKey: TSSTNestedArchives) as! NSNumber?)?.boolValue ?? false) && Archive.archiveExtensions.contains(ext)
+            else if Archive.archiveExtensions.contains(ext)
             {
-                let fileData = imageArchive?.contents(ofEntry: counter)
+                let archivePath = try! write(dataAt: counter, in: imageArchive!)
+                
                 let entity = Archive.init(context: self.managedObjectContext!)
                 entity.name = fileName.lastPathComponent
                 entity.nested = true
-                
-                var collision = 0
-                var archivePath: URL
-                repeat {
-                    let name = String.init(format: "%i-%@", collision, fileName.lastPathComponent)
-                    archivePath = URL.init(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name)
-                    collision += 1
-                } while FileManager.default.fileExists(atPath: archivePath.path)
-                
-                try! FileManager.default.createDirectory(at: archivePath.deletingLastPathComponent(), withIntermediateDirectories: true)
-                FileManager.default.createFile(atPath: archivePath.path, contents: fileData)
-                
                 entity.path = archivePath.path
                 entity.nestedArchiveContents()
                 entity.group = self
@@ -167,22 +158,11 @@ public class Archive: ImageGroup {
                 entity.text = true
                 entity.group = self
             }
-            else if UTTypeConformsTo(uti!, kUTTypePDF)
+            else if UTTypeConformsTo(uti, kUTTypePDF)
             {
+                let archivePath = try! write(dataAt: counter, in: imageArchive!)
+                
                 let entity = PDF.init(context: self.managedObjectContext!)
-                
-                var archivePath = URL.init(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName.lastPathComponent)
-                var collision = 0
-                while FileManager.default.fileExists(atPath: archivePath.path)
-                {
-                    collision += 1
-                    let name = String.init(format: "%i-%@", collision, fileName.lastPathComponent)
-                    archivePath = URL.init(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(name)
-                }
-                
-                let fileData = imageArchive?.contents(ofEntry: counter)
-                try! fileData?.write(to: archivePath, options: .atomicWrite)
-                
                 entity.path = archivePath.path
                 entity.nested = true
                 entity.pdfContents()

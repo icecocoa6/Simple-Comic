@@ -16,7 +16,7 @@ import Quartz
 public class PDF: ImageGroup {
 
     private var _instance: PDFDocument?
-    override var instance: Any? {
+    var instance: Any? {
         guard _instance == nil else { return _instance }
         _instance = PDFDocument.init(url: URL.init(fileURLWithPath: self.path!))
         return _instance

@@ -14,7 +14,6 @@ import CoreData
 
 
 public class ImageGroup: NSManagedObject {
-    @objc var instance: Any? { return nil }
     let groupLock = NSLock.init()
     
     override public func awakeFromInsert() {
@@ -88,53 +87,20 @@ public class ImageGroup: NSManagedObject {
         
         for path in nestedFiles
         {
-            let fileExtension = URL.init(fileURLWithPath: path).pathExtension.lowercased()
-            let fullPath = folderURL.appendingPathComponent(path)
-            var isDirectory: ObjCBool = false
-            let exists = FileManager.default.fileExists(atPath: fullPath.path, isDirectory: &isDirectory)
-            let uti = try! NSWorkspace.shared.type(ofFile: fullPath.path)
+            let url = folderURL.appendingPathComponent(path)
+            let entity = self.managedObjectContext?.createEntity(fromContentsAtURL: url)
             
-            guard exists && fullPath.lastPathComponent.first != "." else { continue }
+            // ignore unreadable files
+            guard entity != nil else { continue }
             
-            if isDirectory.boolValue
-            {
-                let entity = ImageGroup.init(context: self.managedObjectContext!)
-                entity.path = fullPath.path
-                entity.name = path
-                entity.nestedFolderContents()
-                entity.group = self
-                self.addToNestedImages(entity.nestedImages!)
-            }
-            else if Archive.archiveExtensions.contains(fileExtension)
-            {
-                let entity = Archive.init(context: self.managedObjectContext!)
-                entity.path = fullPath.path
-                entity.name = path
-                entity.nestedArchiveContents()
-                entity.group = self
-                self.addToNestedImages(entity.nestedImages!)
-            }
-            else if UTTypeConformsTo(uti as CFString, kUTTypePDF)
-            {
-                let entity = PDF.init(context: self.managedObjectContext!)
-                entity.path = fullPath.path
-                entity.name = path
-                entity.pdfContents()
-                entity.group = self
-                self.addToNestedImages(entity.nestedImages!)
-            }
-            else if Image.imageExtensions.contains(uti)
-            {
-                let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fullPath.path
-                entity.group = self
-            }
-            else if Image.textExtensions.contains(fileExtension)
-            {
-                let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fullPath.path
-                entity.text = true
-                entity.group = self
+            switch entity {
+            case let group as ImageGroup:
+                group.group = self
+                self.addToNestedImages(group.nestedImages!)
+            case let image as Image:
+                image.group = self
+            default:
+                assert(false)
             }
         }
         

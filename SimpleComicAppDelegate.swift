@@ -271,54 +271,9 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         return session
     }
 
-    func addFile(atURL url: URL, toSession session: Session) {
-        let pageSet = session.images?.mutableCopy() as! NSMutableSet
-        let path = url.path
-        let fileExtension = url.pathExtension.lowercased()
-        
-        var isDirectory: ObjCBool = false
-        let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
-        
-        if exists && URL.init(fileURLWithPath: path).lastPathComponent.first != "." {
-            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension as CFString, nil)?.takeRetainedValue()
-            
-            if isDirectory.boolValue {
-                let entity = ImageGroup.init(context: session.managedObjectContext!)
-                entity.path = path
-                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                entity.nestedFolderContents()
-                pageSet.union(entity.nestedImages! as! Set<Image>)
-                entity.session = session
-                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-            } else if Archive.archiveExtensions.contains(fileExtension) {
-                let entity = Archive.init(context: session.managedObjectContext!)
-                entity.path = path
-                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                entity.nestedArchiveContents()
-                pageSet.union(entity.nestedImages! as! Set<Image>)
-                entity.session = session
-                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-            } else if fileExtension == "pdf" {
-                let entity = PDF.init(context: session.managedObjectContext!)
-                entity.path = path
-                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                entity.pdfContents()
-                pageSet.union(entity.nestedImages! as! Set<AnyHashable>)
-                entity.session = session
-                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-            } else if Image.imageExtensions.contains(uti! as String) || Image.textExtensions.contains(fileExtension) {
-                let entity = Image.init(context: session.managedObjectContext!)
-                entity.imagePath = path
-                pageSet.add(entity)
-                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-            }
-        }
-        session.images = pageSet
-    }
-    
     func addFiles(urls: [URL], toSession session: Session) {
         for url in urls {
-            addFile(atURL: url, toSession: session)
+            session.addFile(atURL: url)
         }
     }
 
