@@ -65,8 +65,7 @@ extension UserDefaults {
             TSSTLoupePower: 2.0,
             TSSTStatusbarVisible: true,
             TSSTLonelyFirstPage: true,
-            TSSTNestedArchives: true,
-            TSSTUpdateSelection: 0
+            TSSTNestedArchives: true
         ] as [String: Any]
 
         self.register(defaults: inits)

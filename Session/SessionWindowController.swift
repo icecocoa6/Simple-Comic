@@ -52,7 +52,6 @@ let TSSTLoupePower = "loupePower"
 let TSSTStatusbarVisible = "statusBarVisisble"
 let TSSTLonelyFirstPage = "lonelyFirstPage"
 let TSSTNestedArchives = "nestedArchives"
-let TSSTUpdateSelection = "updateSelection"
 
 let TSSTSessionEndNotification = "sessionEnd"
 

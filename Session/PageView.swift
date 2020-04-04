@@ -92,9 +92,6 @@ class PageView: NSView, CALayerDelegate {
     @IBOutlet @objc var sessionController: SessionWindowController!
     
     
-    // This controls the drawing of the accepting drag-drop border highlighting
-    var acceptingDrag: Bool = false
-    
     /*    While page selection is in progress this method has a value.
      The selection number coresponds to a highlighted page. */
     var pageSelection: Side? = nil
@@ -109,15 +106,12 @@ class PageView: NSView, CALayerDelegate {
         self.layer!.sublayers = [self.firstPage, self.secondPage, self.overlayLayer]
         self.firstPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
         self.secondPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
-        self.overlayLayer.delegate = self
-
         
         if BuildConfiguration.current == .debug {
             self.firstPage.borderColor = CGColor.init(red: 1.0, green: 0.0, blue: 0.0, alpha: 0.5)
             self.firstPage.borderWidth = 2
             self.secondPage.borderColor = CGColor.init(red: 0.0, green: 0.0, blue: 1.0, alpha: 0.5)
             self.secondPage.borderWidth = 2
-            self.overlayLayer.backgroundColor = CGColor.init(gray: 0.0, alpha: 0.1)
         }
     }
     
@@ -208,9 +202,10 @@ class PageView: NSView, CALayerDelegate {
         let pboard = sender.draggingPasteboard
         if pboard.types?.contains(.fileURL) ?? false
         {
-            acceptingDrag = true
             self.needsDisplay = true
-            self.overlayLayer.setNeedsDisplay()
+            self.overlayLayer.borderWidth = 6
+            self.overlayLayer.borderColor = NSColor.keyboardFocusIndicatorColor.cgColor
+            self.overlayLayer.backgroundColor = CGColor(gray: 0.0, alpha: 0.2)
             return .generic
         }
         return []
@@ -226,34 +221,38 @@ class PageView: NSView, CALayerDelegate {
     }
     
     override func draggingExited(_ sender: NSDraggingInfo?) {
-        acceptingDrag = false
         self.needsDisplay = true
-        self.overlayLayer.setNeedsDisplay()
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
     }
     
     override func draggingEnded(_ sender: NSDraggingInfo) {
-        acceptingDrag = false
         self.needsDisplay = true
-        self.overlayLayer.setNeedsDisplay()
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
     }
     
     override func concludeDragOperation(_ sender: NSDraggingInfo?) {
-        acceptingDrag = false
         self.needsDisplay = true
-        self.overlayLayer.setNeedsDisplay()
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
     }
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pboard = sender.draggingPasteboard
-        if pboard.types?.contains(.fileURL) ?? false
-        {
-            let filePaths = pboard.propertyList(forType: .fileURL)! as! String
-            sessionController.updateSessionObject()
-            let app = NSApp.delegate as! SimpleComicAppDelegate
-            app.addFiles(paths: [filePaths], toSession: sessionController.session!)
-            return true
+        sender.enumerateDraggingItems(options: [],
+                                      for: self,
+                                      classes: [NSURL.self],
+                                      searchOptions: [:]) { (item, _, _) in
+                                        switch item.item {
+                                        case let url as URL:
+                                            self.sessionController.updateSessionObject()
+                                            let app = NSApp.delegate as! SimpleComicAppDelegate
+                                            app.addFile(atURL: url, toSession: self.sessionController.session!)
+                                        default:
+                                            break
+                                        }
         }
-        return false
+        return true
     }
     
     override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -326,13 +325,6 @@ class PageView: NSView, CALayerDelegate {
         }
         
         NSGraphicsContext.restoreGraphicsState()
-        
-        if acceptingDrag
-        {
-            NSBezierPath.defaultLineWidth = 6
-            NSColor.keyboardFocusIndicatorColor.set()
-            NSBezierPath.stroke(self.enclosingScrollView!.documentVisibleRect)
-        }
     }
     
     fileprivate func calcFragment(center: CGPoint, size: CGSize, scale: CGFloat) -> CGRect {

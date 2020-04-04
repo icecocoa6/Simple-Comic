@@ -51,9 +51,6 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     var _managedObjectContext: NSManagedObjectContext?
     var _persistentStoreCoordinator: NSPersistentStoreCoordinator?
 
-    /* Auto-save timer */
-    var autoSave: Timer?
-
     /*  Window controller for preferences. */
     var preferences: DTPreferencesController?
 
@@ -87,32 +84,25 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     /*    Stores any files that were opened on launch till applicationDidFinishLaunching:
         is called. */
     func applicationWillFinishLaunching(_ notification: Notification) {
-        autoSave = nil
         launchFiles = []
         launchInProgress = true
         preferences = nil;
         optionHeldAtlaunch = false
-        
+
         UserDefaults.standard.setupDefaults()
 
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: TSSTSessionEndNotification), object: nil, queue: nil) {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: TSSTSessionEndNotification),
+                                               object: nil,
+                                               queue: nil) {
             self.endSession($0)
         }
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTUpdateSelection, options: [], context: nil)
-        UserDefaults.standard.addObserver(self, forKeyPath: TSSTSessionRestore, options: [], context: nil)
-        
+
         Self.setupTemplateImages()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         self.generateEncodingMenu()
 
-        /* Starts the auto save timer */
-        if UserDefaults.standard.bool(forKey: TSSTSessionRestore) {
-            autoSave = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { (_) in
-                _ = self.saveContext()
-            }
-        }
         sessions = [];
         self.sessionRelaunch()
         launchInProgress = false;
@@ -128,7 +118,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
 
         /* Goes through if the user has auto save turned off */
-        if UserDefaults.standard.bool(forKey: TSSTSessionRestore) {
+        if !UserDefaults.standard.bool(forKey: TSSTSessionRestore) {
             return .terminateNow
         }
 
@@ -150,13 +140,6 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
     func windowWillReturnUndoManager(window: NSWindow?) -> UndoManager? {
         return self.managedObjectContext.undoManager
-    }
-
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == TSSTSessionRestore {
-            autoSave?.invalidate()
-            autoSave = nil
-        }
     }
 
     func application(_ sender: NSApplication, openFiles filenames: [String]) {
@@ -248,13 +231,13 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Session Management
 
-    func windowForSession(_ settings: Session) {
-        let s = sessions.map { $0.session }
-        if settings.images!.count > 0 && !s.contains(settings) {
-            let comicWindow = SessionWindowController.init(window: nil, session: settings)
-            sessions.append(comicWindow)
-            comicWindow.showWindow(self)
-        }
+    func windowForSession(_ session: Session) {
+        guard session.images!.count > 0 else { return }
+        guard (sessions.allSatisfy { $0.session != session }) else { return }
+
+        let comicWindow = SessionWindowController.init(window: nil, session: session)
+        sessions.append(comicWindow)
+        comicWindow.showWindow(self)
     }
 
     func endSession(_ notification: Notification) {
@@ -284,54 +267,59 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         session.pageOrder = UserDefaults.standard.pageOrder as NSNumber
         session.twoPageSpread = UserDefaults.standard.twoPageSpread as NSNumber
 
-        self.addFiles(paths: files, toSession: session)
+        self.addFiles(urls: files.map { URL(fileURLWithPath: $0) }, toSession: session)
         return session
     }
 
-    func addFiles(paths: [String], toSession session: Session!) {
+    func addFile(atURL url: URL, toSession session: Session) {
         let pageSet = session.images?.mutableCopy() as! NSMutableSet
-        for path in paths {
-            let fileExtension = URL.init(fileURLWithPath: path).pathExtension.lowercased()
-            var isDirectory: ObjCBool = false
-            let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
-
-            if exists && URL.init(fileURLWithPath: path).lastPathComponent.first != "." {
-                let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension as CFString, nil)?.takeRetainedValue()
-
-                if isDirectory.boolValue {
-                    let entity = ImageGroup.init(context: self.managedObjectContext)
-                    entity.path = path
-                    entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                    entity.nestedFolderContents()
-                    pageSet.union(entity.nestedImages! as! Set<Image>)
-                    entity.session = session
-                    NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-                } else if Archive.archiveExtensions.contains(fileExtension) {
-                    let entity = Archive.init(context: self.managedObjectContext)
-                    entity.path = path
-                    entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                    entity.nestedArchiveContents()
-                    pageSet.union(entity.nestedImages! as! Set<Image>)
-                    entity.session = session
-                    NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-                } else if fileExtension == "pdf" {
-                    let entity = PDF.init(context: self.managedObjectContext)
-                    entity.path = path
-                    entity.name = URL.init(fileURLWithPath: path).lastPathComponent
-                    entity.pdfContents()
-                    pageSet.union(entity.nestedImages! as! Set<AnyHashable>)
-                    entity.session = session
-                    NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-                } else if Image.imageExtensions.contains(uti! as String) || Image.textExtensions.contains(fileExtension) {
-                    let entity = Image.init(context: self.managedObjectContext)
-                    entity.imagePath = path
-                    pageSet.add(entity)
-                    NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
-                }
+        let path = url.path
+        let fileExtension = url.pathExtension.lowercased()
+        
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        
+        if exists && URL.init(fileURLWithPath: path).lastPathComponent.first != "." {
+            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension as CFString, nil)?.takeRetainedValue()
+            
+            if isDirectory.boolValue {
+                let entity = ImageGroup.init(context: session.managedObjectContext!)
+                entity.path = path
+                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
+                entity.nestedFolderContents()
+                pageSet.union(entity.nestedImages! as! Set<Image>)
+                entity.session = session
+                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
+            } else if Archive.archiveExtensions.contains(fileExtension) {
+                let entity = Archive.init(context: session.managedObjectContext!)
+                entity.path = path
+                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
+                entity.nestedArchiveContents()
+                pageSet.union(entity.nestedImages! as! Set<Image>)
+                entity.session = session
+                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
+            } else if fileExtension == "pdf" {
+                let entity = PDF.init(context: session.managedObjectContext!)
+                entity.path = path
+                entity.name = URL.init(fileURLWithPath: path).lastPathComponent
+                entity.pdfContents()
+                pageSet.union(entity.nestedImages! as! Set<AnyHashable>)
+                entity.session = session
+                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
+            } else if Image.imageExtensions.contains(uti! as String) || Image.textExtensions.contains(fileExtension) {
+                let entity = Image.init(context: session.managedObjectContext!)
+                entity.imagePath = path
+                pageSet.add(entity)
+                NSDocumentController.shared.noteNewRecentDocumentURL(URL.init(fileURLWithPath: path))
             }
         }
-
         session.images = pageSet
+    }
+    
+    func addFiles(urls: [URL], toSession session: Session) {
+        for url in urls {
+            addFile(atURL: url, toSession: session)
+        }
     }
 
     // MARK: - Actions
