@@ -145,33 +145,33 @@ class PageView: NSView, CALayerDelegate {
         if self.firstPageSource != nil
         {
             firstPage.contents = CGImageSourceCreateImageAtIndex(first, 0, nil)
-            self.startAnimation(forImage: self.firstPageSource!)
+            self.startAnimation(layer: firstPage, forImage: self.firstPageSource!)
         }
         
         if self.secondPageSource != nil
         {
             secondPage.contents = CGImageSourceCreateImageAtIndex(second!, 0, nil)
-            self.startAnimation(forImage: self.secondPageSource!)
+            self.startAnimation(layer: secondPage, forImage: self.secondPageSource!)
         }
     }
     
     // MARK: - Animations
     
-    func startAnimation(forImage image: CGImageSource)
+    func startAnimation(layer: CALayer, forImage image: CGImageSource)
     {
         let numFrames = CGImageSourceGetCount(image)
-        guard numFrames > 1 else { return }
+        guard numFrames > 1 else {
+            layer.removeAnimation(forKey: "keyframeAnimation")
+            return
+        }
         guard CGImageSourceCreateImageAtIndex(image, 0, nil) != nil else { return }
         
         let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as! [CFString : Any]
         
-        let layer = CALayer.init()
-        self.layer = layer
-        
         var duration: CFTimeInterval = 0.0
         for i in 0 ..< numFrames {
             let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
-            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.1
+            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
             duration += frameDuration
         }
         
@@ -185,7 +185,7 @@ class PageView: NSView, CALayerDelegate {
         var elapsedSeconds: CFTimeInterval = 0.0
         for i in 0 ..< numFrames {
             let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
-            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.1
+            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
             anim.values!.append(CGImageSourceCreateImageAtIndex(image, i, nil) as Any)
             anim.keyTimes!.append((elapsedSeconds / duration) as NSNumber)
             anim.timingFunctions!.append(CAMediaTimingFunction.init(name: CAMediaTimingFunctionName.linear))
@@ -193,7 +193,7 @@ class PageView: NSView, CALayerDelegate {
         }
         anim.keyTimes?.append(1.0)
         anim.repeatCount = (properties[kCGImagePropertyGIFLoopCount] as! NSNumber?)?.floatValue ?? .greatestFiniteMagnitude
-        layer.add(anim, forKey: "contents")
+        layer.add(anim, forKey: "keyframeAnimation")
     }
     
     // MARK: - Drag and Drop
