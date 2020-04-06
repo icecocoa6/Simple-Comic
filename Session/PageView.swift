@@ -35,8 +35,29 @@
 
 import Cocoa
 
+@objc protocol PageViewDelegate {
+    var session: Session! { get }
+    var pageTurn: PageView.Side { get set }
+    
+    func pageLeft(_ sender: Any?)
+    func pageRight(_ sender: Any?)
+    
+    var currentPageIsText: Bool { get }
+    
+    func refreshLoupePanel()
+    func turnPage(to order: SessionWindowController.Order)
+    
+    func killTopOptionalUIElement()
+    func canSelectPageIndex(_ _: Int) -> Bool
+    
+    func rotateLeft(_ sender: Any?)
+    func rotateRight(_ sender: Any?)
+    
+    func updateSessionObject()
+}
+
 class PageView: NSView, CALayerDelegate {
-    enum Side: Int {
+    @objc enum Side: Int {
         case left = 0
         case right = 1
     }
@@ -58,11 +79,13 @@ class PageView: NSView, CALayerDelegate {
         }
     }
     
-    @objc var imageBounds: NSRect = NSZeroRect
+    var imageBounds: NSRect = NSZeroRect
     
-    var firstPage: CALayer = CALayer.init()
-    var secondPage: CALayer = CALayer.init()
-    var overlayLayer: CALayer = CALayer.init()
+    var firstPage: CALayer = CALayer()
+    var secondPage: CALayer = CALayer()
+    var overlayLayer: CALayer = CALayer()
+    var cropLayer = CAShapeLayer()
+    var prompt = CATextLayer()
     private var firstPageImage: NSImage?
     private var secondPageImage: NSImage?
     var firstImageSize: NSSize?
@@ -83,27 +106,40 @@ class PageView: NSView, CALayerDelegate {
             self.updateRotation()
         }
     }
+
+    var onSelectionComplete: ((_ :Int, _:CGRect) -> Void)? = nil
+    var onSelectionCancel: (() -> Void)? = nil
+
+    var pageSelectionInProgress: Bool = false
+    var pageSelectionCanCrop: Bool = false
     
     @objc dynamic var rotationValue: Int = OrthogonalRotation.r0_4.rawValue
         {
         didSet { rotation = OrthogonalRotation.init(rawValue: rotationValue)! }
     }
     
-    @IBOutlet @objc var sessionController: SessionWindowController!
-    
+    @IBOutlet @objc var delegate: PageViewDelegate?
     
     /*    While page selection is in progress this method has a value.
      The selection number coresponds to a highlighted page. */
     var pageSelection: Side? = nil
     /* This is the rect describing the users page selection. */
-    var cropRect: NSRect = NSZeroRect
+    var cropRect: NSRect = NSRect.zero {
+        didSet {
+            let path = CGMutablePath()
+            path.addRect(self.overlayLayer.frame)
+            path.addRect(cropRect)
+            self.cropLayer.path = path
+        }
+    }
     
     override func awakeFromNib() {
         /* Doing this so users can drag archives into the view. */
         self.registerForDraggedTypes([.fileURL])
         
         self.layer = CALayer.init()
-        self.layer!.sublayers = [self.firstPage, self.secondPage, self.overlayLayer]
+        self.layer!.sublayers = [self.firstPage, self.secondPage, self.overlayLayer, self.prompt]
+        self.layer!.layoutManager = CAConstraintLayoutManager()
         self.firstPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
         self.secondPage.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
         
@@ -132,7 +168,7 @@ class PageView: NSView, CALayerDelegate {
         self.resizeView()
     }
     
-    @objc func setSource(first: CGImageSource, _ firstSize: NSSize, second: CGImageSource?, _ secondSize: NSSize) {
+    func setSource(first: CGImageSource, _ firstSize: NSSize, second: CGImageSource?, _ secondSize: NSSize) {
         assert(CGImageSourceGetCount(first) > 0)
         assert(second == nil || CGImageSourceGetCount(second!) > 0)
         
@@ -145,13 +181,25 @@ class PageView: NSView, CALayerDelegate {
         if self.firstPageSource != nil
         {
             firstPage.contents = CGImageSourceCreateImageAtIndex(first, 0, nil)
-            self.startAnimation(layer: firstPage, forImage: self.firstPageSource!)
+            
+            let numFrames = CGImageSourceGetCount(self.firstPageSource!)
+            if numFrames > 1 {
+                self.startAnimation(layer: self.firstPage, forImage: self.firstPageSource!)
+            } else {
+                self.firstPage.removeAnimation(forKey: "keyframeAnimation")
+            }
         }
         
         if self.secondPageSource != nil
         {
             secondPage.contents = CGImageSourceCreateImageAtIndex(second!, 0, nil)
-            self.startAnimation(layer: secondPage, forImage: self.secondPageSource!)
+            
+            let numFrames = CGImageSourceGetCount(self.secondPageSource!)
+            if numFrames > 1 {
+                self.startAnimation(layer: self.secondPage, forImage: self.secondPageSource!)
+            } else {
+                self.secondPage.removeAnimation(forKey: "keyframeAnimation")
+            }
         }
     }
     
@@ -159,13 +207,11 @@ class PageView: NSView, CALayerDelegate {
     
     func startAnimation(layer: CALayer, forImage image: CGImageSource)
     {
-        let numFrames = CGImageSourceGetCount(image)
-        guard numFrames > 1 else {
-            layer.removeAnimation(forKey: "keyframeAnimation")
-            return
+        NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionWillLoad, object: self)
+        defer {
+            NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionDidLoad, object: self)
         }
-        guard CGImageSourceCreateImageAtIndex(image, 0, nil) != nil else { return }
-        
+        let numFrames = CGImageSourceGetCount(self.firstPageSource!)
         let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as! [CFString : Any]
         
         var duration: CFTimeInterval = 0.0
@@ -194,69 +240,6 @@ class PageView: NSView, CALayerDelegate {
         anim.keyTimes?.append(1.0)
         anim.repeatCount = (properties[kCGImagePropertyGIFLoopCount] as! NSNumber?)?.floatValue ?? .greatestFiniteMagnitude
         layer.add(anim, forKey: "keyframeAnimation")
-    }
-    
-    // MARK: - Drag and Drop
-    
-    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        let pboard = sender.draggingPasteboard
-        if pboard.types?.contains(.fileURL) ?? false
-        {
-            self.needsDisplay = true
-            self.overlayLayer.borderWidth = 6
-            self.overlayLayer.borderColor = NSColor.keyboardFocusIndicatorColor.cgColor
-            self.overlayLayer.backgroundColor = CGColor(gray: 0.0, alpha: 0.2)
-            return .generic
-        }
-        return []
-    }
-    
-    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
-        let pboard = sender.draggingPasteboard
-        if pboard.types?.contains(.fileURL) ?? false
-        {
-            return .generic
-        }
-        return []
-    }
-    
-    override func draggingExited(_ sender: NSDraggingInfo?) {
-        self.needsDisplay = true
-        self.overlayLayer.borderWidth = 0
-        self.overlayLayer.backgroundColor = CGColor.clear
-    }
-    
-    override func draggingEnded(_ sender: NSDraggingInfo) {
-        self.needsDisplay = true
-        self.overlayLayer.borderWidth = 0
-        self.overlayLayer.backgroundColor = CGColor.clear
-    }
-    
-    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
-        self.needsDisplay = true
-        self.overlayLayer.borderWidth = 0
-        self.overlayLayer.backgroundColor = CGColor.clear
-    }
-    
-    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        sender.enumerateDraggingItems(options: [],
-                                      for: self,
-                                      classes: [NSURL.self],
-                                      searchOptions: [:]) { (item, _, _) in
-                                        switch item.item {
-                                        case let url as URL:
-                                            self.sessionController.updateSessionObject()
-                                            self.sessionController.session?.addFile(atURL: url)
-                                        default:
-                                            break
-                                        }
-        }
-        return true
-    }
-    
-    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pboard = sender.draggingPasteboard
-        return pboard.types?.contains(.fileURL) ?? false
     }
     
     // MARK: - Drawing
@@ -300,30 +283,65 @@ class PageView: NSView, CALayerDelegate {
             highlight.fill()
         }
         
-        NSColor.init(calibratedWhite: 0.2, alpha: 0.8).set()
-        
-        if sessionController.pageSelectionInProgress()
-        {
-            let style = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-            style.alignment = .center
-            let stringAttributes = [
-                NSAttributedString.Key.font: NSFont.init(name: "Lucida Grande", size: 24)!,
-                NSAttributedString.Key.foregroundColor: NSColor.init(calibratedWhite: 1.0, alpha: 1.0),
-                NSAttributedString.Key.paragraphStyle: style
-            ]
-            var selectionText: NSString = "Click to select page"
-            if self.sessionController.pageSelectionCanCrop()
-            {
-                selectionText = selectionText.appending("\nDrag to crop") as NSString
-            }
-            let textSize = selectionText.size(withAttributes: stringAttributes)
-            let bezelRect = rectWithSizeCenteredInRect(textSize, self.imageBounds)
-            let bezel = NSBezierPath.init(roundedRect: bezelRect.insetBy(dx: -8, dy: -4), xRadius: 10, yRadius: 10)
-            bezel.fill()
-            selectionText.draw(in: bezelRect, withAttributes: stringAttributes)
-        }
-        
         NSGraphicsContext.restoreGraphicsState()
+    }
+    
+    func startImageSelect(canCrop: Bool, onComplete: @escaping (_ :Int, _:CGRect) -> Void, onCancel: @escaping () -> Void) {
+        self.onSelectionComplete = onComplete
+        self.onSelectionCancel = onCancel
+        self.pageSelectionInProgress = true
+        self.pageSelectionCanCrop = canCrop
+        self.overlayLayer.backgroundColor = CGColor(gray: 0.0, alpha: 0.5)
+        self.overlayLayer.mask = self.cropLayer
+        
+        self.cropLayer.path = CGPath(rect: self.overlayLayer.frame, transform: nil)
+        self.cropLayer.backgroundColor = CGColor.white
+        self.cropLayer.fillRule = .evenOdd
+        self.cropLayer.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
+        
+        let attributes = [
+            NSAttributedString.Key.font: NSFont.init(name: "Lucida Grande", size: 24)!,
+            NSAttributedString.Key.foregroundColor: NSColor(calibratedWhite: 1.0, alpha: 1.0),
+        ]
+        var text = "Click to select page"
+        if self.pageSelectionCanCrop
+        {
+            text = text.appending("\nDrag to crop")
+        }
+        let attrString = NSAttributedString(string: text, attributes: attributes)
+        
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        self.prompt.name = "prompt"
+        self.prompt.string = attrString
+        self.prompt.alignmentMode = .center
+        self.prompt.frame.size = attrString.size()
+        self.prompt.frame.origin = CGPoint(x: self.layer!.frame.midX, y: self.layer!.frame.midY)
+        self.prompt.opacity = 0.0
+        self.prompt.constraints = [
+            CAConstraint(attribute: .midX, relativeTo: "superlayer", attribute: .midX),
+            CAConstraint(attribute: .midY, relativeTo: "superlayer", attribute: .midY)
+        ]
+        self.layer!.layoutSublayers()
+        self.prompt.actions = ["contents": NSNull(), "bounds": NSNull(), "position": NSNull(), "transform": NSNull()]
+        CATransaction.commit()
+        
+        let duration = 3.0
+        let fadeAnimation = CAKeyframeAnimation(keyPath:"opacity")
+        fadeAnimation.beginTime = 0.0
+        fadeAnimation.duration = duration
+        fadeAnimation.keyTimes = [0, 0.25/duration as NSNumber, (1.0 - 0.25/duration) as NSNumber, 1]
+        fadeAnimation.values = [0.0, 1.0, 1.0, 0.0]
+        fadeAnimation.isRemovedOnCompletion = false
+        fadeAnimation.fillMode = .forwards
+        self.prompt.add(fadeAnimation, forKey:"animateOpacity")
+    }
+    
+    func endImageSelect() {
+        self.overlayLayer.backgroundColor = CGColor.clear
+        self.prompt.removeAllAnimations()
+        self.prompt.opacity = 0.0
+        self.pageSelectionInProgress = false
     }
     
     fileprivate func calcFragment(center: CGPoint, size: CGSize, scale: CGFloat) -> CGRect {
@@ -375,7 +393,7 @@ class PageView: NSView, CALayerDelegate {
         
         let firstRect: CGRect
         let secondRect: CGRect
-        if (sessionController.session?.pageOrder!.boolValue)! || !(secondPageImage?.isValid ?? false)
+        if (delegate?.session?.pageOrder!.boolValue)! || !(secondPageImage?.isValid ?? false)
         {
             (firstRect, secondRect) = convertBoundsToFrameParts(bounds: size, left: firstImageSize!, right: secondImageSize, into: rect)
         }
@@ -454,7 +472,7 @@ class PageView: NSView, CALayerDelegate {
         
         guard frameSize != NSZeroSize else { return }
         
-        if sessionController.pageTurn == .left
+        if delegate?.pageTurn == .left
         {
             correctOrigin.x = frameSize.width > viewSize.width ? (frameSize.width - viewSize.width) : 0
         }
@@ -487,8 +505,8 @@ class PageView: NSView, CALayerDelegate {
     
     fileprivate func calcViewSize(_ imageSize: NSSize, _ visibleRect: NSRect) -> CGSize {
         var viewSize: CGSize = CGSize.zero
-        var scaling = sessionController.session?.adjustmentMode ?? .none
-        scaling = sessionController.currentPageIsText() ? .fitToWidth : scaling
+        var scaling = delegate?.session?.adjustmentMode ?? .none
+        scaling = delegate?.currentPageIsText ?? false ? .fitToWidth : scaling
         switch (scaling)
         {
         case .none:
@@ -527,12 +545,12 @@ class PageView: NSView, CALayerDelegate {
         let frameRect = self.frame
         
         
-        var imageSize = self.combinedImageSize().scaleBy(CGFloat(sessionController.session?.zoomLevel?.floatValue ?? 1.0))
+        var imageSize = self.combinedImageSize().scaleBy(CGFloat(delegate?.session?.zoomLevel?.floatValue ?? 1.0))
         let viewSize = calcViewSize(imageSize, visibleRect)
         self.frame.size = viewSize
         
         if !UserDefaults.standard.isImageScaleConstrained &&
-            sessionController.session!.adjustmentMode != .none
+            delegate?.session!.adjustmentMode != PageAdjustmentMode.none
         {
             if( viewSize.width / viewSize.height < imageSize.width / imageSize.height)
             {
@@ -581,7 +599,7 @@ class PageView: NSView, CALayerDelegate {
         
         if isTwoPageSpreaded
         {
-            let reversed = !(sessionController.session?.pageOrder?.boolValue ?? false)
+            let reversed = !(delegate?.session?.pageOrder?.boolValue ?? false)
             let fst: CALayer = reversed ? self.secondPage : self.firstPage
             let snd: CALayer = reversed ? self.firstPage : self.secondPage
             
@@ -623,7 +641,7 @@ class PageView: NSView, CALayerDelegate {
             return selection == .left ? self.bounds : NSZeroRect
         }
         
-        let left2right = sessionController.session!.pageOrder!.boolValue
+        let left2right = delegate?.session!.pageOrder!.boolValue ?? false
         let pages = left2right ? [self.firstPage.frame, self.secondPage.frame] : [self.secondPage.frame, self.firstPage.frame]
         let leftSelected = (left2right && selection == .left) || (!left2right && selection == .right)
         let left = NSRect.init(x: 0, y: 0, width: pages[0].maxX, height: self.bounds.height)
@@ -673,14 +691,14 @@ class PageView: NSView, CALayerDelegate {
     // MARK: - Event handling
     
     override func scrollWheel(with event: NSEvent) {
-        guard !sessionController.pageSelectionInProgress() else
+        guard !self.pageSelectionInProgress else
         {
             return
         }
         
         let modifier = event.modifierFlags
-        var scaling = sessionController.session!.adjustmentMode
-        scaling = sessionController.currentPageIsText() ? .fitToWidth : scaling
+        var scaling = delegate?.session!.adjustmentMode
+        scaling = delegate?.currentPageIsText ?? false ? .fitToWidth : scaling
         
         if modifier.contains(.command) && event.deltaY != 0
         {
@@ -706,11 +724,11 @@ class PageView: NSView, CALayerDelegate {
             
             if (deltaX > 0.0)
             {
-                sessionController.pageLeft(self)
+                delegate?.pageLeft(self)
             }
             else if (deltaX < 0.0)
             {
-                sessionController.pageRight(self)
+                delegate?.pageRight(self)
             }
             
         }
@@ -721,13 +739,16 @@ class PageView: NSView, CALayerDelegate {
             self.scroll(scrollPoint)
         }
         
-        sessionController.refreshLoupePanel()
+        delegate?.refreshLoupePanel()
     }
     
     override func keyDown(with event: NSEvent) {
-        if sessionController.pageSelectionInProgress()
+        if self.pageSelectionInProgress
         {
-            sessionController.cancelPageSelection()
+            if self.onSelectionCancel != nil {
+                self.onSelectionCancel!()
+            }
+            self.endImageSelect()
             pageSelection = nil
             cropRect = NSZeroRect
             self.needsDisplay = true
@@ -748,7 +769,7 @@ class PageView: NSView, CALayerDelegate {
         case NSUpArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController.turnPage(to: .prev)
+                delegate?.turnPage(to: .prev)
             }
             else
             {
@@ -760,7 +781,7 @@ class PageView: NSView, CALayerDelegate {
         case NSDownArrowFunctionKey:
             if !self.verticalScrollIsPossible
             {
-                sessionController.turnPage(to: .next)
+                delegate?.turnPage(to: .next)
             }
             else
             {
@@ -772,7 +793,7 @@ class PageView: NSView, CALayerDelegate {
         case NSLeftArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                sessionController.pageLeft(self)
+                delegate?.pageLeft(self)
             }
             else
             {
@@ -784,7 +805,7 @@ class PageView: NSView, CALayerDelegate {
         case NSRightArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                sessionController.pageRight(self)
+                delegate?.pageRight(self)
             }
             else
             {
@@ -810,7 +831,7 @@ class PageView: NSView, CALayerDelegate {
             }
             break;
         case 27:
-            sessionController.killTopOptionalUIElement()
+            delegate?.killTopOptionalUIElement()
             break;
         case 127:
             self.pageUp()
@@ -823,7 +844,7 @@ class PageView: NSView, CALayerDelegate {
         if scrolling && scrollTimer != nil
         {
             self.scroll(scrollPoint)
-            sessionController.refreshLoupePanel()
+            delegate?.refreshLoupePanel()
             let userInfo = [
                 "lastTime": Date.init(),
                 "accelerate": shiftKey,
@@ -841,7 +862,7 @@ class PageView: NSView, CALayerDelegate {
         
         if self.bounds.maxY <= visible.maxY
         {
-            if sessionController.session!.pageOrder!.boolValue
+            if delegate?.session!.pageOrder!.boolValue ?? false
             {
                 if visible.minX > 0
                 {
@@ -849,8 +870,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = .left
-                    sessionController.turnPage(to: .prev)
+                    delegate?.pageTurn = .left
+                    delegate?.turnPage(to: .prev)
                 }
             }
             else
@@ -861,8 +882,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = .right
-                    sessionController.turnPage(to: .prev)
+                    delegate?.pageTurn = .right
+                    delegate?.turnPage(to: .prev)
                 }
             }
         }
@@ -879,7 +900,7 @@ class PageView: NSView, CALayerDelegate {
         
         if scrollPoint.y <= 0
         {
-            if sessionController.session!.pageOrder!.boolValue
+            if delegate?.session!.pageOrder!.boolValue ?? false
             {
                 if visible.maxX < self.bounds.width
                 {
@@ -887,8 +908,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn =  .right
-                    sessionController.turnPage(to: .next)
+                    delegate?.pageTurn =  .right
+                    delegate?.turnPage(to: .next)
                 }
             }
             else
@@ -899,8 +920,8 @@ class PageView: NSView, CALayerDelegate {
                 }
                 else
                 {
-                    sessionController.pageTurn = .left
-                    sessionController.turnPage(to: .next)
+                    delegate?.pageTurn = .left
+                    delegate?.turnPage(to: .next)
                 }
             }
         }
@@ -957,7 +978,7 @@ class PageView: NSView, CALayerDelegate {
         let delta = CGFloat(1000 * difference * Double(multiplier))
         var turn: Side? = nil
         var directionString: NSString? = nil
-        let turnDirection = sessionController.session!.pageOrder?.boolValue
+        let turnDirection = delegate?.session!.pageOrder?.boolValue
         var finishTurn = false
         if scrollKeys.contains(.up)
         {
@@ -1021,11 +1042,11 @@ class PageView: NSView, CALayerDelegate {
             {
                 if t == .left
                 {
-                    sessionController.pageLeft(self)
+                    delegate?.pageLeft(self)
                 }
                 else if t == .right
                 {
-                    sessionController.pageRight(self)
+                    delegate?.pageRight(self)
                 }
                 finishTurn = true
                 scrollTimer?.invalidate()
@@ -1046,16 +1067,16 @@ class PageView: NSView, CALayerDelegate {
             scrollView?.reflectScrolledClipView(clipView)
         }
         
-        sessionController.refreshLoupePanel()
+        delegate?.refreshLoupePanel()
     }
     
     override func rightMouseDown(with event: NSEvent) {
-        let loupe = sessionController.session!.loupe!.boolValue
-        sessionController.session!.loupe = !loupe as NSNumber
+        let loupe = delegate?.session!.loupe!.boolValue ?? false
+        delegate?.session!.loupe = !loupe as NSNumber
     }
     
     override func mouseDown(with event: NSEvent) {
-        if sessionController.pageSelectionInProgress() {
+        if self.pageSelectionInProgress {
             let cursor = self.convert(event.locationInWindow, from: nil)
             cropRect.origin = cursor;
         }
@@ -1066,19 +1087,21 @@ class PageView: NSView, CALayerDelegate {
     }
     
     override func mouseMoved(with event: NSEvent) {
-        guard sessionController.pageSelectionInProgress() else {
+        guard self.pageSelectionInProgress else {
             super.mouseMoved(with: event)
             return
         }
         
         let cursor = self.convert(event.locationInWindow, from: nil)
-        if sessionController.canSelectPageIndex(Side.left.rawValue) && self.firstPage.frame.contains(cursor)
+        if (delegate?.canSelectPageIndex(Side.left.rawValue) ?? false) && self.firstPage.frame.contains(cursor)
         {
             pageSelection = .left
+            cropRect = self.firstPage.frame
         }
-        else if sessionController.canSelectPageIndex(Side.right.rawValue) && self.secondPage.frame.contains(cursor)
+        else if (delegate?.canSelectPageIndex(Side.right.rawValue) ?? false) && self.secondPage.frame.contains(cursor)
         {
             pageSelection = .right
+            cropRect = self.secondPage.frame
         }
         else
         {
@@ -1092,7 +1115,7 @@ class PageView: NSView, CALayerDelegate {
         let viewOrigin = self.enclosingScrollView!.documentVisibleRect.origin
         var cursor = event.locationInWindow
         var currentPoint: NSPoint
-        if sessionController.pageSelectionInProgress()
+        if self.pageSelectionInProgress
         {
             cursor = self.convert(cursor, from: nil)
             cropRect.size.width = cursor.x - cropRect.origin.x;
@@ -1117,7 +1140,7 @@ class PageView: NSView, CALayerDelegate {
                 {
                     currentPoint = e.locationInWindow
                     self.scroll(NSMakePoint(viewOrigin.x + cursor.x - currentPoint.x,viewOrigin.y + cursor.y - currentPoint.y))
-                    sessionController.refreshLoupePanel()
+                    delegate?.refreshLoupePanel()
                 }
                 e = (self.window?.nextEvent(matching: [.leftMouseUp, .leftMouseDragged]))!
             }
@@ -1126,9 +1149,12 @@ class PageView: NSView, CALayerDelegate {
     }
     
     override func mouseUp(with event: NSEvent) {
-        if sessionController.pageSelectionInProgress()
+        if self.pageSelectionInProgress
         {
-            sessionController.selectedPage(pageSelection?.rawValue ?? -1, withCropRect: self.imageCropRectangle())
+            if self.onSelectionComplete != nil {
+                self.onSelectionComplete!(pageSelection?.rawValue ?? -1, self.imageCropRectangle())
+            }
+            self.endImageSelect()
             pageSelection = nil
             cropRect = NSZeroRect;
             
@@ -1174,11 +1200,11 @@ class PageView: NSView, CALayerDelegate {
     override func swipe(with event: NSEvent) {
         if event.deltaX > 0.0
         {
-            sessionController.pageLeft(self)
+            delegate?.pageLeft(self)
         }
         else if event.deltaX < 0.0
         {
-            sessionController.pageRight(self)
+            delegate?.pageRight(self)
         }
     }
     
@@ -1189,18 +1215,18 @@ class PageView: NSView, CALayerDelegate {
         // Prevent more than one rotation in the same direction per second
         if event.rotation > 0.5 && event.timestamp > PageView.nextValidRight
         {
-            sessionController.rotateLeft(self)
+            delegate?.rotateLeft(self)
             PageView.nextValidRight = event.timestamp + 0.75
         }
         else if event.rotation < -0.5 && event.timestamp > PageView.nextValidLeft
         {
-            sessionController.rotateRight(self)
+            delegate?.rotateRight(self)
             PageView.nextValidLeft = event.timestamp + 0.75;
         }
     }
     
     override func magnify(with event: NSEvent) {
-        let session = sessionController.session
+        let session = delegate?.session
         var previousZoom = CGFloat(session!.zoomLevel!.floatValue)
         
         if session!.adjustmentMode != .none
@@ -1221,7 +1247,7 @@ class PageView: NSView, CALayerDelegate {
         return
             self.horizontalScrollIsPossible ||
                 self.verticalScrollIsPossible &&
-                !sessionController.pageSelectionInProgress()
+                !self.pageSelectionInProgress
     }
     
     var horizontalScrollIsPossible: Bool {
@@ -1245,6 +1271,71 @@ class PageView: NSView, CALayerDelegate {
         {
             super.resetCursorRects();
         }
+    }
+}
+
+// MARK: - Drag and Drop
+
+extension PageView /* NSDraggingDestination */ {
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        let pboard = sender.draggingPasteboard
+        if pboard.types?.contains(.fileURL) ?? false
+        {
+            self.needsDisplay = true
+            self.overlayLayer.borderWidth = 6
+            self.overlayLayer.borderColor = NSColor.keyboardFocusIndicatorColor.cgColor
+            self.overlayLayer.backgroundColor = CGColor(gray: 0.0, alpha: 0.2)
+            return .generic
+        }
+        return []
+    }
+    
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        let pboard = sender.draggingPasteboard
+        if pboard.types?.contains(.fileURL) ?? false
+        {
+            return .generic
+        }
+        return []
+    }
+    
+    override func draggingExited(_ sender: NSDraggingInfo?) {
+        self.needsDisplay = true
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
+    }
+    
+    override func draggingEnded(_ sender: NSDraggingInfo) {
+        self.needsDisplay = true
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
+    }
+    
+    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
+        self.needsDisplay = true
+        self.overlayLayer.borderWidth = 0
+        self.overlayLayer.backgroundColor = CGColor.clear
+    }
+    
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        sender.enumerateDraggingItems(options: [],
+                                      for: self,
+                                      classes: [NSURL.self],
+                                      searchOptions: [:]) { (item, _, _) in
+                                        switch item.item {
+                                        case let url as URL:
+                                            self.delegate?.updateSessionObject()
+                                            self.delegate?.session?.addFile(atURL: url)
+                                        default:
+                                            break
+                                        }
+        }
+        return true
+    }
+    
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        let pboard = sender.draggingPasteboard
+        return pboard.types?.contains(.fileURL) ?? false
     }
 }
 

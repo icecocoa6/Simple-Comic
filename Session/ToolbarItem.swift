@@ -14,7 +14,7 @@ class ToolbarItem: NSToolbarItem {
     override func validate() {
         let toolbarDelegate = self.toolbar?.delegate as! SessionWindowController
         let control = self.view as! NSControl
-        control.isEnabled = !toolbarDelegate.pageSelectionInProgress()
+        control.isEnabled = !toolbarDelegate.pageSelectionInProgress
     }
 }
 

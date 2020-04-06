@@ -18,7 +18,9 @@
                 <outlet property="pageScrollView" destination="236" id="239"/>
                 <outlet property="pageView" destination="235" id="238"/>
                 <outlet property="progressBar" destination="607" id="608"/>
+                <outlet property="progressInditator" destination="wkl-4G-HXF" id="OWO-ho-ssK"/>
                 <outlet property="thumbnailPanel" destination="483" id="589"/>
+                <outlet property="titlebarAccessory" destination="l5B-wr-7hb" id="XKE-cJ-mKB"/>
                 <outlet property="window" destination="6" id="40"/>
                 <outlet property="zoomView" destination="366" id="367"/>
             </connections>
@@ -43,11 +45,11 @@
                             <rect key="frame" x="0.0" y="0.0" width="460" height="530"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="235" customClass="PageView" customModule="Simple_Comic" customModuleProvider="target">
+                                <customView wantsLayer="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="235" customClass="PageView" customModule="Simple_Comic" customModuleProvider="target">
                                     <rect key="frame" x="0.0" y="0.0" width="135" height="65"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <connections>
-                                        <outlet property="sessionController" destination="-2" id="750"/>
+                                        <outlet property="delegate" destination="-2" id="750"/>
                                     </connections>
                                 </customView>
                             </subviews>
@@ -444,6 +446,24 @@ Gw
             </view>
             <point key="canvasLocation" x="928" y="-343"/>
         </window>
+        <customView id="l5B-wr-7hb" userLabel="Titlebar Accessory View">
+            <rect key="frame" x="0.0" y="0.0" width="40" height="20"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <progressIndicator wantsLayer="YES" maxValue="100" doubleValue="42" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="wkl-4G-HXF">
+                    <rect key="frame" x="16" y="2" width="16" height="16"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="16" id="E7v-5m-Jix"/>
+                        <constraint firstAttribute="height" constant="16" id="ndc-hL-Y6x"/>
+                    </constraints>
+                </progressIndicator>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="wkl-4G-HXF" secondAttribute="trailing" constant="8" id="L2j-GB-Ayh"/>
+                <constraint firstItem="wkl-4G-HXF" firstAttribute="centerY" secondItem="l5B-wr-7hb" secondAttribute="centerY" id="png-dW-WLR"/>
+            </constraints>
+            <point key="canvasLocation" x="296" y="-377"/>
+        </customView>
     </objects>
     <resources>
         <image name="Left To Right" width="19" height="19"/>

@@ -34,6 +34,7 @@ import CoreData
 
 
 public class Image: NSManagedObject {
+    static let imageSourceCache = NSCache<Image, CGImageSource>()
     var thumbLock: NSLock?
     var loaderLock: NSLock?
     
@@ -193,7 +194,8 @@ public class Image: NSManagedObject {
         return imageFromData
     }
     
-    @objc var imageSource: CGImageSource? {
+    var imageSource: CGImageSource? {
+        if let cache = Image.imageSourceCache.object(forKey: self) { return cache }
         guard text == nil || !text!.boolValue else { return nil }
         guard let img = self.pageData else { return nil }
         
@@ -202,6 +204,7 @@ public class Image: NSManagedObject {
         guard CGImageSourceGetStatus(source) == .statusComplete else { return nil }
         guard CGImageSourceGetCount(source) > 0 else { return nil }
         
+        Image.imageSourceCache.setObject(source, forKey: self)
         return source
     }
     

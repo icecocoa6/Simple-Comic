@@ -54,19 +54,19 @@ let TSSTLonelyFirstPage = "lonelyFirstPage"
 
 let TSSTSessionEndNotification = "sessionEnd"
 
-class NotificationObservation : NSObject {
+class NotificationObservation: NSObject {
     let center: NotificationCenter
     let observer: NSObjectProtocol
-    
+
     init(center: NotificationCenter, observer: NSObjectProtocol) {
         self.center = center
         self.observer = observer
     }
-    
+
     func invalidate() {
         center.removeObserver(observer)
     }
-    
+
     deinit {
         self.invalidate()
     }
@@ -79,7 +79,14 @@ extension NotificationCenter {
     }
 }
 
-class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuItemValidation {
+extension Notification.Name {
+    struct SimpleComic {
+        static let sessionWillLoad = Notification.Name("SimpleComic.SessionWillLoad")
+        static let sessionDidLoad = Notification.Name("SimpleComic.SessionDidLoad")
+    }
+}
+
+class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuItemValidation, PageViewDelegate {
     // MARK: - Properties
     /* Controller for all of the page entities related to the session object */
     @IBOutlet var pageController: NSArrayController!
@@ -110,12 +117,15 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     @IBOutlet var exposeView: ThumbnailView!
     @IBOutlet var thumbnailPanel: InfoWindow!
 
+    @IBOutlet var titlebarAccessory: NSView!
+    @IBOutlet var progressInditator: NSProgressIndicator!
+
     /* The session object used to maintain settings */
     @objc dynamic var session: Session?
 
     /* This var is bound to the session window name */
     @objc dynamic var pageNames: String?
-    var pageTurn: PageView.Side? = nil
+    var pageTurn: PageView.Side = .left
 
     /* Exactly what it sounds like */
     @objc dynamic var pageSortDescriptor: NSArray?
@@ -135,14 +145,16 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         case Delete = 2
         case Extract = 3
     };
-    var _pageSelectionInProgress: PageSelectionMode = .None
 
+    var pageSelectionMode: PageSelectionMode = .None
+    var _pageSelectionInProgress: PageSelectionMode {
+        get { self.pageSelectionMode }
+        set(value) { self.pageSelectionMode = value }
+    }
 
     init(window: NSWindow?, session: Session) {
         super.init(window: window)
 
-        self.pageTurn = nil
-        self._pageSelectionInProgress = .None
         self.mouseMovedTimer = nil
         self.session = session
         let cascade = session.position == nil
@@ -166,6 +178,11 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.exposeBezel.windowController = self
         self.window?.acceptsMouseMovedEvents = true
         self.pageController.setSelectionIndex(self.session!.selection!.intValue)
+
+        let vc = NSTitlebarAccessoryViewController()
+        vc.view = self.titlebarAccessory
+        vc.layoutAttribute = .right
+        self.window?.addTitlebarAccessoryViewController(vc)
 
         self.observers.removeAll()
         let defaults = UserDefaults.standard
@@ -261,8 +278,19 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.observers += [
             NotificationCenter.default.observe(forName: NSNotification.Name(rawValue: "SCMouseDragNotification"), object: self, queue: nil) {
                 self.handleMouseDragged($0)
+            },
+            NotificationCenter.default.observe(forName: NSNotification.Name.SimpleComic.sessionWillLoad,
+                                               object: self,
+                                               queue: OperationQueue.main) { (_) in
+                self.progressInditator.startAnimation(self)
+            },
+            NotificationCenter.default.observe(forName: NSNotification.Name.SimpleComic.sessionDidLoad,
+                                               object: self,
+                                               queue: OperationQueue.main) { (_) in
+                self.progressInditator.stopAnimation(self)
             }
         ]
+
         self.restoreSession()
     }
 
@@ -276,7 +304,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.progressBar.unbind(NSBindingName(rawValue: "maxValue"))
         self.progressBar.unbind(NSBindingName(rawValue: "leftToRight"))
 
-        self.pageView.sessionController = nil
+        self.pageView.delegate = nil
     }
 
     // MARK: - Progress bar
@@ -409,7 +437,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         depending on the prefered page ordering.
     */
     @IBAction
-    func pageRight(_ sender: Any) {
+    func pageRight(_ sender: Any?) {
         self.pageTurn = .right
         self.turnPage(to: orderTo(side: .right))
     }
@@ -418,7 +446,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         depending on the prefered page ordering.
     */
     @IBAction
-    func pageLeft(_ sender: Any) {
+    func pageLeft(_ sender: Any?) {
         self.pageTurn = .left
         self.turnPage(to: orderTo(side: .left))
     }
@@ -468,7 +496,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             self.zoomReset(self)
         }
     }
-    
+
     func zoom(by scale: CGFloat) {
         var previousZoom = CGFloat(self.session!.zoomLevel!.floatValue)
 
@@ -515,7 +543,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     @IBAction
-    func rotateRight(_ sender: Any) {
+    func rotateRight(_ sender: Any?) {
         var current: Int = (self.session?.rotation!.intValue)!
         current = (current + 1) % 4
         self.session?.rotation = current as NSNumber
@@ -524,7 +552,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     @IBAction
-    func rotateLeft(_ sender: Any) {
+    func rotateLeft(_ sender: Any?) {
         var current: Int = (self.session?.rotation!.intValue)!
         current = (current - 1) % 4
         self.session?.rotation = current as NSNumber
@@ -589,22 +617,27 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     func removePages(_ sender: Any) {
         self._pageSelectionInProgress = .Delete
         self.changeViewForSelection()
+        self.pageView.startImageSelect(canCrop: false,
+                                       onComplete: self.selectedPage,
+                                       onCancel: self.cancelPageSelection)
     }
 
     @IBAction
     func setArchiveIcon(_ sender: Any) {
         self._pageSelectionInProgress = .Icon
         self.changeViewForSelection()
+        self.pageView.startImageSelect(canCrop: true,
+                                       onComplete: self.selectedPage,
+                                       onCancel: self.cancelPageSelection)
     }
 
     @IBAction
     func extractPage(_ sender: Any) {
         self._pageSelectionInProgress = .Extract
         self.changeViewForSelection()
-    }
-
-    func pageSelectionCanCrop() -> Bool {
-        _pageSelectionInProgress == .Icon
+        self.pageView.startImageSelect(canCrop: false,
+                                       onComplete: self.selectedPage,
+                                       onCancel: self.cancelPageSelection)
     }
 
     func changeViewForSelection() {
@@ -636,7 +669,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             !selectedPage.text!.boolValue
     }
 
-    func pageSelectionInProgress() -> Bool {
+    var pageSelectionInProgress: Bool {
         self._pageSelectionInProgress != .None
     }
 
@@ -865,7 +898,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     fileprivate var pageScaleMode: PageAdjustmentMode {
         if _pageSelectionInProgress != .None || !UserDefaults.standard.bool(forKey: TSSTScrollersVisible) {
             return .fitToWindow
-        } else if self.currentPageIsText() {
+        } else if self.currentPageIsText {
             return .fitToWidth
         }
 
@@ -995,7 +1028,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         (NSApp.delegate as! SimpleComicAppDelegate).managedObjectContext
     }
 
-    enum Order {
+    @objc enum Order: Int {
         case prev
         case next
     }
@@ -1181,7 +1214,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.pageView.resizeView()
     }
 
-    func currentPageIsText() -> Bool {
+    var currentPageIsText: Bool {
         let set = self.pageController.selectionIndexes
         if set.count == 0 {
             return false
