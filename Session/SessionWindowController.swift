@@ -281,18 +281,24 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             },
             NotificationCenter.default.observe(forName: NSNotification.Name.SimpleComic.sessionWillLoad,
                                                object: self,
-                                               queue: OperationQueue.main) { (_) in
+                                               queue: OperationQueue.main) { notification in
                 self.progressInditator.startAnimation(self)
+                self.processingWorkers += 1
             },
             NotificationCenter.default.observe(forName: NSNotification.Name.SimpleComic.sessionDidLoad,
                                                object: self,
-                                               queue: OperationQueue.main) { (_) in
-                self.progressInditator.stopAnimation(self)
+                                               queue: OperationQueue.main) { notification in
+                self.processingWorkers -= 1
+                if self.processingWorkers == 0 {
+                    self.progressInditator.stopAnimation(self)
+                }
             }
         ]
 
         self.restoreSession()
     }
+    
+    var processingWorkers: Int = 0
 
     override var windowNibName: NSNib.Name? { "TSSTSessionWindow" }
 
@@ -865,18 +871,25 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.window?.title = titleString
         self.pageNames = titleString
 
-        if pageOne.imageSource != nil {
-            self.pageView.setSource(first: pageOne.imageSource!,
-                                    CGSize.init(width: CGFloat(pageOne.width!.floatValue),
-                                                height: CGFloat(pageOne.height!.floatValue)),
-                                    second: pageTwo?.imageSource,
-                                    CGSize.init(width: CGFloat(pageTwo?.width?.floatValue ?? 0),
-                                                height: CGFloat(pageTwo?.height?.floatValue ?? 0)))
+        NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionWillLoad, object: self)
+        DispatchQueue.global().async {
+            if pageOne.imageSource != nil {
+                self.pageView.setSource(first: ImagePack(image: pageOne),
+                                        CGSize.init(width: CGFloat(pageOne.width!.floatValue),
+                                                    height: CGFloat(pageOne.height!.floatValue)),
+                                        second: (pageTwo != nil) ? ImagePack(image: pageTwo!) : nil,
+                                        CGSize.init(width: CGFloat(pageTwo?.width?.floatValue ?? 0),
+                                                    height: CGFloat(pageTwo?.height?.floatValue ?? 0)))
+            }
+            
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionDidLoad, object: self)
+                self.pageView.resizeView()
+                self.scaleToWindow()
+                self.pageView.correctViewPoint()
+                self.refreshLoupePanel()
+            }
         }
-
-        self.scaleToWindow()
-        self.pageView.correctViewPoint()
-        self.refreshLoupePanel()
     }
 
     func resizeWindow() {

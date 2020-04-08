@@ -90,8 +90,6 @@ class PageView: NSView, CALayerDelegate {
     private var secondPageImage: NSImage?
     var firstImageSize: NSSize?
     var secondImageSize: NSSize?
-    var firstPageSource: CGImageSource?
-    var secondPageSource: CGImageSource?
     var isTwoPageSpreaded: Bool { secondImageSize != nil }
     
     // Stores which arrow keys are currently depressed this enables multi axis keyboard scrolling.
@@ -112,6 +110,8 @@ class PageView: NSView, CALayerDelegate {
 
     var pageSelectionInProgress: Bool = false
     var pageSelectionCanCrop: Bool = false
+    
+    let decodingOperation = OperationQueue()
     
     @objc dynamic var rotationValue: Int = OrthogonalRotation.r0_4.rawValue
         {
@@ -157,89 +157,87 @@ class PageView: NSView, CALayerDelegate {
     
     override var acceptsFirstResponder: Bool { true }
     
-    func setFirstPage(_ first: NSImage, secondPageImage second: NSImage?) {
+    private func setFirstPage(_ first: NSImage, secondPageImage second: NSImage?) {
         scrollKeys = []
         
         firstPageImage = first
         firstImageSize = first.size
         secondPageImage = second
         secondImageSize = second?.size
-        
-        self.resizeView()
     }
     
-    func setSource(first: CGImageSource, _ firstSize: NSSize, second: CGImageSource?, _ secondSize: NSSize) {
-        assert(CGImageSourceGetCount(first) > 0)
-        assert(second == nil || CGImageSourceGetCount(second!) > 0)
+    func setSource(first: ImagePack, _ firstSize: NSSize, second: ImagePack?, _ secondSize: NSSize) {
+        assert(first.count > 0)
+        assert(second == nil || second!.count > 0)
         
-        firstPageSource = first
-        secondPageSource = second
-        let img = second != nil ? NSImage.init(cgImage: CGImageSourceCreateImageAtIndex(second!, 0, nil)!, size: secondSize) : nil
-        setFirstPage(NSImage.init(cgImage: CGImageSourceCreateImageAtIndex(first, 0, nil)!, size: firstSize),
+        decodingOperation.cancelAllOperations()
+        
+        let img = second != nil ? NSImage.init(cgImage: second!.image(at: 0), size: secondSize) : nil
+        setFirstPage(NSImage.init(cgImage: first.image(at: 0), size: firstSize),
                      secondPageImage: img)
         
-        if self.firstPageSource != nil
-        {
-            firstPage.contents = CGImageSourceCreateImageAtIndex(first, 0, nil)
-            
-            let numFrames = CGImageSourceGetCount(self.firstPageSource!)
-            if numFrames > 1 {
-                self.startAnimation(layer: self.firstPage, forImage: self.firstPageSource!)
-            } else {
-                self.firstPage.removeAnimation(forKey: "keyframeAnimation")
-            }
+        DispatchQueue.main.async {
+            self.firstPage.removeAnimation(forKey: "keyframeAnimation")
+            self.firstPage.contents = first.image(at: 0)
+        }
+
+        let numFrames = first.count
+        if numFrames > 1 {
+            self.startAnimation(layer: self.firstPage, forImage: first)
         }
         
-        if self.secondPageSource != nil
+        if second != nil
         {
-            secondPage.contents = CGImageSourceCreateImageAtIndex(second!, 0, nil)
-            
-            let numFrames = CGImageSourceGetCount(self.secondPageSource!)
-            if numFrames > 1 {
-                self.startAnimation(layer: self.secondPage, forImage: self.secondPageSource!)
-            } else {
+            DispatchQueue.main.async {
                 self.secondPage.removeAnimation(forKey: "keyframeAnimation")
+                self.secondPage.contents = second?.image(at: 0)
+            }
+            
+            let numFrames = second!.count
+            if numFrames > 1 {
+                self.startAnimation(layer: self.secondPage, forImage: second!)
             }
         }
     }
     
     // MARK: - Animations
     
-    func startAnimation(layer: CALayer, forImage image: CGImageSource)
+    func startAnimation(layer: CALayer, forImage image: ImagePack)
     {
-        NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionWillLoad, object: self)
-        defer {
-            NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionDidLoad, object: self)
+        decodingOperation.addOperation { this in
+            NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionWillLoad, object: self)
+            var duration: CFTimeInterval = 0.0
+            for i in 0 ..< image.count {
+                let props = image.property(at: i)
+                let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
+                duration += frameDuration
+            }
+
+            let anim = CAKeyframeAnimation.init(keyPath: "contents")
+            anim.duration = duration
+            anim.calculationMode = .discrete
+            anim.values = []
+            anim.keyTimes = [NSNumber](repeating: 0, count: image.count)
+            anim.timingFunctions = [CAMediaTimingFunction](repeating: CAMediaTimingFunction(name: .linear), count: image.count)
+
+            var elapsedSeconds: CFTimeInterval = 0.0
+            for i in 0 ..< image.count {
+                if this.isCancelled { return }
+                let props = image.property(at: i)
+                let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
+                anim.values!.append(image.image(at: i))
+                anim.keyTimes![i] = (elapsedSeconds / duration) as NSNumber
+                elapsedSeconds += frameDuration
+            }
+            anim.keyTimes?.append(1.0)
+            anim.repeatCount = (image.property(at: 0)[kCGImagePropertyGIFLoopCount] as! NSNumber?)?.floatValue ?? .greatestFiniteMagnitude
+
+            if this.isCancelled { return }
+            OperationQueue.main.addOperation {
+                layer.add(anim, forKey: "keyframeAnimation")
+                NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionDidLoad, object: self)
+            }
         }
-        let numFrames = CGImageSourceGetCount(self.firstPageSource!)
-        let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as! [CFString : Any]
-        
-        var duration: CFTimeInterval = 0.0
-        for i in 0 ..< numFrames {
-            let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
-            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
-            duration += frameDuration
-        }
-        
-        let anim = CAKeyframeAnimation.init(keyPath: "contents")
-        anim.duration = duration
-        anim.calculationMode = .discrete
-        anim.values = []
-        anim.keyTimes = []
-        anim.timingFunctions = []
-        
-        var elapsedSeconds: CFTimeInterval = 0.0
-        for i in 0 ..< numFrames {
-            let props = CGImageSourceCopyPropertiesAtIndex(image, i, nil) as! [CFString : Any]
-            let frameDuration = (props[kCGImagePropertyGIFUnclampedDelayTime] as! NSNumber?)?.doubleValue ?? 0.05
-            anim.values!.append(CGImageSourceCreateImageAtIndex(image, i, nil) as Any)
-            anim.keyTimes!.append((elapsedSeconds / duration) as NSNumber)
-            anim.timingFunctions!.append(CAMediaTimingFunction.init(name: CAMediaTimingFunctionName.linear))
-            elapsedSeconds += frameDuration
-        }
-        anim.keyTimes?.append(1.0)
-        anim.repeatCount = (properties[kCGImagePropertyGIFLoopCount] as! NSNumber?)?.floatValue ?? .greatestFiniteMagnitude
-        layer.add(anim, forKey: "keyframeAnimation")
     }
     
     // MARK: - Drawing
