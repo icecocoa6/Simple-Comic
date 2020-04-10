@@ -48,7 +48,6 @@
 		28C1D5600DF1FE37003392B4 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28C1D55F0DF1FE37003392B4 /* QuickLook.framework */; };
 		28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 28EF3FBF0E9970BD002AD2EE /* UKXattrMetadataStore.m */; };
 		28F660461067255600EC8A34 /* Help in Resources */ = {isa = PBXBuildFile; fileRef = 28F6603B1067255600EC8A34 /* Help */; };
-		28FA89161094DA53005D6F0C /* TSSTKeyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 28F998320A1FF52C0047BD97 /* TSSTKeyWindow.m */; };
 		5207FA712430E5E600FB5D4B /* SessionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA702430E5E600FB5D4B /* SessionWindowController.swift */; };
 		5207FA74243378C800FB5D4B /* CGSize+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA73243378C800FB5D4B /* CGSize+SimpleComic.swift */; };
 		5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */; };
@@ -75,6 +74,7 @@
 		52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611946242A44CF00958E3F /* ToolbarItem.swift */; };
 		52611949242A48A900958E3F /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611948242A48A900958E3F /* PageView.swift */; };
 		529C1B8C2440A4B400574BC0 /* BezelWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8B2440A4B400574BC0 /* BezelWindow.swift */; };
+		529C1B8E2440A6CD00574BC0 /* KeyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */; };
 		52B4DD1A242BCA1D00B94227 /* Comparable+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */; };
 		52F52C77242E4C080020D911 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C76242E4C080020D911 /* Configuration.swift */; };
 		52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */; };
@@ -177,8 +177,6 @@
 		28EF3FBE0E9970BD002AD2EE /* UKXattrMetadataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UKXattrMetadataStore.h; sourceTree = "<group>"; };
 		28EF3FBF0E9970BD002AD2EE /* UKXattrMetadataStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UKXattrMetadataStore.m; sourceTree = "<group>"; };
 		28F59A9A0B784892003530FB /* TSSTSortDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSSTSortDescriptor.h; sourceTree = "<group>"; };
-		28F998310A1FF52C0047BD97 /* TSSTKeyWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TSSTKeyWindow.h; path = "Custom Windows/Fullscreen/TSSTKeyWindow.h"; sourceTree = "<group>"; };
-		28F998320A1FF52C0047BD97 /* TSSTKeyWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TSSTKeyWindow.m; path = "Custom Windows/Fullscreen/TSSTKeyWindow.m"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -217,6 +215,7 @@
 		52611946242A44CF00958E3F /* ToolbarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ToolbarItem.swift; path = Session/ToolbarItem.swift; sourceTree = "<group>"; };
 		52611948242A48A900958E3F /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PageView.swift; path = Session/PageView.swift; sourceTree = "<group>"; };
 		529C1B8B2440A4B400574BC0 /* BezelWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BezelWindow.swift; path = "Custom Windows/Fullscreen/BezelWindow.swift"; sourceTree = "<group>"; };
+		529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeyWindow.swift; path = "Custom Windows/Fullscreen/KeyWindow.swift"; sourceTree = "<group>"; };
 		52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+SimpleComic.swift"; sourceTree = "<group>"; };
 		52F52C76242E4C080020D911 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleComicAppDelegate.swift; sourceTree = "<group>"; };
@@ -302,9 +301,8 @@
 		28195CFA0C179DBD001F5E95 /* Fullscreen */ = {
 			isa = PBXGroup;
 			children = (
-				28F998310A1FF52C0047BD97 /* TSSTKeyWindow.h */,
-				28F998320A1FF52C0047BD97 /* TSSTKeyWindow.m */,
 				529C1B8B2440A4B400574BC0 /* BezelWindow.swift */,
+				529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */,
 			);
 			name = Fullscreen;
 			sourceTree = "<group>";
@@ -631,13 +629,13 @@
 				5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */,
 				52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */,
 				5261193C242911BC00958E3F /* Archive+CoreDataClass.swift in Sources */,
+				529C1B8E2440A6CD00574BC0 /* KeyWindow.swift in Sources */,
 				523B8EB8243CC9AC002E9138 /* ImagePack.swift in Sources */,
 				283C4D5E0C43DE6900DB4FE9 /* TSSTImageUtilities.m in Sources */,
 				28EF3FC00E9970BD002AD2EE /* UKXattrMetadataStore.m in Sources */,
 				52B4DD1A242BCA1D00B94227 /* Comparable+SimpleComic.swift in Sources */,
 				5261193F242911BC00958E3F /* PDF+CoreDataProperties.swift in Sources */,
 				5207FA74243378C800FB5D4B /* CGSize+SimpleComic.swift in Sources */,
-				28FA89161094DA53005D6F0C /* TSSTKeyWindow.m in Sources */,
 				526119142427756400958E3F /* PolishedProgressBar.swift in Sources */,
 				526119302428CC8600958E3F /* ImageGroup+CoreDataClass.swift in Sources */,
 				287D0C1210F0595900207768 /* Sessions_DataModel.xcdatamodel in Sources */,
