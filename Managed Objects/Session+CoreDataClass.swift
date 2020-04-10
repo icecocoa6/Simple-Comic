@@ -51,6 +51,10 @@ public class Session: NSManagedObject {
         
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
     }
+    
+    var orientation: Orientation.Horizontal {
+        return (pageOrder?.boolValue ?? false) ? .right : .left
+    }
 }
 
 extension NSManagedObjectContext {

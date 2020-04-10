@@ -125,7 +125,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     /* This var is bound to the session window name */
     @objc dynamic var pageNames: String?
-    var pageTurn: PageView.Side = .left
+    var pageTurn: Orientation.Horizontal = .left
 
     /* Exactly what it sounds like */
     @objc dynamic var pageSortDescriptor: NSArray?
@@ -560,7 +560,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     @IBAction
     func rotateLeft(_ sender: Any?) {
         var current: Int = (self.session?.rotation!.intValue)!
-        current = (current - 1) % 4
+        current = (current + 3) % 4
         self.session?.rotation = current as NSNumber
         self.resizeWindow()
         self.refreshLoupePanel()
@@ -663,8 +663,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.pageView.resizeView()
     }
 
-    func canSelectPageIndex(_ selection: Int) -> Bool {
-        let index = self.pageController.selectionIndex + selection
+    func canSelectPage(_ selection: Order) -> Bool {
+        let index = (selection == .prev) ? self.pageController.selectionIndex : (self.pageController.selectionIndex + 1)
         let contents = self.pageController.arrangedObjects as! [Image]
         let selectedPage = contents[index]
         let selectedGroup = selectedPage.group
@@ -930,7 +930,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             self.session?.zoomLevel = 1.0
         case .fitToWidth:
             self.session?.zoomLevel = 1.0
-            if self.pageView.rotation == .r1_4 || self.pageView.rotation == .r3_4 {
+            if case .horizontal = self.pageView.pageOrientation {
                 hasHor = true
             } else {
                 hasVert = true
@@ -1046,7 +1046,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         case next
     }
 
-    func orderTo(side: PageView.Side) -> Order {
+    func orderTo(side: Orientation.Horizontal) -> Order {
         switch side {
         case .left:
             return self.session!.pageOrder!.boolValue ? .prev : .next
@@ -1055,7 +1055,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         }
     }
 
-    func canTurnTo(_ side: PageView.Side) -> Bool {
+    func canTurnTo(_ side: Orientation.Horizontal) -> Bool {
         return canTurnTo(orderTo(side: side))
     }
 

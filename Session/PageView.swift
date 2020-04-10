@@ -37,7 +37,7 @@ import Cocoa
 
 @objc protocol PageViewDelegate {
     var session: Session! { get }
-    var pageTurn: PageView.Side { get set }
+    var pageTurn: Orientation.Horizontal { get set }
     
     func pageLeft(_ sender: Any?)
     func pageRight(_ sender: Any?)
@@ -48,7 +48,7 @@ import Cocoa
     func turnPage(to order: SessionWindowController.Order)
     
     func killTopOptionalUIElement()
-    func canSelectPageIndex(_ _: Int) -> Bool
+    func canSelectPage(_ _: SessionWindowController.Order) -> Bool
     
     func rotateLeft(_ sender: Any?)
     func rotateRight(_ sender: Any?)
@@ -57,11 +57,6 @@ import Cocoa
 }
 
 class PageView: NSView, CALayerDelegate {
-    @objc enum Side: Int {
-        case left = 0
-        case right = 1
-    }
-    
     struct ArrowFlags: OptionSet {
         let rawValue: Int
         
@@ -105,6 +100,8 @@ class PageView: NSView, CALayerDelegate {
         }
     }
 
+    var pageOrientation: Orientation { rotation * Orientation.up }
+    
     var onSelectionComplete: ((_ :Int, _:CGRect) -> Void)? = nil
     var onSelectionCancel: (() -> Void)? = nil
 
@@ -113,8 +110,7 @@ class PageView: NSView, CALayerDelegate {
     
     let decodingOperation = OperationQueue()
     
-    @objc dynamic var rotationValue: Int = OrthogonalRotation.r0_4.rawValue
-        {
+    @objc dynamic var rotationValue: Int = OrthogonalRotation.r0_4.rawValue {
         didSet { rotation = OrthogonalRotation.init(rawValue: rotationValue)! }
     }
     
@@ -122,7 +118,7 @@ class PageView: NSView, CALayerDelegate {
     
     /*    While page selection is in progress this method has a value.
      The selection number coresponds to a highlighted page. */
-    var pageSelection: Side? = nil
+    var pageSelection: Orientation.Horizontal? = nil
     /* This is the rect describing the users page selection. */
     var cropRect: NSRect = NSRect.zero {
         didSet {
@@ -242,48 +238,6 @@ class PageView: NSView, CALayerDelegate {
     
     // MARK: - Drawing
     
-    func draw(_ layer: CALayer, in ctx: CGContext) {
-        NSGraphicsContext.current = NSGraphicsContext.init(cgContext: ctx, flipped: false)
-        NSGraphicsContext.saveGraphicsState()
-        self.rotationTransform(frame: self.frame)
-        let interpolation = (self.inLiveResize || !scrollKeys.isEmpty) ? NSImageInterpolation.low : NSImageInterpolation.high
-        NSGraphicsContext.current?.imageInterpolation = interpolation
-        
-        NSColor.init(calibratedWhite: 0.2, alpha: 0.5).set()
-        
-        let highlight: NSBezierPath
-        if self.cropRect != NSZeroRect
-        {
-            let selection: NSRect
-            if self.pageSelection == .left
-            {
-                selection = rectFromNegativeRect(self.cropRect).intersection(self.firstPage.frame)
-            }
-            else
-            {
-                selection = rectFromNegativeRect(self.cropRect).intersection(self.secondPage.frame)
-            }
-            
-            highlight = NSBezierPath.init(rect: selection)
-            highlight.fill()
-            NSColor.init(calibratedWhite: 1.0, alpha: 0.8).set()
-            NSBezierPath.defaultLineWidth = 2.0
-            NSBezierPath.stroke(selection)
-        }
-        else if self.pageSelection == .left
-        {
-            highlight = NSBezierPath.init(rect: self.firstPage.frame)
-            highlight.fill()
-        }
-        else if self.pageSelection == .right
-        {
-            highlight = NSBezierPath.init(rect: self.secondPage.frame)
-            highlight.fill()
-        }
-        
-        NSGraphicsContext.restoreGraphicsState()
-    }
-    
     func startImageSelect(canCrop: Bool, onComplete: @escaping (_ :Int, _:CGRect) -> Void, onCancel: @escaping () -> Void) {
         self.onSelectionComplete = onComplete
         self.onSelectionCancel = onCancel
@@ -402,7 +356,7 @@ class PageView: NSView, CALayerDelegate {
         
         let imageFragment = NSImage.init(size: rect.size)
         imageFragment.lockFocus()
-        self.rotationTransform(frame: NSRect.init(origin: CGPoint.zero, size: rect.size))
+        rotation.affineTransform(withSize: rect.size).concat()
         
         if firstRect != NSZeroRect
         {
@@ -427,39 +381,9 @@ class PageView: NSView, CALayerDelegate {
     // MARK: - Geometry handling
     
     func updateRotation() {
-        let transform: CATransform3D
-        switch rotation {
-        case .r0_4:
-            transform = CATransform3DIdentity
-        case .r1_4:
-            transform = CATransform3DMakeRotation(.pi / 2, 0, 0, 1)
-        case .r2_4:
-            transform = CATransform3DMakeRotation(.pi, 0, 0, 1)
-        case .r3_4:
-            transform = CATransform3DMakeRotation(-.pi / 2, 0, 0, 1)
-        }
-        
+        let transform: CATransform3D = rotation.caTransform
         firstPage.transform = transform
         secondPage.transform = transform
-    }
-    
-    func rotationTransform(frame: NSRect)
-    {
-        let transform = NSAffineTransform.init()
-        switch rotation {
-        case .r0_4:
-            break
-        case .r3_4:
-            transform.rotate(byDegrees: 270)
-            transform.translateX(by: -frame.height, yBy: 0)
-        case .r2_4:
-            transform.rotate(byDegrees: 180)
-            transform.translateX(by: -frame.width, yBy: -frame.height)
-        case .r1_4:
-            transform.rotate(byDegrees: 90)
-            transform.translateX(by: 0, yBy: -frame.width)
-        }
-        transform.concat()
     }
     
     @objc func correctViewPoint()
@@ -492,14 +416,19 @@ class PageView: NSView, CALayerDelegate {
         let width = firstSize.scaleTo(height: height).width + secondSize.scaleTo(height: height).width
         let result = CGSize.init(width: width, height: height)
         
-        return (rotation == .r3_4 || rotation == .r1_4) ?
-            result.transposed : result
+        if case .horizontal = pageOrientation {
+            return result.transposed
+        } else {
+            return result
+        }
     }
     
     @objc func combinedImageSize(forZoom zoom: CGFloat) -> NSSize
     {
         return combinedImageSize().scaleBy(zoom)
     }
+    
+    
     
     fileprivate func calcViewSize(_ imageSize: NSSize, _ visibleRect: NSRect) -> CGSize {
         var viewSize: CGSize = CGSize.zero
@@ -514,7 +443,7 @@ class PageView: NSView, CALayerDelegate {
             viewSize = visibleRect.size
         case .fitToWidth:
             var scaleToFit: CGFloat
-            if(rotation == .r3_4 || rotation == .r1_4)
+            if case .horizontal = pageOrientation
             {
                 scaleToFit = visibleRect.height / imageSize.height;
             }
@@ -562,7 +491,7 @@ class PageView: NSView, CALayerDelegate {
         
         imageBounds = rectWithSizeCenteredInRect(imageSize, NSMakeRect(0,0,viewSize.width, viewSize.height));
         let imageRect: CGRect
-        if rotation == .r3_4 || rotation == .r1_4
+        if case .horizontal = pageOrientation
         {
             imageRect = rectWithSizeCenteredInRect(imageBounds.size,
                                                    NSRect.init(origin: CGPoint.zero, size: self.frame.size))
@@ -574,21 +503,16 @@ class PageView: NSView, CALayerDelegate {
         
         if isTwoPageSpreaded
         {
-            switch rotation
+            let size: CGSize
+            switch pageOrientation
             {
-            case .r0_4:
-                fallthrough
-            case .r2_4:
-                let size = CGSize.init(width: imageRect.width / 2, height: imageRect.height)
-                self.firstPage.frame.size = size
-                self.secondPage.frame.size = size
-            case .r1_4:
-                fallthrough
-            case .r3_4:
-                let size = CGSize.init(width: imageRect.width, height: imageRect.height / 2)
-                self.firstPage.frame.size = size
-                self.secondPage.frame.size = size
+            case .horizontal:
+                size = CGSize.init(width: imageRect.width, height: imageRect.height / 2)
+            case .vertical:
+                size = CGSize.init(width: imageRect.width / 2, height: imageRect.height)
             }
+            self.firstPage.frame.size = size
+            self.secondPage.frame.size = size
         }
         else
         {
@@ -632,7 +556,7 @@ class PageView: NSView, CALayerDelegate {
         self.overlayLayer.setNeedsDisplay()
     }
     
-    func pageSelectionRect(selection: Side) -> NSRect
+    func pageSelectionRect(selection: Orientation.Horizontal) -> NSRect
     {
         if !(secondPageImage?.isValid ?? false)
         {
@@ -974,7 +898,7 @@ class PageView: NSView, CALayerDelegate {
         (timer.userInfo! as! NSMutableDictionary)["lastTime"] = currentDate
         var scrollPoint = visible.origin
         let delta = CGFloat(1000 * difference * Double(multiplier))
-        var turn: Side? = nil
+        var turn: Orientation.Horizontal? = nil
         var directionString: NSString? = nil
         let turnDirection = delegate?.session!.pageOrder?.boolValue
         var finishTurn = false
@@ -1091,12 +1015,12 @@ class PageView: NSView, CALayerDelegate {
         }
         
         let cursor = self.convert(event.locationInWindow, from: nil)
-        if (delegate?.canSelectPageIndex(Side.left.rawValue) ?? false) && self.firstPage.frame.contains(cursor)
+        if (delegate?.canSelectPage(.prev) ?? false) && self.firstPage.frame.contains(cursor)
         {
             pageSelection = .left
             cropRect = self.firstPage.frame
         }
-        else if (delegate?.canSelectPageIndex(Side.right.rawValue) ?? false) && self.secondPage.frame.contains(cursor)
+        else if (delegate?.canSelectPage(.next) ?? false) && self.secondPage.frame.contains(cursor)
         {
             pageSelection = .right
             cropRect = self.secondPage.frame
@@ -1337,12 +1261,6 @@ extension PageView /* NSDraggingDestination */ {
     }
 }
 
-extension CGRect {
-    fileprivate var center: CGPoint {
-        CGPoint.init(x: midX, y: midY)
-    }
-}
-
 extension UserDefaults {
     // If true a page scale is constrained by its resolution.
     var isImageScaleConstrained: Bool {
@@ -1350,14 +1268,3 @@ extension UserDefaults {
     }
 }
 
-enum OrthogonalRotation: Int {
-    case r0_4 = 0
-    case r1_4 = 3
-    case r2_4 = 2
-    case r3_4 = 1
-    static let r4_4 = r0_4
-}
-
-func * (lhs: OrthogonalRotation, rhs: OrthogonalRotation) -> OrthogonalRotation {
-    return OrthogonalRotation.init(rawValue: (lhs.rawValue + rhs.rawValue) % 4)!
-}

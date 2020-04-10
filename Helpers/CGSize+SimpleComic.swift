@@ -31,4 +31,15 @@ extension CGSize {
         guard self.height > 0 else { return CGSize.zero }
         return self.scaleBy(height / self.height)
     }
+    
+    func fit(into rect: CGRect) -> CGRect {
+        let s = self.scaleBy(min(rect.height / self.height, rect.width / self.width, 1.0))
+        let x = rect.minX + ((rect.width - s.width) / 2)
+        let y = rect.minY + ((rect.height - s.height) / 2)
+        return CGRect(x: x, y: y, width: s.width, height: s.height)
+    }
+    
+    func adjust(to size: CGSize) -> CGSize {
+        return self.scaleBy(min(size.width / self.width, size.height / self.height))
+    }
 }

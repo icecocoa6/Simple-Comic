@@ -55,6 +55,9 @@
 		5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */; };
 		523B8EB8243CC9AC002E9138 /* ImagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EB7243CC9AC002E9138 /* ImagePack.swift */; };
 		523B8EBA243E0551002E9138 /* CancellableBlockOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EB9243E0551002E9138 /* CancellableBlockOperation.swift */; };
+		523B8EBC243E3B41002E9138 /* CGRect+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */; };
+		523B8EBE243F8C2A002E9138 /* Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBD243F8C2A002E9138 /* Orientation.swift */; };
+		523B8EC0243F8C55002E9138 /* OrthogonalRotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBF243F8C55002E9138 /* OrthogonalRotation.swift */; };
 		526119102427438F00958E3F /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261190F2427438F00958E3F /* ImageView.swift */; };
 		52611912242759FA00958E3F /* InfoWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611911242759FA00958E3F /* InfoWindow.swift */; };
 		526119142427756400958E3F /* PolishedProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526119132427756400958E3F /* PolishedProgressBar.swift */; };
@@ -187,6 +190,9 @@
 		5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+SimpleComic.swift"; sourceTree = "<group>"; };
 		523B8EB7243CC9AC002E9138 /* ImagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePack.swift; sourceTree = "<group>"; };
 		523B8EB9243E0551002E9138 /* CancellableBlockOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancellableBlockOperation.swift; sourceTree = "<group>"; };
+		523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+SimpleComic.swift"; sourceTree = "<group>"; };
+		523B8EBD243F8C2A002E9138 /* Orientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Orientation.swift; sourceTree = "<group>"; };
+		523B8EBF243F8C55002E9138 /* OrthogonalRotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrthogonalRotation.swift; sourceTree = "<group>"; };
 		526119012426832000958E3F /* Simple Comic-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Simple Comic-Bridging-Header.h"; sourceTree = "<group>"; };
 		526119052427247D00958E3F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		526119062427247D00958E3F /* en */ = {isa = PBXFileReference; lastKnownFileType = folder; name = en; path = en.lproj/Help; sourceTree = "<group>"; };
@@ -321,6 +327,9 @@
 				5207FA73243378C800FB5D4B /* CGSize+SimpleComic.swift */,
 				5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */,
 				523B8EB9243E0551002E9138 /* CancellableBlockOperation.swift */,
+				523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */,
+				523B8EBD243F8C2A002E9138 /* Orientation.swift */,
+				523B8EBF243F8C55002E9138 /* OrthogonalRotation.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -608,6 +617,7 @@
 				5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */,
 				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
 				52F52C77242E4C080020D911 /* Configuration.swift in Sources */,
+				523B8EC0243F8C55002E9138 /* OrthogonalRotation.swift in Sources */,
 				52611949242A48A900958E3F /* PageView.swift in Sources */,
 				FA9FB53508AADA270085AA55 /* TSSTCustomValueTransformers.m in Sources */,
 				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
@@ -617,6 +627,7 @@
 				5261191624279D1000958E3F /* ThumbnailView.swift in Sources */,
 				523B8EBA243E0551002E9138 /* CancellableBlockOperation.swift in Sources */,
 				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,
+				523B8EBE243F8C2A002E9138 /* Orientation.swift in Sources */,
 				286AEDB70C4161C20031E3D9 /* TSSTSortDescriptor.m in Sources */,
 				5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */,
 				52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */,
@@ -633,6 +644,7 @@
 				526119302428CC8600958E3F /* ImageGroup+CoreDataClass.swift in Sources */,
 				287D0C1210F0595900207768 /* Sessions_DataModel.xcdatamodel in Sources */,
 				5261193E242911BC00958E3F /* PDF+CoreDataClass.swift in Sources */,
+				523B8EBC243E3B41002E9138 /* CGRect+SimpleComic.swift in Sources */,
 				52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */,
 				28A266301285C73200ED6391 /* DTPreferencesController.m in Sources */,
 			);
