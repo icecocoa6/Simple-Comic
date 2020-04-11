@@ -52,7 +52,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     var _persistentStoreCoordinator: NSPersistentStoreCoordinator?
 
     /*  Window controller for preferences. */
-    var preferences: DTPreferencesController?
+    var preferences: NSWindowController?
 
     /*  This is the array that maintains all of the session window managers. */
     var sessions: [SessionWindowController] = []
@@ -307,7 +307,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     @IBAction
     func openPreferences(_ sender: Any) {
         if preferences == nil {
-            preferences = DTPreferencesController.init()
+            preferences = NSWindowController(windowNibName: "Preferences")
         }
         preferences?.showWindow(self)
     }
