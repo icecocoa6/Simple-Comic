@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 enum OrthogonalRotation: Int {
     case r0_4 = 0

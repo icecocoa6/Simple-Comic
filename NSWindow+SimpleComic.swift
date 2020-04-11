@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import AppKit
 
 extension NSWindow {
     @objc func toolbarHeight() -> CGFloat

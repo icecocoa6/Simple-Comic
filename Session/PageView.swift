@@ -1000,6 +1000,7 @@ class PageView: NSView, CALayerDelegate {
         if self.pageSelectionInProgress {
             let cursor = self.convert(event.locationInWindow, from: nil)
             cropRect.origin = cursor;
+            cropRect.size = CGSize.zero
         }
         else if self.dragIsPossible
         {

@@ -9,6 +9,7 @@
 //
 //
 
+import AppKit
 import Foundation
 import CoreData
 

@@ -29,6 +29,7 @@
 //  Ported by Tomioka Taichi on 2020/03/29.
 //
 
+import AppKit
 import Cocoa
 
 let TSSTPageOrder = "pageOrder"
@@ -151,7 +152,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         get { self.pageSelectionMode }
         set(value) { self.pageSelectionMode = value }
     }
-    
+
     let fileNameComparator: Comparator = {
         let option: String.CompareOptions = [.caseInsensitive, .numeric, .widthInsensitive, .forcedOrdering]
         let sa = $0 as! String
@@ -304,7 +305,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
         self.restoreSession()
     }
-    
+
     var processingWorkers: Int = 0
 
     override var windowNibName: NSNib.Name? { "TSSTSessionWindow" }
@@ -740,14 +741,17 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     fileprivate func saveQuickLookMetadataOfFile(atPath archivePath: String, name coverString: String, rect cropRect: CGRect) {
-        UKXattrMetadataStore.setString(coverString,
-                                       forKey: "QCCoverName",
-                                       atPath: archivePath,
-                                       traverseLink: false)
-        UKXattrMetadataStore.setString(NSStringFromRect(cropRect),
-                                       forKey: "QCCoverRect",
-                                       atPath: archivePath,
-                                       traverseLink: false)
+        let data = coverString.data(using: .utf8)!
+        data.withUnsafeBytes { buffer -> Void in
+            let ptr = buffer.bindMemory(to: Int8.self).baseAddress!
+            setxattr(archivePath, "QCCoverName", ptr, buffer.count, 0, 0)
+        }
+        
+        let rect = NSStringFromRect(cropRect).data(using: .utf8)!
+        rect.withUnsafeBytes { buffer -> Void in
+            let ptr = buffer.bindMemory(to: Int8.self).baseAddress!
+            setxattr(archivePath, "QCCoverRect", ptr, buffer.count, 0, 0)
+        }
 
         Process.launchedProcess(launchPath: "/usr/bin/touch", arguments: [archivePath])
     }
@@ -888,7 +892,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
                                         CGSize.init(width: CGFloat(pageTwo?.width?.floatValue ?? 0),
                                                     height: CGFloat(pageTwo?.height?.floatValue ?? 0)))
             }
-            
+
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: NSNotification.Name.SimpleComic.sessionDidLoad, object: self)
                 self.pageView.resizeView()

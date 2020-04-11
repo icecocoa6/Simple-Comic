@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 extension UserDefaults {
     fileprivate static let TSSTPageScaleOptions = "scaleOptions"
