@@ -35,12 +35,10 @@
 
 import Cocoa
 
+
 @objc protocol PageViewDelegate {
     var session: Session! { get }
     var pageTurn: Orientation.Horizontal { get set }
-    
-    func pageLeft(_ sender: Any?)
-    func pageRight(_ sender: Any?)
     
     var currentPageIsText: Bool { get }
     
@@ -49,14 +47,10 @@ import Cocoa
     
     func killTopOptionalUIElement()
     func canSelectPage(_ _: SessionWindowController.Order) -> Bool
-    
-    func rotateLeft(_ sender: Any?)
-    func rotateRight(_ sender: Any?)
-    
     func updateSessionObject()
 }
 
-class PageView: NSView, CALayerDelegate {
+class PageView: NSView {
     struct ArrowFlags: OptionSet {
         let rawValue: Int
         
@@ -101,6 +95,7 @@ class PageView: NSView, CALayerDelegate {
     }
 
     var pageOrientation: Orientation { rotation * Orientation.up }
+    var pageDirection: Orientation.Horizontal { delegate?.session.orientation ?? .left }
     
     var onSelectionComplete: ((_ :Int, _:CGRect) -> Void)? = nil
     var onSelectionCancel: (() -> Void)? = nil
@@ -114,7 +109,7 @@ class PageView: NSView, CALayerDelegate {
         didSet { rotation = OrthogonalRotation.init(rawValue: rotationValue)! }
     }
     
-    @IBOutlet @objc var delegate: PageViewDelegate?
+    @IBOutlet var delegate: PageViewDelegate?
     
     /*    While page selection is in progress this method has a value.
      The selection number coresponds to a highlighted page. */
@@ -345,7 +340,7 @@ class PageView: NSView, CALayerDelegate {
         
         let firstRect: CGRect
         let secondRect: CGRect
-        if (delegate?.session?.pageOrder!.boolValue)! || !(secondPageImage?.isValid ?? false)
+        if (pageDirection == .right) || !(secondPageImage?.isValid ?? false)
         {
             (firstRect, secondRect) = convertBoundsToFrameParts(bounds: size, left: firstImageSize!, right: secondImageSize, into: rect)
         }
@@ -423,12 +418,10 @@ class PageView: NSView, CALayerDelegate {
         }
     }
     
-    @objc func combinedImageSize(forZoom zoom: CGFloat) -> NSSize
+    func combinedImageSize(forZoom zoom: CGFloat) -> NSSize
     {
         return combinedImageSize().scaleBy(zoom)
     }
-    
-    
     
     fileprivate func calcViewSize(_ imageSize: NSSize, _ visibleRect: NSRect) -> CGSize {
         var viewSize: CGSize = CGSize.zero
@@ -520,7 +513,7 @@ class PageView: NSView, CALayerDelegate {
         
         if isTwoPageSpreaded
         {
-            let reversed = !(delegate?.session?.pageOrder?.boolValue ?? false)
+            let reversed = pageDirection == .left
             let fst: CALayer = reversed ? self.secondPage : self.firstPage
             let snd: CALayer = reversed ? self.firstPage : self.secondPage
             
@@ -562,7 +555,7 @@ class PageView: NSView, CALayerDelegate {
             return selection == .left ? self.bounds : NSZeroRect
         }
         
-        let left2right = delegate?.session!.pageOrder!.boolValue ?? false
+        let left2right = pageDirection == .right
         let pages = left2right ? [self.firstPage.frame, self.secondPage.frame] : [self.secondPage.frame, self.firstPage.frame]
         let leftSelected = (left2right && selection == .left) || (!left2right && selection == .right)
         let left = NSRect.init(x: 0, y: 0, width: pages[0].maxX, height: self.bounds.height)
@@ -645,11 +638,11 @@ class PageView: NSView, CALayerDelegate {
             
             if (deltaX > 0.0)
             {
-                delegate?.pageLeft(self)
+                NSApp.sendAction(#selector(SimpleComicAction.pageLeft), to: nil, from: self)
             }
             else if (deltaX < 0.0)
             {
-                delegate?.pageRight(self)
+                NSApp.sendAction(#selector(SimpleComicAction.pageRight), to: nil, from: self)
             }
             
         }
@@ -714,7 +707,7 @@ class PageView: NSView, CALayerDelegate {
         case NSLeftArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                delegate?.pageLeft(self)
+                NSApp.sendAction(#selector(SimpleComicAction.pageLeft), to: nil, from: self)
             }
             else
             {
@@ -726,7 +719,7 @@ class PageView: NSView, CALayerDelegate {
         case NSRightArrowFunctionKey:
             if !self.horizontalScrollIsPossible
             {
-                delegate?.pageRight(self)
+                NSApp.sendAction(#selector(SimpleComicAction.pageRight), to: nil, from: self)
             }
             else
             {
@@ -783,7 +776,7 @@ class PageView: NSView, CALayerDelegate {
         
         if self.bounds.maxY <= visible.maxY
         {
-            if delegate?.session!.pageOrder!.boolValue ?? false
+            if pageDirection == .right
             {
                 if visible.minX > 0
                 {
@@ -821,7 +814,7 @@ class PageView: NSView, CALayerDelegate {
         
         if scrollPoint.y <= 0
         {
-            if delegate?.session!.pageOrder!.boolValue ?? false
+            if pageDirection == .right
             {
                 if visible.maxX < self.bounds.width
                 {
@@ -899,14 +892,14 @@ class PageView: NSView, CALayerDelegate {
         let delta = CGFloat(1000 * difference * Double(multiplier))
         var turn: Orientation.Horizontal? = nil
         var directionString: NSString? = nil
-        let turnDirection = delegate?.session!.pageOrder?.boolValue
+        let turnDirection = pageDirection == .right
         var finishTurn = false
         if scrollKeys.contains(.up)
         {
             scrollPoint.y += delta;
             if(NSMaxY(visible) >= NSMaxY(self.frame) && pageTurnAllowed)
             {
-                turn = turnDirection! ? .left : .right
+                turn = turnDirection ? .left : .right
             }
         }
         
@@ -915,7 +908,7 @@ class PageView: NSView, CALayerDelegate {
             scrollPoint.y -= delta;
             if(scrollPoint.y <= 0 && pageTurnAllowed)
             {
-                turn = turnDirection! ? .right : .left
+                turn = turnDirection ? .right : .left
             }
         }
         
@@ -963,11 +956,11 @@ class PageView: NSView, CALayerDelegate {
             {
                 if t == .left
                 {
-                    delegate?.pageLeft(self)
+                    NSApp.sendAction(#selector(SimpleComicAction.pageLeft), to: nil, from: self)
                 }
                 else if t == .right
                 {
-                    delegate?.pageRight(self)
+                    NSApp.sendAction(#selector(SimpleComicAction.pageRight), to: nil, from: self)
                 }
                 finishTurn = true
                 scrollTimer?.invalidate()
@@ -1098,11 +1091,11 @@ class PageView: NSView, CALayerDelegate {
             {
                 if event.modifierFlags.contains(.option)
                 {
-                    NSApp.sendAction(#selector(SessionWindowController.shiftPageLeft(_:)), to: nil, from: self)
+                    NSApp.sendAction(#selector(SimpleComicAction.shiftPageLeft(_:)), to: nil, from: self)
                 }
                 else
                 {
-                    NSApp.sendAction(#selector(SessionWindowController.pageLeft(_:)), to: nil, from: self)
+                    NSApp.sendAction(#selector(SimpleComicAction.pageLeft(_:)), to: nil, from: self)
                 }
             }
             else
@@ -1122,11 +1115,11 @@ class PageView: NSView, CALayerDelegate {
     override func swipe(with event: NSEvent) {
         if event.deltaX > 0.0
         {
-            delegate?.pageLeft(self)
+            NSApp.sendAction(#selector(SimpleComicAction.pageLeft), to: nil, from: self)
         }
         else if event.deltaX < 0.0
         {
-            delegate?.pageRight(self)
+            NSApp.sendAction(#selector(SimpleComicAction.pageRight), to: nil, from: self)
         }
     }
     
@@ -1137,12 +1130,12 @@ class PageView: NSView, CALayerDelegate {
         // Prevent more than one rotation in the same direction per second
         if event.rotation > 0.5 && event.timestamp > PageView.nextValidRight
         {
-            delegate?.rotateLeft(self)
+            NSApp.sendAction(#selector(SimpleComicAction.rotateLeft), to: nil, from: self)
             PageView.nextValidRight = event.timestamp + 0.75
         }
         else if event.rotation < -0.5 && event.timestamp > PageView.nextValidLeft
         {
-            delegate?.rotateRight(self)
+            NSApp.sendAction(#selector(SimpleComicAction.rotateRight), to: nil, from: self)
             PageView.nextValidLeft = event.timestamp + 0.75;
         }
     }

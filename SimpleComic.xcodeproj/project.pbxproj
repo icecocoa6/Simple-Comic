@@ -72,6 +72,7 @@
 		529C1B8C2440A4B400574BC0 /* BezelWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8B2440A4B400574BC0 /* BezelWindow.swift */; };
 		529C1B8E2440A6CD00574BC0 /* KeyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */; };
 		529C1B922441829200574BC0 /* ColorTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B912441829200574BC0 /* ColorTransformer.swift */; };
+		529C1B942441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B932441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift */; };
 		52B4DD1A242BCA1D00B94227 /* Comparable+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */; };
 		52F52C77242E4C080020D911 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C76242E4C080020D911 /* Configuration.swift */; };
 		52F52C79242E5F270020D911 /* SimpleComicAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */; };
@@ -204,6 +205,7 @@
 		529C1B8B2440A4B400574BC0 /* BezelWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BezelWindow.swift; path = "Custom Windows/Fullscreen/BezelWindow.swift"; sourceTree = "<group>"; };
 		529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeyWindow.swift; path = "Custom Windows/Fullscreen/KeyWindow.swift"; sourceTree = "<group>"; };
 		529C1B912441829200574BC0 /* ColorTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTransformer.swift; sourceTree = "<group>"; };
+		529C1B932441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionWindowController+SimpleComicAction.swift"; sourceTree = "<group>"; };
 		52B4DD19242BCA1D00B94227 /* Comparable+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+SimpleComic.swift"; sourceTree = "<group>"; };
 		52F52C76242E4C080020D911 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		52F52C78242E5F270020D911 /* SimpleComicAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleComicAppDelegate.swift; sourceTree = "<group>"; };
@@ -444,11 +446,12 @@
 		FAA1C3E808BAB158006F7EC4 /* Session */ = {
 			isa = PBXGroup;
 			children = (
+				523B8EB7243CC9AC002E9138 /* ImagePack.swift */,
 				52611944242A434200958E3F /* NSWindow+SimpleComic.swift */,
-				52611946242A44CF00958E3F /* ToolbarItem.swift */,
 				52611948242A48A900958E3F /* PageView.swift */,
 				5207FA702430E5E600FB5D4B /* SessionWindowController.swift */,
-				523B8EB7243CC9AC002E9138 /* ImagePack.swift */,
+				529C1B932441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift */,
+				52611946242A44CF00958E3F /* ToolbarItem.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -586,6 +589,7 @@
 				523B8EC0243F8C55002E9138 /* OrthogonalRotation.swift in Sources */,
 				52611949242A48A900958E3F /* PageView.swift in Sources */,
 				5261192A2427DFB800958E3F /* Image+CoreDataClass.swift in Sources */,
+				529C1B942441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift in Sources */,
 				52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */,
 				526119102427438F00958E3F /* ImageView.swift in Sources */,
 				5261192B2427DFB800958E3F /* Image+CoreDataProperties.swift in Sources */,

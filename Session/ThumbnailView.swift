@@ -32,15 +32,6 @@ public class ThumbnailView: NSView {
         thumbnailView?.clears = true
     }
     
-    override public init(frame frameRect: NSRect)
-    {
-        super.init(frame: frameRect)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     override public func draw(_ dirtyRect: NSRect) {
         let mouse = NSEvent.mouseLocation
         let mousePoint = self.window!.convertPoint(fromScreen: mouse)
@@ -76,7 +67,6 @@ public class ThumbnailView: NSView {
         case 27:
             let wc = self.window?.windowController as! SessionWindowController
             wc.killTopOptionalUIElement()
-            break
         default:
             break
         }
@@ -131,7 +121,7 @@ public class ThumbnailView: NSView {
         if let window = thumbView.window as! InfoWindow?
         {
             let length: CGFloat = 312.0  // thumbnailView.frame.width
-            let imageSize = thumb.size.fit(to: length)
+            let imageSize = thumb.size.adjust(to: CGSize(width: length, height: length))
             
             let indexRect = self.rectFor(index: index)
             let visibleRect = self.window!.screen!.visibleFrame
@@ -230,20 +220,5 @@ public class ThumbnailView: NSView {
         }
         
         self.needsDisplay = true
-    }
-}
-
-extension CGSize {
-    fileprivate func fit(to length: CGFloat) -> CGSize {
-        let aspect = self.width / self.height
-        let viewSize: CGFloat = length
-        if aspect <= 1.0
-        {
-            return CGSize.init(width: aspect * viewSize, height: viewSize)
-        }
-        else
-        {
-            return CGSize.init(width: viewSize, height: viewSize / aspect)
-        }
     }
 }

@@ -69,7 +69,7 @@ class PolishedProgressBar: NSView {
                                                   (NSColor.init(deviceWhite: 0.82, alpha: 1), 0.5),
                                                   (NSColor.init(deviceWhite: 0.92, alpha: 1), 1.0))!
     let shadowGradient: NSGradient = NSGradient.init(colorsAndLocations: (NSColor.init(deviceWhite: 0.3, alpha: 1), 0.0),
-                                                     (NSColor.init(deviceWhite: 0.25, alpha: 1), 0.55),
+                                                     (NSColor.init(deviceWhite: 0.25, alpha: 1), 0.5),
                                                      (NSColor.init(deviceWhite: 0.2, alpha: 1), 0.5),
                                                      (NSColor.init(deviceWhite: 0.1, alpha: 1), 1.0))!
     /* The highlight on the bottom lip of the bar. */
