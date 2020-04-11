@@ -151,6 +151,13 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         get { self.pageSelectionMode }
         set(value) { self.pageSelectionMode = value }
     }
+    
+    let fileNameComparator: Comparator = {
+        let option: String.CompareOptions = [.caseInsensitive, .numeric, .widthInsensitive, .forcedOrdering]
+        let sa = $0 as! String
+        let sb = $1 as! String
+        return sa.compare(sb, options: option, range: nil, locale: nil)
+    }
 
     init(window: NSWindow?, session: Session) {
         super.init(window: window)
@@ -161,8 +168,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.shouldCascadeWindows = cascade
         /* Make sure that the session does not start out in fullscreen, nor with the loupe enabled. */
         self.session?.loupe = false
-        let fileNameSort = TSSTSortDescriptor.init(key: "imagePath", ascending: true)
-        let archivePathSort = TSSTSortDescriptor.init(key: "group.path", ascending: true)
+        let fileNameSort = NSSortDescriptor(keyPath: \Image.imagePath, ascending: true, comparator: fileNameComparator)
+        let archivePathSort = NSSortDescriptor(keyPath: \Image.group?.path, ascending: true, comparator: fileNameComparator)
         self.pageSortDescriptor = [archivePathSort, fileNameSort]
     }
 
