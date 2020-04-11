@@ -28,7 +28,7 @@
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="218">
                                 <rect key="frame" x="17" y="0.0" width="253" height="28"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Open windows are preserved between exit and relaunch." id="236">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -63,7 +63,7 @@
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="216">
                                 <rect key="frame" x="17" y="0.0" width="259" height="28"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Windows automatically resize to maximize viewing area." id="235">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -98,7 +98,7 @@
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="213">
                                 <rect key="frame" x="17" y="0.0" width="259" height="28"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Images will not excede their actual resolution in &quot;fit to window&quot; scaling modes." id="234">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -130,7 +130,7 @@
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="243">
                                 <rect key="frame" x="23" y="0.0" width="259" height="28"/>
                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="This color is displayed around pages in fullscreen mode." id="244">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -154,11 +154,11 @@
                                 </constraints>
                                 <color key="color" red="0.058130499000000002" green="0.055541898999999999" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
-                                    <binding destination="42" name="value" keyPath="values.backgroundColor" id="gXv-Rc-xCv">
+                                    <binding destination="42" name="value" keyPath="values.backgroundColor" id="8sb-rk-Lfe">
                                         <dictionary key="options">
                                             <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
                                             <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                            <string key="NSValueTransformerName">TTSTColorTransformer</string>
+                                            <string key="NSValueTransformerName">ColorTransformer</string>
                                         </dictionary>
                                     </binding>
                                 </connections>

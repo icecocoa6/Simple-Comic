@@ -489,12 +489,11 @@ class PageView: NSView, CALayerDelegate {
             }
         }
         
-        imageBounds = rectWithSizeCenteredInRect(imageSize, NSMakeRect(0,0,viewSize.width, viewSize.height));
+        imageBounds = imageSize.fit(into: CGRect(origin: CGPoint.zero, size: viewSize))
         let imageRect: CGRect
         if case .horizontal = pageOrientation
         {
-            imageRect = rectWithSizeCenteredInRect(imageBounds.size,
-                                                   NSRect.init(origin: CGPoint.zero, size: self.frame.size))
+            imageRect = imageBounds.size.fit(into: CGRect(origin: CGPoint.zero, size: self.frame.size))
         }
         else
         {
@@ -580,10 +579,10 @@ class PageView: NSView, CALayerDelegate {
         }
         
         let selection = (pageSelection == .left) ?
-            rectFromNegativeRect(cropRect).intersection(self.firstPage.frame) :
-            rectFromNegativeRect(cropRect).intersection(self.secondPage.frame)
+            cropRect.standardized.intersection(self.firstPage.frame) :
+            cropRect.standardized.intersection(self.secondPage.frame)
         
-        let center = centerPointOfRect(selection)
+        let center = selection.center
         var pageRect = NSZeroRect
         let originalSize: NSSize
         

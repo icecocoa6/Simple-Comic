@@ -45,7 +45,7 @@ public class PDF: ImageGroup {
         var bounds = page!.bounds(for: .mediaBox)
         let dimension: CGFloat = 1400.0
         let scale = bounds.width > bounds.height ? dimension / bounds.width : dimension / bounds.height
-        bounds.size = scaleSize(bounds.size, Float(scale))
+        bounds.size = bounds.size.scaleBy(scale)
         
         let pageImage = NSImage.init(size: bounds.size)
         pageImage.lockFocus()

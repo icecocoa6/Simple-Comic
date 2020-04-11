@@ -391,7 +391,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         let index = bar?.indexFor(point: cursorPoint!)
 
         let thumb = self.imageForPageAtIndex(index!)
-        let thumbSize = sizeConstrainedByDimension(thumb!.size, 128)
+        let thumbSize = thumb!.size.adjust(to: CGSize(width: 128, height: 128))
 
         self.infoPicture.setFrameSize(thumbSize)
         self.infoPicture.image = thumb
@@ -750,7 +750,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         let shadowImage = NSImage.init(size: CGSize.init(width: 512, height: 512))
         var drawRect = CGRect.init(x: 0, y: 0, width: 496, height: 496)
         let iconImage = NSImage.init(size: drawRect.size)
-        drawRect = rectWithSizeCenteredInRect(size, drawRect)
+        drawRect = size.fit(into: drawRect)
 
         iconImage.lockFocus()
         NSGraphicsContext.current?.imageInterpolation = .high

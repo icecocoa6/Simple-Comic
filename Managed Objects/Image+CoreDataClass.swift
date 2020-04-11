@@ -148,7 +148,7 @@ public class Image: NSManagedObject {
         
         if let image = managedImage
         {
-            let pixelSize = sizeConstrainedByDimension(image.size, 256);
+            let pixelSize = image.size.adjust(to: CGSize(width: 256, height: 256))
             let temp = NSImage.init(size: pixelSize)
             temp.lockFocus()
             NSGraphicsContext.current?.imageInterpolation = .high

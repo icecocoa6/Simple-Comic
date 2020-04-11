@@ -78,6 +78,11 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         NSImage.init(named: "thumbnails")?.isTemplate = true
         NSImage.init(named: "extract")?.isTemplate = true
     }
+    
+    override init() {
+        super.init()
+        ValueTransformer.setValueTransformer(ColorTransformer(), forName: NSValueTransformerName.ColorTransformer)
+    }
 
     // MARK: - Application Delegate
 

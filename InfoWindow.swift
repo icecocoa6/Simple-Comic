@@ -97,7 +97,7 @@ class CircularImageView: NSImageView {
         guard self.image != nil else { return }
         
         let loupeGradient = NSGradient.init(starting: NSColor.init(calibratedWhite: 0.3, alpha: 1), ending: NSColor.init(calibratedWhite: 0.6, alpha: 1))
-        let centerPoint = centerPointOfRect(dirtyRect)
+        let centerPoint = dirtyRect.center
         loupeGradient?.draw(fromCenter: centerPoint, radius: dirtyRect.width / 2 - 10, toCenter: centerPoint, radius: dirtyRect.width / 2 - 1, options: [])
         
         let circle = NSBezierPath.init(ovalIn: self.bounds.insetBy(dx: 1, dy: 1))

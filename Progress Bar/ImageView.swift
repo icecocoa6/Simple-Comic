@@ -36,14 +36,14 @@ public class ImageView: NSImageView {
         
         guard let img = self.image else { return }
         
-        let imageRect = rectWithSizeCenteredInRect(img.size, self.bounds)
+        let imageRect = img.size.fit(into: self.bounds)
         img.draw(in: imageRect, from: NSZeroRect, operation: NSCompositingOperation.sourceOver, fraction: 1.0)
         
         if let imgName = self.imageName
         {
             let imgRect = imageRect.insetBy(dx: 10, dy: 10)
             let nameBounds = imgName.boundingRect(with: imgRect.size, options: [], attributes: ImageView.stringAttributes)
-            let stringRect = rectWithSizeCenteredInRect(nameBounds.size, imgRect)
+            let stringRect = nameBounds.size.fit(into: imgRect)
             NSColor.init(calibratedWhite: 0, alpha: 0.8).set()
             NSBezierPath.init(roundedRect: stringRect.insetBy(dx: -5.0, dy: -5.0), xRadius: 10, yRadius: 10).fill()
             imgName.draw(in: stringRect, withAttributes: ImageView.stringAttributes)

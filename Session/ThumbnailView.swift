@@ -49,7 +49,7 @@ public class ThumbnailView: NSView {
         {
             let thumbnail = dataSource?.imageForPageAtIndex(counter)
             var drawRect = self.rectFor(index: counter)
-            drawRect = rectWithSizeCenteredInRect(thumbnail!.size, drawRect.insetBy(dx: 2, dy: 2))
+            drawRect = thumbnail!.size.fit(into: drawRect.insetBy(dx: 2, dy: 2))
             thumbnail?.draw(in: drawRect, from: NSZeroRect, operation: .sourceOver, fraction: 1.0)
             
             if NSMouseInRect(mousePoint, drawRect, false)

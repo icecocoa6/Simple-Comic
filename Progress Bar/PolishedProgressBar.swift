@@ -143,12 +143,12 @@ class PolishedProgressBar: NSView {
         let leftStringRect = NSRect.init(x: 0, y: self.bounds.minY, width: self.horizontalMargin, height: self.bounds.height);
         let totalString = NSString.init(format: "%i", maxValue)
         var stringSize = totalString.size(withAttributes: self.numberStyle)
-        var stringRect = rectWithSizeCenteredInRect(stringSize, self.leftToRight ? rightStringRect : leftStringRect)
+        var stringRect = stringSize.fit(into:  self.leftToRight ? rightStringRect : leftStringRect)
         totalString.draw(in: stringRect, withAttributes: self.numberStyle)
 
         let progressString = NSString.init(format: "%i", self.currentValue + 1)
         stringSize = progressString.size(withAttributes: self.numberStyle);
-        stringRect = rectWithSizeCenteredInRect(stringSize, self.leftToRight ? leftStringRect : rightStringRect);
+        stringRect = stringSize.fit(into: self.leftToRight ? leftStringRect : rightStringRect)
         progressString.draw(in: stringRect, withAttributes: self.numberStyle)
     }
 
