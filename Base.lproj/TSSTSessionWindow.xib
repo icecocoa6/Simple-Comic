@@ -43,7 +43,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" autoresizesSubviews="NO" ambiguous="YES" copiesOnScroll="NO" id="KlA-W9-AWW">
                             <rect key="frame" x="0.0" y="0.0" width="460" height="530"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView wantsLayer="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="235" customClass="PageView" customModule="Simple_Comic" customModuleProvider="target">
                                     <rect key="frame" x="0.0" y="0.0" width="135" height="65"/>

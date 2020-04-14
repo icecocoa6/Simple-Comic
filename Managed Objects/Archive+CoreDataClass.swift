@@ -135,7 +135,7 @@ public class Archive: ImageGroup {
             if Image.imageExtensions.contains(uti as String)
             {
                 let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fileName.lastPathComponent
+                entity.imagePath = fileName.path
                 entity.index = counter as NSNumber
                 entity.group = self
             }
@@ -144,7 +144,7 @@ public class Archive: ImageGroup {
                 let archivePath = try! write(dataAt: counter, in: imageArchive!)
                 
                 let entity = Archive.init(context: self.managedObjectContext!)
-                entity.name = fileName.lastPathComponent
+                entity.name = fileName.path
                 entity.nested = true
                 entity.path = archivePath.path
                 entity.nestedArchiveContents()
@@ -154,7 +154,7 @@ public class Archive: ImageGroup {
             else if Image.textExtensions.contains(ext)
             {
                 let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fileName.lastPathComponent
+                entity.imagePath = fileName.path
                 entity.index = counter as NSNumber
                 entity.text = true
                 entity.group = self
