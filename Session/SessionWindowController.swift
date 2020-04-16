@@ -107,7 +107,6 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     /* Page info window with caret. */
     @IBOutlet var infoWindow: InfoWindow!
-    @IBOutlet var infoPicture: NSImageView!
 
     /* Localized image zoom loupe elements */
     @IBOutlet var loupeWindow: InfoWindow!
@@ -378,7 +377,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
             let localPoint = self.pageView.convert(self.window!.convertFromScreen(point).origin, from: nil)
             let zoomRect = CGRect(origin: localPoint, size: self.zoomView.frame.size)
-            self.loupeWindow.center(atPoint: mouse)
+            self.loupeWindow.moveCenter(atPoint: mouse)
             self.zoomView.image = self.pageView.image(inRect: zoomRect)
         } else {
             if self.loupeWindow.isVisible {
@@ -393,21 +392,19 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     func infoPanelSetupAtPoint(_ _point: NSPoint) {
         var point = _point
         let bar = self.progressBar
-        (self.infoWindow.contentView as! InfoView).bordered = false
+//        (self.infoWindow.contentView as! InfoView).bordered = false
         point.y = bar!.frame.maxY - 6
         let cursorPoint = bar?.convert(point, from: nil)
         let index = bar?.indexFor(point: cursorPoint!)
 
-        let thumb = self.imageForPageAtIndex(index!)
-        let thumbSize = thumb!.size.adjust(to: CGSize(width: 128, height: 128))
-
-        self.infoPicture.setFrameSize(thumbSize)
-        self.infoPicture.image = thumb
+        let thumb = self.imageForPageAtIndex(index!)!
+        thumb.size = thumb.size.adjust(to: CGSize(width: 128, height: 128))
+        self.infoWindow.image = thumb
 
         let area = CGRect.init(origin: point, size: CGSize.zero)
         let _cursorPoint = self.window?.convertToScreen(area).origin
         self.infoWindow.caret(atPoint: _cursorPoint!,
-                              size: thumbSize,
+                              size: thumb.size,
                               withLimitLeft: (bar?.window!.frame.minX)!,
                               right: (bar?.window!.frame.maxX)!)
     }

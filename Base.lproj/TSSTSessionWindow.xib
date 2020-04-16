@@ -9,7 +9,6 @@
             <connections>
                 <outlet property="exposeBezel" destination="373" id="375"/>
                 <outlet property="exposeView" destination="378" id="380"/>
-                <outlet property="infoPicture" destination="359" id="360"/>
                 <outlet property="infoWindow" destination="350" id="357"/>
                 <outlet property="jumpField" destination="448" id="461"/>
                 <outlet property="jumpPanel" destination="445" id="451"/>
@@ -293,16 +292,9 @@
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="222" y="490" width="104" height="104"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
-            <view key="contentView" id="351" customClass="InfoView" customModule="Simple_Comic" customModuleProvider="target">
+            <view key="contentView" id="351">
                 <rect key="frame" x="0.0" y="0.0" width="104" height="104"/>
                 <autoresizingMask key="autoresizingMask"/>
-                <subviews>
-                    <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="359" customClass="ImageView" customModule="Simple_Comic" customModuleProvider="target">
-                        <rect key="frame" x="10" y="15" width="64" height="64"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="499"/>
-                    </imageView>
-                </subviews>
             </view>
             <point key="canvasLocation" x="79" y="-26"/>
         </window>

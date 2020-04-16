@@ -9,9 +9,13 @@
 //
 
 import Cocoa
+import SwiftUI
 
 public class InfoWindow: NSPanel {
-
+    private var viewModel: ThumbnailPopupViewModel {
+        (self.contentView as! NSHostingView<ThumbnailPopup>).rootView.viewModel
+    }
+    
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: NSWindow.StyleMask.borderless, backing: backingStoreType, defer: flag)
         
@@ -20,71 +24,50 @@ public class InfoWindow: NSPanel {
         self.ignoresMouseEvents = true
     }
     
-    @objc public func caret(atPoint point: NSPoint, size: NSSize, withLimitLeft left: CGFloat, right: CGFloat)
+    public override func awakeFromNib() {
+        self.contentView = NSHostingView(rootView: ThumbnailPopup())
+    }
+    
+    func caret(atPoint point: NSPoint, size: NSSize, withLimitLeft left: CGFloat, right: CGFloat)
     {
+        let view = self.contentView as! NSHostingView<ThumbnailPopup>
+        let radius = view.rootView.radius
+        let caretSize = view.rootView.caretSize
         let limitWidth = right - left
         let relativePosition = (point.x - left) / limitWidth
         let offset = size.width * relativePosition
-        let frameRect = NSRect.init(x: point.x - offset - 10, y: point.y, width: size.width + 20, height: size.height + 25)
+        let frameRect = NSRect(x: point.x - offset - radius,
+                               y: point.y,
+                               width: size.width + radius * 2,
+                               height: size.height + radius * 2 + caretSize.height)
         
-        let view = self.contentView as! InfoView?
-        view?.caretPosition = offset + 10
+        self.viewModel.caret = offset + radius
         self.setFrame(frameRect, display: true, animate: false)
         self.invalidateShadow()
     }
     
-    @objc public func center(atPoint center: NSPoint)
+    func moveCenter(atPoint center: NSPoint)
     {
         self.setFrameOrigin(NSPoint.init(x: center.x - self.frame.width / 2.0, y: center.y - self.frame.height / 2.0))
         self.invalidateShadow()
     }
 
-    @objc public func resize(toDiameter diameter: CGFloat)
+    func resize(toDiameter diameter: CGFloat)
     {
-        let center = NSPoint.init(x: self.frame.midX, y: self.frame.midY)
-        self.setFrame(NSRect.init(x: center.x - diameter / 2.0, y: center.y - diameter / 2.0, width: diameter, height: diameter), display: true, animate: false)
+        let center = self.frame.center
+        self.setFrame(NSRect(x: center.x - diameter / 2.0,
+                             y: center.y - diameter / 2.0,
+                             width: diameter, height: diameter),
+                      display: true, animate: false)
     }
-}
-
-class InfoView: NSView {
-    private var _caretPosition: CGFloat = 0.0
-    var caretPosition: CGFloat {
-        get { return self._caretPosition }
-        set(value) {
-            self._caretPosition = value
-            self.needsDisplay = true
+    
+    var image: NSImage? {
+        get {
+            self.viewModel.image
         }
-    }
-    var bordered: Bool = false
-    
-    @objc public func setBordered(_ flag: Bool)
-    {
-        bordered = flag
-    }
-    
-    override public func draw(_ dirtyRect: NSRect) {
-        NSColor.clear.set()
-        self.bounds.fill()
-        
-        let outline = NSBezierPath.init()
-        outline.move(to: NSPoint.init(x: caretPosition + 5, y: 5))
-        outline.line(to: NSPoint.init(x: caretPosition, y: 0))
-        outline.line(to: NSPoint.init(x: caretPosition - 5, y: 5))
-        outline.appendArc(from: NSPoint.init(x: 0, y: 5),
-                          to: NSPoint.init(x: 0, y: self.bounds.midY),
-                          radius: 5)
-        outline.appendArc(from: NSPoint.init(x: 0, y: bounds.maxY),
-                          to: NSPoint.init(x: self.bounds.midX, y: self.bounds.maxY),
-                          radius: 5)
-        outline.appendArc(from: NSPoint.init(x: self.bounds.maxX, y: self.bounds.maxY),
-                          to: NSPoint.init(x: self.bounds.maxX, y: self.bounds.midY),
-                          radius: 5)
-        outline.appendArc(from: NSPoint.init(x: self.bounds.maxX, y: 5),
-                          to: NSPoint.init(x: caretPosition + 5, y: 5),
-                          radius: 5)
-        outline.close()
-        NSColor.init(calibratedWhite: 1.0, alpha: 1.0).set()
-        outline.fill()
+        set(value) {
+            self.viewModel.image = value
+        }
     }
 }
 

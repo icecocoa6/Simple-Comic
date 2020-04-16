@@ -69,6 +69,7 @@
 		52611945242A434200958E3F /* NSWindow+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611944242A434200958E3F /* NSWindow+SimpleComic.swift */; };
 		52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611946242A44CF00958E3F /* ToolbarItem.swift */; };
 		52611949242A48A900958E3F /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611948242A48A900958E3F /* PageView.swift */; };
+		5271A80C2447390000395F0F /* ThumbnailPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5271A80B2447390000395F0F /* ThumbnailPopup.swift */; };
 		529C1B8C2440A4B400574BC0 /* BezelWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8B2440A4B400574BC0 /* BezelWindow.swift */; };
 		529C1B8E2440A6CD00574BC0 /* KeyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */; };
 		529C1B922441829200574BC0 /* ColorTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C1B912441829200574BC0 /* ColorTransformer.swift */; };
@@ -202,6 +203,7 @@
 		52611944242A434200958E3F /* NSWindow+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+SimpleComic.swift"; sourceTree = "<group>"; };
 		52611946242A44CF00958E3F /* ToolbarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ToolbarItem.swift; path = Session/ToolbarItem.swift; sourceTree = "<group>"; };
 		52611948242A48A900958E3F /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PageView.swift; path = Session/PageView.swift; sourceTree = "<group>"; };
+		5271A80B2447390000395F0F /* ThumbnailPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailPopup.swift; sourceTree = "<group>"; };
 		529C1B8B2440A4B400574BC0 /* BezelWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BezelWindow.swift; path = "Custom Windows/Fullscreen/BezelWindow.swift"; sourceTree = "<group>"; };
 		529C1B8D2440A6CD00574BC0 /* KeyWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeyWindow.swift; path = "Custom Windows/Fullscreen/KeyWindow.swift"; sourceTree = "<group>"; };
 		529C1B912441829200574BC0 /* ColorTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTransformer.swift; sourceTree = "<group>"; };
@@ -363,6 +365,7 @@
 				5261190F2427438F00958E3F /* ImageView.swift */,
 				52611911242759FA00958E3F /* InfoWindow.swift */,
 				526119132427756400958E3F /* PolishedProgressBar.swift */,
+				5271A80B2447390000395F0F /* ThumbnailPopup.swift */,
 			);
 			name = "Progress Bar";
 			sourceTree = "<group>";
@@ -612,6 +615,7 @@
 				287D0C1210F0595900207768 /* Sessions_DataModel.xcdatamodel in Sources */,
 				5261193E242911BC00958E3F /* PDF+CoreDataClass.swift in Sources */,
 				523B8EBC243E3B41002E9138 /* CGRect+SimpleComic.swift in Sources */,
+				5271A80C2447390000395F0F /* ThumbnailPopup.swift in Sources */,
 				52611942242A406500958E3F /* Session+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
