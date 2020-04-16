@@ -532,25 +532,25 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     fileprivate func createIcon(from source: NSImage, in cropRect: CGRect) -> NSImage {
         let size = cropRect.size == CGSize.zero ? source.size : cropRect.size
-        let shadowImage = NSImage.init(size: CGSize.init(width: 512, height: 512))
-        var drawRect = CGRect.init(x: 0, y: 0, width: 496, height: 496)
-        let iconImage = NSImage.init(size: drawRect.size)
+        let shadowImage = NSImage(size: CGSize(width: 512, height: 512))
+        var drawRect = CGRect(x: 0, y: 0, width: 496, height: 496)
+        let iconImage = NSImage(size: drawRect.size)
         drawRect = size.fit(into: drawRect)
 
         iconImage.lockFocus()
         NSGraphicsContext.current?.imageInterpolation = .high
-        source.draw(in: drawRect, from: CGRect.init(origin: cropRect.origin, size: size), operation: .sourceOver, fraction: 1)
+        source.draw(in: drawRect, from: CGRect(origin: cropRect.origin, size: size), operation: .sourceOver, fraction: 1)
         iconImage.unlockFocus()
 
 
         let thumbShadow = NSShadow.init()
-        thumbShadow.shadowOffset = CGSize.init(width: 0.0, height: -8.0)
+        thumbShadow.shadowOffset = CGSize(width: 0.0, height: -8.0)
         thumbShadow.shadowBlurRadius = 25.0
-        thumbShadow.shadowColor = NSColor.init(calibratedWhite: 0.2, alpha: 1.0)
+        thumbShadow.shadowColor = NSColor(calibratedWhite: 0.2, alpha: 1.0)
 
         shadowImage.lockFocus()
         thumbShadow.set()
-        iconImage.draw(in: CGRect.init(x: 16, y: 16, width: 496, height: 496), from: CGRect.zero, operation: .sourceOver, fraction: 1)
+        iconImage.draw(in: CGRect(x: 16, y: 16, width: 496, height: 496), from: CGRect.zero, operation: .sourceOver, fraction: 1)
         shadowImage.unlockFocus()
 
         return shadowImage
@@ -605,7 +605,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.scaleToWindow()
         self.adjustStatusBar()
         let loupeDiameter = UserDefaults.standard.integer(forKey: TSSTLoupeDiameter)
-        self.loupeWindow.setFrame(CGRect.init(x: 0, y: 0, width: loupeDiameter, height: loupeDiameter), display: false)
+        self.loupeWindow.setFrame(CGRect(x: 0, y: 0, width: loupeDiameter, height: loupeDiameter), display: false)
         let color = try! NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: UserDefaults.standard.data(forKey: TSSTBackgroundColor)!)
         self.pageScrollView.backgroundColor = color!
         self.pageView.rotationValue = (self.session?.rotation!.intValue)!

@@ -292,12 +292,10 @@ class PageView: NSView {
     }
     
     fileprivate func calcFragment(center: CGPoint, size: CGSize, scale: CGFloat) -> CGRect {
-        let power: CGFloat = CGFloat((UserDefaults.standard.value(forKey: TSSTLoupePower) as! NSNumber?)?.floatValue ?? 0.0)
-        let zoomSize = size.scaleBy(1.0 / (power * scale))
-        return NSRect.init(x: center.x / scale - zoomSize.width / 2,
-                          y: center.y / scale - zoomSize.height / 2,
-                          width: zoomSize.width,
-                          height: zoomSize.height)
+        let power = CGFloat(UserDefaults.standard.loupePower)
+        let zoomSize = CGVector(size) / (power * scale)
+        return NSRect(origin: CGPoint(CGVector(center) / scale - zoomSize / 2),
+                      size: CGSize(zoomSize))
     }
     
     fileprivate func convertBoundsToFrameParts(bounds size: CGSize, left: CGSize, right: CGSize?, into rect: CGRect) -> (CGRect, CGRect) {
@@ -309,7 +307,7 @@ class PageView: NSView {
         guard remainder > 0 else { return (fst, NSRect.zero) }
         guard let img = right else { return (fst, NSRect.zero) }
         
-        let snd = calcFragment(center: CGPoint.init(x: rect.origin.x - left.width * size.height / left.height, y: rect.origin.y),
+        let snd = calcFragment(center: CGPoint(x: rect.origin.x - left.width * size.height / left.height, y: rect.origin.y),
                                size: rect.size,
                                scale: size.height / img.height)
         

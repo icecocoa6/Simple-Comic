@@ -98,12 +98,10 @@ public class ThumbnailView: NSView {
     fileprivate func thumbRect(from rect: CGRect, size: CGSize, in visibleRect: CGRect) -> CGRect {
         let xRange = visibleRect.minX + size.width / 2 ... visibleRect.maxX - size.width / 2
         let yRange = visibleRect.minY + size.height / 2 ... visibleRect.maxY - size.height / 2
-        let center = NSPoint.init(x: rect.midX.clamp(xRange),
-                                  y: rect.midY.clamp(yRange))
+        let center = CGVector(dx: rect.midX.clamp(xRange),
+                              dy: rect.midY.clamp(yRange))
         
-        return NSRect.init(x: center.x - size.width / 2.0,
-                           y: center.y - size.height / 2.0,
-                           width: size.width, height: size.height)
+        return CGRect(origin: CGPoint(center - CGVector(size) / 2.0), size: size)
     }
     
     func zoomThumbnail(at index: Int)
@@ -180,11 +178,11 @@ public class ThumbnailView: NSView {
         
         if pageOrder?.boolValue ?? false
         {
-            return NSRect.init(x: horGridPos * horSide, y: bounds.maxY - side - vertGridPos * side, width: horSide, height: side);
+            return NSRect(x: horGridPos * horSide, y: bounds.maxY - side - vertGridPos * side, width: horSide, height: side);
         }
         else
         {
-            return NSRect.init(x: bounds.maxX - horSide - horGridPos * horSide, y: bounds.maxY - side - vertGridPos * side, width: horSide, height: side);
+            return NSRect(x: bounds.maxX - horSide - horGridPos * horSide, y: bounds.maxY - side - vertGridPos * side, width: horSide, height: side);
         }
     }
     

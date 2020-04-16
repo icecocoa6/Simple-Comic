@@ -46,18 +46,20 @@ public class InfoWindow: NSPanel {
         self.invalidateShadow()
     }
     
-    func moveCenter(atPoint center: NSPoint)
+    func moveCenter(atPoint _center: NSPoint)
     {
-        self.setFrameOrigin(NSPoint.init(x: center.x - self.frame.width / 2.0, y: center.y - self.frame.height / 2.0))
+        let center = CGVector(_center)
+        let size = CGVector(self.frame.size)
+        self.setFrameOrigin(CGPoint(center - size / 2.0))
         self.invalidateShadow()
     }
 
     func resize(toDiameter diameter: CGFloat)
     {
-        let center = self.frame.center
-        self.setFrame(NSRect(x: center.x - diameter / 2.0,
-                             y: center.y - diameter / 2.0,
-                             width: diameter, height: diameter),
+        let center = CGVector(self.frame.center)
+        let size = CGVector(dx: diameter, dy: diameter)
+        let origin = center - size / 2.0
+        self.setFrame(CGRect(origin: CGPoint(origin), size: CGSize(size)),
                       display: true, animate: false)
     }
     
