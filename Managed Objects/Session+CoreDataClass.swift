@@ -78,32 +78,15 @@ extension NSManagedObjectContext {
         guard isReadable && !isHidden else { return nil }
         
         if isDirectory {
-            let entity = ImageGroup.init(context: self)
-            entity.path = url.path
-            entity.name = url.lastPathComponent
-            entity.nestedFolderContents()
-            return entity
+            return ImageGroup(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypeArchive) {
-            let entity = Archive.init(context: self)
-            entity.path = url.path
-            entity.name = url.lastPathComponent
-            entity.nestedArchiveContents()
-            return entity
+            return Archive(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypePDF) {
-            let entity = PDF.init(context: self)
-            entity.path = url.path
-            entity.name = url.lastPathComponent
-            entity.pdfContents()
-            return entity
+            return PDF(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypeImage) {
-            let entity = Image.init(context: self)
-            entity.imagePath = url.path
-            return entity
+            return Image(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypeText) {
-            let entity = Image.init(context: self)
-            entity.imagePath = url.path
-            entity.text = true
-            return entity
+            return Image(context: self, url: url, text: true)
         }
         
         return nil

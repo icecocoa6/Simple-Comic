@@ -71,6 +71,12 @@ public class Image: NSManagedObject {
         ]
     }()
     
+    convenience init(context: NSManagedObjectContext, url: URL, text: Bool = false) {
+        self.init(context: context)
+        self.imagePath = url.path
+        self.text = text as NSNumber
+    }
+    
     override public func awakeFromInsert() {
         super.awakeFromInsert()
         thumbLock = NSLock.init()
@@ -134,12 +140,17 @@ public class Image: NSManagedObject {
         }
     }
     
-    @objc var thumbnail: NSImage? {
+    var thumbnail: NSImage? {
         if self.thumbnailData == nil
         {
             self.thumbnailData = self.prepThumbnail
         }
-        return NSImage.init(data: self.thumbnailData!)
+        
+        if let data = self.thumbnailData {
+            return NSImage(data: data)
+        } else {
+            return nil
+        }
     }
     
     var prepThumbnail: Data? {

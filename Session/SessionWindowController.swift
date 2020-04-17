@@ -392,19 +392,22 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     func infoPanelSetupAtPoint(_ _point: NSPoint) {
         var point = _point
         let bar = self.progressBar
-//        (self.infoWindow.contentView as! InfoView).bordered = false
         point.y = bar!.frame.maxY - 6
         let cursorPoint = bar?.convert(point, from: nil)
         let index = bar?.indexFor(point: cursorPoint!)
 
-        let thumb = self.imageForPageAtIndex(index!)!
-        thumb.size = thumb.size.adjust(to: CGSize(width: 128, height: 128))
-        self.infoWindow.image = thumb
+        let thumbnail = self.imageForPageAtIndex(index!)
+        self.infoWindow.image = thumbnail
+        
+        if thumbnail != nil {
+            thumbnail!.size = thumbnail!.size.adjust(to: CGSize(width: 128, height:
+                128))
+        }
 
         let area = CGRect.init(origin: point, size: CGSize.zero)
         let _cursorPoint = self.window?.convertToScreen(area).origin
         self.infoWindow.caret(atPoint: _cursorPoint!,
-                              size: thumb.size,
+                              size: thumbnail?.size ?? CGSize.zero,
                               withLimitLeft: (bar?.window!.frame.minX)!,
                               right: (bar?.window!.frame.maxX)!)
     }

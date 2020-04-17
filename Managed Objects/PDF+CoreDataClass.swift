@@ -14,6 +14,12 @@ import CoreData
 import Quartz
 
 public class PDF: ImageGroup {
+    convenience init(context: NSManagedObjectContext, url: URL) {
+        self.init(context: context)
+        self.path = url.path
+        self.name = url.lastPathComponent
+        self.pdfContents()
+    }
 
     private var _instance: PDFDocument?
     var instance: Any? {

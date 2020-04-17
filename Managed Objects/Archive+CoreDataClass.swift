@@ -31,6 +31,13 @@ public class Archive: ImageGroup {
                                 create: true)
     }()
     
+    convenience init(context: NSManagedObjectContext, url: URL) {
+        self.init(context: context)
+        self.path = url.path
+        self.name = url.lastPathComponent
+        self.nestedArchiveContents()
+    }
+    
     deinit {
         try? FileManager.default.removeItem(atPath: tempDir.path)
     }
@@ -58,10 +65,11 @@ public class Archive: ImageGroup {
     
     private var _instance: XADArchive?
     public var instance: XADArchive? {
-        guard _instance == nil else { return _instance; }
-        guard FileManager.default.fileExists(atPath: self.path!) else { return nil; }
+        guard _instance == nil else { return _instance }
+        guard FileManager.default.fileExists(atPath: self.path!) else { return nil }
+        guard FileManager.default.isReadableFile(atPath: self.path!) else { return nil }
         
-        _instance = XADArchive.init(file: self.path!, delegate: self, error: nil)
+        _instance = XADArchive(file: self.path!, delegate: self, error: nil)
         
         if _instance == nil {
             let alert = NSAlert()
@@ -80,15 +88,15 @@ public class Archive: ImageGroup {
     }
     
     override func dataFor(pageIndex: Int) -> Data? {
-        let source = self.instance!
+        let source = self.instance
 
         groupLock.lock()
         defer { groupLock.unlock() }
         
-        let imageData = source.contents(ofEntry: Int32(pageIndex))
+        let imageData = source?.contents(ofEntry: Int32(pageIndex))
         
-        if source.isSolid() {
-            let url = self.url(forDataAt: Int32(pageIndex), in: source)
+        if source?.isSolid() ?? false {
+            let url = self.url(forDataAt: Int32(pageIndex), in: source!)
 
             if FileManager.default.fileExists(atPath: url.path) {
                 return try! Data(contentsOf: url)
@@ -137,17 +145,15 @@ public class Archive: ImageGroup {
         for counter in 0 ..< numOfEntries
         {
             let name = imageArchive!.name(ofEntry: counter)
-            let fileName = URL(fileURLWithPath: name!, relativeTo: URL(fileURLWithPath: self.path!))
-            print(fileName.absoluteString)
-            guard fileName.lastPathComponent != "" && fileName.lastPathComponent.first != "." else { continue }
+            var url = URL(fileURLWithPath: name!, relativeTo: URL(fileURLWithPath: self.path!))
+            guard url.lastPathComponent != "" && url.lastPathComponent.first != "." else { continue }
             
-            let ext = fileName.pathExtension.lowercased()
+            let ext = url.pathExtension.lowercased()
             let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext as CFString, nil)!.takeRetainedValue()
             
             if Image.imageExtensions.contains(uti as String)
             {
-                let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fileName.path
+                let entity = Image(context: self.managedObjectContext!, url: url)
                 entity.index = counter as NSNumber
                 entity.group = self
             }
@@ -155,30 +161,23 @@ public class Archive: ImageGroup {
             {
                 let archivePath = try! write(dataAt: counter, in: imageArchive!)
                 
-                let entity = Archive.init(context: self.managedObjectContext!)
-                entity.name = fileName.path
+                let entity = Archive(context: self.managedObjectContext!, url: archivePath)
                 entity.nested = true
-                entity.path = archivePath.path
-                entity.nestedArchiveContents()
                 entity.group = self
                 self.addToNestedImages(entity.nestedImages!)
             }
             else if Image.textExtensions.contains(ext)
             {
-                let entity = Image.init(context: self.managedObjectContext!)
-                entity.imagePath = fileName.path
+                let entity = Image(context: self.managedObjectContext!, url: url, text: true)
                 entity.index = counter as NSNumber
-                entity.text = true
                 entity.group = self
             }
             else if UTTypeConformsTo(uti, kUTTypePDF)
             {
                 let archivePath = try! write(dataAt: counter, in: imageArchive!)
                 
-                let entity = PDF.init(context: self.managedObjectContext!)
-                entity.path = archivePath.path
+                let entity = PDF(context: self.managedObjectContext!, url: archivePath)
                 entity.nested = true
-                entity.pdfContents()
                 entity.group = self
                 self.addToNestedImages(entity.nestedImages!)
             }

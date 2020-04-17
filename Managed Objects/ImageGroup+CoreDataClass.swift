@@ -17,6 +17,13 @@ import CoreData
 public class ImageGroup: NSManagedObject {
     let groupLock = NSLock.init()
     
+    convenience init(context: NSManagedObjectContext, url: URL) {
+        self.init(context: context)
+        self.path = url.path
+        self.name = url.lastPathComponent
+        self.nestedFolderContents()
+    }
+    
     override public func awakeFromInsert() {
         super.awakeFromInsert()
     }
