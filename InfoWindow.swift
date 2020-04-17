@@ -72,33 +72,3 @@ public class InfoWindow: NSPanel {
         }
     }
 }
-
-class CircularImageView: NSImageView {
-    
-    override func draw(_ dirtyRect: NSRect) {
-        NSColor.clear.set()
-        self.bounds.fill()
-        
-        guard self.image != nil else { return }
-        
-        let loupeGradient = NSGradient.init(starting: NSColor.init(calibratedWhite: 0.3, alpha: 1), ending: NSColor.init(calibratedWhite: 0.6, alpha: 1))
-        let centerPoint = dirtyRect.center
-        loupeGradient?.draw(fromCenter: centerPoint, radius: dirtyRect.width / 2 - 10, toCenter: centerPoint, radius: dirtyRect.width / 2 - 1, options: [])
-        
-        let circle = NSBezierPath.init(ovalIn: self.bounds.insetBy(dx: 1, dy: 1))
-        NSColor.init(calibratedWhite: 0.2, alpha: 2).set()
-        circle.lineWidth = 2.0
-        circle.stroke()
-        
-        let innerCirc = NSBezierPath.init(ovalIn: self.bounds.insetBy(dx: 10, dy: 10))
-        NSColor.white.set()
-        innerCirc.fill()
-        innerCirc.addClip()
-        
-        super.draw(dirtyRect)
-        
-        NSColor.init(calibratedWhite: 0.6, alpha: 1).set()
-        innerCirc.lineWidth = 3.0
-        innerCirc.stroke()
-    }
-}

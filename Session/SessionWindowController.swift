@@ -109,8 +109,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     @IBOutlet var infoWindow: InfoWindow!
 
     /* Localized image zoom loupe elements */
-    @IBOutlet var loupeWindow: InfoWindow!
-    @IBOutlet var zoomView: NSImageView!
+    @IBOutlet var loupeWindow: LoupeWindow!
 
     /* Panel and view for the page expose method */
     @IBOutlet var exposeBezel: NSPanel!
@@ -208,7 +207,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
                 self.pageScrollView.backgroundColor = color!
             },
             defaults.observe(\.loupeDiameter, options: .new) { (_, change) in
-                self.loupeWindow!.resize(toDiameter: CGFloat(change.newValue!))
+                self.loupeWindow.diameter = CGFloat(change.newValue!)
+                self.refreshLoupePanel()
             },
             defaults.observe(\.loupePower) { (_, _) in
                 self.refreshLoupePanel()
@@ -376,9 +376,9 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             }
 
             let localPoint = self.pageView.convert(self.window!.convertFromScreen(point).origin, from: nil)
-            let zoomRect = CGRect(origin: localPoint, size: self.zoomView.frame.size)
+            let zoomRect = CGRect(origin: localPoint, size: self.loupeWindow.frame.size)
             self.loupeWindow.moveCenter(atPoint: mouse)
-            self.zoomView.image = self.pageView.image(inRect: zoomRect)
+            self.loupeWindow.image = self.pageView.image(inRect: zoomRect)
         } else {
             if self.loupeWindow.isVisible {
                 self.loupeWindow.parent?.removeChildWindow(self.loupeWindow)
