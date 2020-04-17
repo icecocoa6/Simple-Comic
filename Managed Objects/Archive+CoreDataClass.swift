@@ -61,7 +61,17 @@ public class Archive: ImageGroup {
         guard _instance == nil else { return _instance; }
         guard FileManager.default.fileExists(atPath: self.path!) else { return nil; }
         
-        _instance = XADArchive.init(file: self.path!, delegate: self, error: nil)!
+        _instance = XADArchive.init(file: self.path!, delegate: self, error: nil)
+        
+        if _instance == nil {
+            let alert = NSAlert()
+            alert.messageText = "Invalid Archive Found"
+            alert.informativeText = "This application just ignores the invalid archive file. Check the archive at '\(self.path!)'."
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            return nil
+        }
+        
         if let password = self.password
         {
             _instance!.setPassword(password)
@@ -126,7 +136,9 @@ public class Archive: ImageGroup {
         let numOfEntries = imageArchive?.numberOfEntries() ?? 0
         for counter in 0 ..< numOfEntries
         {
-            let fileName = URL.init(fileURLWithPath: (imageArchive?.name(ofEntry: counter)!)!)
+            let name = imageArchive!.name(ofEntry: counter)
+            let fileName = URL(fileURLWithPath: name!, relativeTo: URL(fileURLWithPath: self.path!))
+            print(fileName.absoluteString)
             guard fileName.lastPathComponent != "" && fileName.lastPathComponent.first != "." else { continue }
             
             let ext = fileName.pathExtension.lowercased()
