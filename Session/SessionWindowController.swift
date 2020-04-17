@@ -576,7 +576,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             let archive = selectedGroup as! Archive
             let archivePath = URL.init(fileURLWithPath: selectedGroup!.path!).standardizedFileURL.path
 
-            if archive.quicklookCompatible() {
+            if archive.quicklookCompatible {
                 let xad = archive.instance!
                 let coverIndex = selectedPage.index!.intValue
                 let coverName = xad.rawName(ofEntry: Int32(coverIndex))

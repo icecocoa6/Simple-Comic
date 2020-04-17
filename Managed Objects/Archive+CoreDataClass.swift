@@ -139,54 +139,31 @@ public class Archive: ImageGroup {
     
     func nestedArchiveContents()
     {
-        let imageArchive = self.instance
+        guard let imageArchive = self.instance else { return }
         
-        let numOfEntries = imageArchive?.numberOfEntries() ?? 0
+        let numOfEntries = imageArchive.numberOfEntries()
         for counter in 0 ..< numOfEntries
         {
-            let name = imageArchive!.name(ofEntry: counter)
-            var url = URL(fileURLWithPath: name!, relativeTo: URL(fileURLWithPath: self.path!))
-            guard url.lastPathComponent != "" && url.lastPathComponent.first != "." else { continue }
+            let url = try! write(dataAt: counter, in: imageArchive)
             
-            let ext = url.pathExtension.lowercased()
-            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext as CFString, nil)!.takeRetainedValue()
-            
-            if Image.imageExtensions.contains(uti as String)
-            {
-                let entity = Image(context: self.managedObjectContext!, url: url)
-                entity.index = counter as NSNumber
-                entity.group = self
-            }
-            else if Archive.archiveExtensions.contains(ext)
-            {
-                let archivePath = try! write(dataAt: counter, in: imageArchive!)
-                
-                let entity = Archive(context: self.managedObjectContext!, url: archivePath)
-                entity.nested = true
-                entity.group = self
-                self.addToNestedImages(entity.nestedImages!)
-            }
-            else if Image.textExtensions.contains(ext)
-            {
-                let entity = Image(context: self.managedObjectContext!, url: url, text: true)
-                entity.index = counter as NSNumber
-                entity.group = self
-            }
-            else if UTTypeConformsTo(uti, kUTTypePDF)
-            {
-                let archivePath = try! write(dataAt: counter, in: imageArchive!)
-                
-                let entity = PDF(context: self.managedObjectContext!, url: archivePath)
-                entity.nested = true
-                entity.group = self
-                self.addToNestedImages(entity.nestedImages!)
+            let entity = self.managedObjectContext?.createEntity(fromContentsAtURL: url)
+            switch entity {
+            case let image as Image:
+                image.index = counter as NSNumber
+                image.group = self
+            case let group as ImageGroup:
+                group.nested = true
+                group.group = self
+                self.addToNestedImages(group.nestedImages!)
+            default:
+                break
             }
         }
         
         self.addToNestedImages(self.images!)
     }
     
-    @objc func quicklookCompatible() -> Bool {
+    var quicklookCompatible: Bool {
         guard let name = self.name else { return false }
         let ext = URL.init(fileURLWithPath: name).pathExtension.lowercased()
         return Archive.quicklookExtensions.contains(ext)
