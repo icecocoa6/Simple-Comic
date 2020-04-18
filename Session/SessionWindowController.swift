@@ -183,7 +183,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.exposeBezel.isFloatingPanel = true
         self.exposeBezel.windowController = self
         self.window?.acceptsMouseMovedEvents = true
-        self.pageController.setSelectionIndex(self.session!.selection!.intValue)
+        self.pageController.setSelectionIndex(Int(self.session!.selection))
 
         let vc = NSTitlebarAccessoryViewController()
         vc.view = self.titlebarAccessory
@@ -228,14 +228,17 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
         if let session = self.session {
             self.observers += [
-                session.observe(\.pageOrder, options: .new) { _, change in
-                    UserDefaults.standard[keyPath: \.pageOrder] = change.newValue!!.boolValue
+                session.observe(\Session.pageOrder, options: .new) { _, change in
+                    UserDefaults.standard.pageOrder = change.newValue!
+                    return
                 },
-                session.observe(\.rawAdjustmentMode, options: .new) { _, change in
-                    UserDefaults.standard[keyPath: \.rawAdjustmentMode] = change.newValue!!.intValue
+                session.observe(\Session.rawAdjustmentMode, options: .new) { _, change in
+                    UserDefaults.standard.rawAdjustmentMode = Int(change.newValue!)
+                    return
                 },
-                session.observe(\.twoPageSpread, options: .new) { _, change in
-                    UserDefaults.standard[keyPath: \.twoPageSpread] = change.newValue!!.boolValue
+                session.observe(\Session.twoPageSpread, options: .new) { _, change in
+                    UserDefaults.standard.twoPageSpread = change.newValue!
+                    return
                 },
                 session.observe(\Session.loupe) { _, _ in self.refreshLoupePanel() }
             ]
@@ -361,7 +364,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     func refreshLoupePanel() {
-        let loupe = session?.loupe?.boolValue ?? false
+        let loupe = session?.loupe ?? false
         let mouse = NSEvent.mouseLocation
         let point = CGRect.init(origin: mouse, size: CGSize.zero)
         let scrollPoint = self.pageScrollView.convert((self.window?.convertFromScreen(point).origin)!, from: nil)
@@ -417,13 +420,13 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
 
     func zoom(by scale: CGFloat) {
-        var previousZoom = CGFloat(self.session!.zoomLevel!.floatValue)
+        var previousZoom = CGFloat(self.session!.zoomLevel)
 
         if self.session!.adjustmentMode != .none {
             previousZoom = self.pageView.imageBounds.width / self.pageView.combinedImageSize().width
         }
 
-        self.session?.zoomLevel = previousZoom + scale as NSNumber
+        self.session?.zoomLevel = Float(previousZoom + scale)
         self.session?.adjustmentMode = .none
 
         self.pageView.resizeView()
@@ -432,7 +435,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
 
     func changeViewForSelection() {
-        self.savedZoom = (self.session?.zoomLevel!.floatValue)!
+        self.savedZoom = self.session!.zoomLevel
         self.pageScrollView.hasVerticalScroller = false
         self.pageScrollView.hasHorizontalScroller = false
         self.refreshLoupePanel()
@@ -443,7 +446,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         scrollerBounds.height -= 20
 
         let factor = max(scrollerBounds.width / imageSize.width, scrollerBounds.height / imageSize.height)
-        self.session?.zoomLevel = factor as NSNumber
+        self.session?.zoomLevel = Float(factor)
 
         self.pageView.resizeView()
     }
@@ -465,7 +468,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     func cancelPageSelection() {
-        self.session?.zoomLevel = self.savedZoom as NSNumber
+        self.session?.zoomLevel = self.savedZoom
         self._pageSelectionInProgress = .None
         self.scaleToWindow()
     }
@@ -482,7 +485,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             self.extractPageWithSelection(selection)
         }
 
-        self.session?.zoomLevel = self.savedZoom as NSNumber
+        self.session?.zoomLevel = self.savedZoom
         self._pageSelectionInProgress = .None
         self.scaleToWindow()
     }
@@ -560,7 +563,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     func setIconWithSelection(_ selection: Int, andCropRect cropRect: CGRect) {
-        self.session?.zoomLevel = self.savedZoom as NSNumber
+        self.session?.zoomLevel = self.savedZoom
 
         guard selection != -1 else { return }
 
@@ -611,7 +614,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.loupeWindow.setFrame(CGRect(x: 0, y: 0, width: loupeDiameter, height: loupeDiameter), display: false)
         let color = try! NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: UserDefaults.standard.data(forKey: TSSTBackgroundColor)!)
         self.pageScrollView.backgroundColor = color!
-        self.pageView.rotationValue = (self.session?.rotation!.intValue)!
+        self.pageView.rotationValue = Int(self.session!.rotation)
         if let posData = self.session?.position {
             let positionValue = try! NSKeyedUnarchiver.unarchivedObject(ofClass: NSValue.self, from: posData)
             self.window?.setFrame(positionValue!.rectValue, display: false)
@@ -642,8 +645,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
         let currentAllowed = !pageOne.shouldDisplayAlone() && !(index == 0 && UserDefaults.standard.bool(forKey: TSSTLonelyFirstPage))
 
-        if currentAllowed && self.session?.twoPageSpread?.boolValue ?? false && pageTwo != nil && !pageTwo!.shouldDisplayAlone() {
-            if self.session?.pageOrder?.boolValue ?? false {
+        if currentAllowed && self.session?.twoPageSpread ?? false && pageTwo != nil && !pageTwo!.shouldDisplayAlone() {
+            if self.session?.pageOrder ?? false {
                 titleString = "\(titleString) \(pageTwo!.name!)"
             } else {
                 titleString = "\(pageTwo!.name!) \(titleString)"
@@ -759,7 +762,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     func hasTwoPagesSpreadableFrom(index: Int) -> Bool {
-        guard self.session?.twoPageSpread?.boolValue ?? false else { return false }
+        guard self.session?.twoPageSpread ?? false else { return false }
 
         let contents = self.pageController.arrangedObjects as! [Image]
         guard (0 ..< contents.count - 1).contains(index) else { return false }
@@ -806,7 +809,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             self.exposeBezel.orderOut(self)
         } else if self.window!.isFullscreen() {
             self.window!.toggleFullScreen(self)
-        } else if self.session?.loupe?.boolValue ?? false {
+        } else if self.session?.loupe ?? false {
             self.session?.loupe = false
         }
     }
@@ -837,9 +840,9 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     func orderTo(side: Orientation.Horizontal) -> Order {
         switch side {
         case .left:
-            return self.session!.pageOrder!.boolValue ? .prev : .next
+            return self.session!.pageOrder ? .prev : .next
         case .right:
-            return self.session!.pageOrder!.boolValue ? .next : .prev
+            return self.session!.pageOrder ? .next : .prev
         }
     }
 
@@ -880,10 +883,10 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             menuItem.state = state
             return true
         } else if menuItem.action == #selector(changeTwoPage(_:)) {
-            menuItem.state = self.session!.pageOrder!.boolValue ? .on : .off
+            menuItem.state = self.session!.pageOrder ? .on : .off
             return true
         } else if menuItem.action == #selector(changePageOrder(_:)) {
-            if self.session!.pageOrder!.boolValue {
+            if self.session!.pageOrder {
                 menuItem.title = NSLocalizedString("Right To Left", tableName: "Right to left page order menu item text", comment: "")
             } else {
                 menuItem.title = NSLocalizedString("Left To Right", tableName: "Left to right page order menu item text", comment: "")
@@ -908,11 +911,11 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         } else if menuItem.action == #selector(skipLeft(_:)) {
             return self.canTurnTo(.left)
         } else if menuItem.action == #selector(setArchiveIcon(_:)) {
-            return self.session!.rotation!.intValue == 0
+            return self.session!.rotation == 0
         } else if menuItem.action == #selector(extractPage(_:)) {
-            return self.session!.rotation!.intValue == 0
+            return self.session!.rotation == 0
         } else if menuItem.action == #selector(removePages(_:)) {
-            return self.session!.rotation!.intValue == 0
+            return self.session!.rotation == 0
         } else if menuItem.tag == 400 {
             menuItem.state = self.pageScaleMode == .none ? .on : .off
             return true
@@ -982,7 +985,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
     }
 
     func optimalPageViewRectForRect(_ boundingRect: CGRect) -> CGRect {
-        let maxImageSize = self.pageView.combinedImageSize(forZoom: CGFloat(self.session!.zoomLevel!.floatValue))
+        let maxImageSize = self.pageView.combinedImageSize(forZoom: CGFloat(self.session!.zoomLevel))
         var vertOffset = self.window!.contentBorderThickness(for: .minY) + self.window!.toolbarHeight()
 
         if self.pageScrollView.hasHorizontalScroller {
@@ -1051,7 +1054,7 @@ extension SessionWindowController: NSWindowDelegate {
 
         NSApp.presentationOptions = NSApplication.PresentationOptions.init()
 
-        if self.session?.loupe?.boolValue ?? false {
+        if self.session?.loupe ?? false {
             NSCursor.hide()
         }
 

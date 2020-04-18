@@ -12,41 +12,71 @@
         <attribute name="text" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="thumbnailData" optional="YES" transient="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="width" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
-        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="images" inverseEntity="ImageGroup" indexed="YES" syncable="YES"/>
-        <relationship name="includedGroups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="nestedImages" inverseEntity="ImageGroup" indexed="YES" syncable="YES"/>
-        <relationship name="session" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="images" inverseEntity="Session" indexed="YES" syncable="YES"/>
+        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="images" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="includedGroups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="nestedImages" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="session" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="images" inverseEntity="Session" syncable="YES"/>
+        <fetchIndex name="byGroupIndex">
+            <fetchIndexElement property="group" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byIncludedGroupsIndex">
+            <fetchIndexElement property="includedGroups" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="bySessionIndex">
+            <fetchIndexElement property="session" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
     <entity name="ImageGroup" representedClassName=".ImageGroup" syncable="YES">
         <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
         <attribute name="nested" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="pathData" attributeType="Binary" syncable="YES"/>
-        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="groups" inverseEntity="ImageGroup" indexed="YES" syncable="YES"/>
-        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="group" inverseEntity="ImageGroup" indexed="YES" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="Image" inverseName="group" inverseEntity="Image" indexed="YES" syncable="YES"/>
-        <relationship name="nestedImages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="includedGroups" inverseEntity="Image" indexed="YES" syncable="YES"/>
-        <relationship name="session" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="groups" inverseEntity="Session" indexed="YES" syncable="YES"/>
+        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="groups" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="group" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="Image" inverseName="group" inverseEntity="Image" syncable="YES"/>
+        <relationship name="nestedImages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="includedGroups" inverseEntity="Image" syncable="YES"/>
+        <relationship name="session" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="groups" inverseEntity="Session" syncable="YES"/>
+        <fetchIndex name="byGroupIndex">
+            <fetchIndexElement property="group" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byGroupsIndex">
+            <fetchIndexElement property="groups" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byImagesIndex">
+            <fetchIndexElement property="images" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byNestedImagesIndex">
+            <fetchIndexElement property="nestedImages" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="bySessionIndex">
+            <fetchIndexElement property="session" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
     <entity name="PDF" representedClassName=".PDF" parentEntity="ImageGroup" syncable="YES"/>
     <entity name="Session" representedClassName=".Session" syncable="YES">
-        <attribute name="fullscreen" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="loupe" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="pageOrder" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="fullscreen" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="loupe" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="pageOrder" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="position" optional="YES" attributeType="Binary" syncable="YES"/>
-        <attribute name="rawAdjustmentMode" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="rotation" attributeType="Integer 16" valueTransformerName="NSSecureUnarchiveFromDataTransformer" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="rawAdjustmentMode" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="rotation" attributeType="Integer 16" valueTransformerName="NSSecureUnarchiveFromDataTransformer" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="scrollPosition" optional="YES" attributeType="Binary" syncable="YES"/>
-        <attribute name="selection" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="twoPageSpread" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="zoomLevel" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
-        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="session" inverseEntity="ImageGroup" indexed="YES" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Image" inverseName="session" inverseEntity="Image" indexed="YES" syncable="YES"/>
+        <attribute name="selection" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="twoPageSpread" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="zoomLevel" attributeType="Float" defaultValueString="1" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="session" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Image" inverseName="session" inverseEntity="Image" syncable="YES"/>
+        <fetchIndex name="byGroupsIndex">
+            <fetchIndexElement property="groups" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byImagesIndex">
+            <fetchIndexElement property="images" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
     <elements>
-        <element name="PDF" positionX="153" positionY="18" width="92" height="43"/>
         <element name="Archive" positionX="342" positionY="15" width="90" height="73"/>
-        <element name="ImageGroup" positionX="241" positionY="117" width="92" height="178"/>
-        <element name="Session" positionX="414" positionY="117" width="90" height="223"/>
         <element name="Image" positionX="72" positionY="162" width="92" height="193"/>
+        <element name="ImageGroup" positionX="241" positionY="117" width="92" height="178"/>
+        <element name="PDF" positionX="153" positionY="18" width="92" height="43"/>
+        <element name="Session" positionX="414" positionY="117" width="90" height="223"/>
     </elements>
 </model>

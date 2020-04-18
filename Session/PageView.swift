@@ -463,7 +463,7 @@ class PageView: NSView {
         let frameRect = self.frame
         
         
-        var imageSize = self.combinedImageSize().scaleBy(CGFloat(delegate?.session?.zoomLevel?.floatValue ?? 1.0))
+        var imageSize = self.combinedImageSize().scaleBy(CGFloat(delegate?.session?.zoomLevel ?? 1.0))
         let viewSize = calcViewSize(imageSize, visibleRect)
         self.frame.size = viewSize
         
@@ -983,8 +983,8 @@ class PageView: NSView {
     }
     
     override func rightMouseDown(with event: NSEvent) {
-        let loupe = delegate?.session!.loupe!.boolValue ?? false
-        delegate?.session!.loupe = !loupe as NSNumber
+        let loupe = delegate?.session.loupe ?? false
+        delegate?.session!.loupe = !loupe
     }
     
     override func mouseDown(with event: NSEvent) {
@@ -1140,7 +1140,7 @@ class PageView: NSView {
     
     override func magnify(with event: NSEvent) {
         let session = delegate?.session
-        var previousZoom = CGFloat(session!.zoomLevel!.floatValue)
+        var previousZoom = CGFloat(session!.zoomLevel)
         
         if session!.adjustmentMode != .none
         {
@@ -1150,7 +1150,7 @@ class PageView: NSView {
         previousZoom += event.magnification * 2;
         previousZoom = previousZoom < 5 ? previousZoom : 5;
         previousZoom = previousZoom > 0.25 ? previousZoom : 0.25;
-        session!.zoomLevel = previousZoom as NSNumber
+        session!.zoomLevel = Float(previousZoom)
         session!.adjustmentMode = .none
         
         self.resizeView()

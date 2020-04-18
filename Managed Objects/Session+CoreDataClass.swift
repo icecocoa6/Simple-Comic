@@ -28,10 +28,10 @@ public class Session: NSManagedObject {
     }
 
     var adjustmentMode: PageAdjustmentMode {
-        get { PageAdjustmentMode(rawValue: rawAdjustmentMode?.intValue ?? 0) ?? .none }
+        get { PageAdjustmentMode(rawValue: Int(rawAdjustmentMode)) ?? .none }
         set(value) {
             self.willChangeValue(for: \.rawAdjustmentMode)
-            rawAdjustmentMode = value.rawValue as NSNumber
+            rawAdjustmentMode = Int16(value.rawValue)
             self.didChangeValue(for: \.rawAdjustmentMode)
         }
     }
@@ -54,7 +54,7 @@ public class Session: NSManagedObject {
     }
     
     var orientation: Orientation.Horizontal {
-        return (pageOrder?.boolValue ?? false) ? .right : .left
+        return pageOrder ? .right : .left
     }
 }
 

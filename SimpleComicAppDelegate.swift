@@ -268,9 +268,9 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
 
     func newSessionWithFiles(_ files: [String]) -> Session {
         let session = Session.init(context: self.managedObjectContext)
-        session.rawAdjustmentMode = UserDefaults.standard.rawAdjustmentMode as NSNumber
-        session.pageOrder = UserDefaults.standard.pageOrder as NSNumber
-        session.twoPageSpread = UserDefaults.standard.twoPageSpread as NSNumber
+        session.rawAdjustmentMode = Int16(UserDefaults.standard.rawAdjustmentMode)
+        session.pageOrder = UserDefaults.standard.pageOrder
+        session.twoPageSpread = UserDefaults.standard.twoPageSpread
 
         self.addFiles(urls: files.map { URL(fileURLWithPath: $0) }, toSession: session)
         return session

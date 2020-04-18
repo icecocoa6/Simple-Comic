@@ -43,14 +43,14 @@ extension SessionWindowController: SimpleComicAction {
     @IBAction
     func changeTwoPage(_ sender: Any) {
         if let session = self.session {
-            session.twoPageSpread = !session.twoPageSpread!.boolValue as NSNumber
+            session.twoPageSpread = !session.twoPageSpread
         }
     }
 
     @IBAction
     func changePageOrder(_ sender: Any) {
         if let session = self.session {
-            session.pageOrder = !session.pageOrder!.boolValue as NSNumber
+            session.pageOrder = !session.pageOrder
         }
     }
 
@@ -170,18 +170,18 @@ extension SessionWindowController: SimpleComicAction {
 
     @IBAction
     func rotateRight(_ sender: Any?) {
-        var current: Int = (self.session?.rotation!.intValue)!
+        var current: Int16 = self.session?.rotation ?? 0
         current = (current + 1) % 4
-        self.session?.rotation = current as NSNumber
+        self.session?.rotation = current
         self.resizeWindow()
         self.refreshLoupePanel()
     }
 
     @IBAction
     func rotateLeft(_ sender: Any?) {
-        var current: Int = (self.session?.rotation!.intValue)!
+        var current = self.session?.rotation ?? 0
         current = (current + 3) % 4
-        self.session?.rotation = current as NSNumber
+        self.session?.rotation = current
         self.resizeWindow()
         self.refreshLoupePanel()
     }
@@ -195,8 +195,8 @@ extension SessionWindowController: SimpleComicAction {
 
     @IBAction
     func toggleLoupe(_ sender: Any) {
-        let loupe = (self.session?.loupe!.boolValue)!
-        self.session?.loupe = !loupe as NSNumber
+        let loupe = (self.session?.loupe)!
+        self.session?.loupe = !loupe
     }
 
     @IBAction
