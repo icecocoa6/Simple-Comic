@@ -14,6 +14,8 @@ import CoreData
 import Quartz
 
 public class PDF: ImageGroup {
+    let groupLock = NSLock.init()
+
     convenience init(context: NSManagedObjectContext, url: URL) {
         self.init(context: context)
         self.url = url

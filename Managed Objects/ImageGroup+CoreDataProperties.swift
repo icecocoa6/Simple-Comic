@@ -2,7 +2,7 @@
 //  ImageGroup+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by 冨岡太一 on 2020/03/24.
+//  Created by 冨岡太一 on 2020/04/18.
 //
 //
 
@@ -16,32 +16,31 @@ extension ImageGroup {
         return NSFetchRequest<ImageGroup>(entityName: "ImageGroup")
     }
 
-    @NSManaged public var pathData: Data?
-    @NSManaged public var nested: NSNumber?
-    @NSManaged public var modified: Date?
+    @NSManaged public var modified: TimeInterval
     @NSManaged public var name: String?
-    @NSManaged public var groups: NSSet?
+    @NSManaged public var pathData: Data?
+    @NSManaged public var parent: ImageGroup?
+    @NSManaged public var children: NSSet?
     @NSManaged public var images: NSSet?
-    @NSManaged public var session: Session?
-    @NSManaged public var group: ImageGroup?
     @NSManaged public var nestedImages: NSSet?
+    @NSManaged public var session: Session?
 
 }
 
-// MARK: Generated accessors for groups
+// MARK: Generated accessors for children
 extension ImageGroup {
 
-    @objc(addGroupsObject:)
-    @NSManaged public func addToGroups(_ value: ImageGroup)
+    @objc(addChildrenObject:)
+    @NSManaged public func addToChildren(_ value: ImageGroup)
 
-    @objc(removeGroupsObject:)
-    @NSManaged public func removeFromGroups(_ value: ImageGroup)
+    @objc(removeChildrenObject:)
+    @NSManaged public func removeFromChildren(_ value: ImageGroup)
 
-    @objc(addGroups:)
-    @NSManaged public func addToGroups(_ values: NSSet)
+    @objc(addChildren:)
+    @NSManaged public func addToChildren(_ values: NSSet)
 
-    @objc(removeGroups:)
-    @NSManaged public func removeFromGroups(_ values: NSSet)
+    @objc(removeChildren:)
+    @NSManaged public func removeFromChildren(_ values: NSSet)
 
 }
 

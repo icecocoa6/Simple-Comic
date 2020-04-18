@@ -78,7 +78,7 @@ extension NSManagedObjectContext {
         guard isReadable && !isHidden else { return nil }
         
         if isDirectory {
-            return ImageGroup(context: self, url: url)
+            return Directory(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypeArchive) {
             return Archive(context: self, url: url)
         } else if UTTypeConformsTo(uti, kUTTypePDF) {

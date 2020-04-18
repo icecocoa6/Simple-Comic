@@ -4,6 +4,7 @@
         <attribute name="password" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="solidDirectory" optional="YES" attributeType="URI" syncable="YES"/>
     </entity>
+    <entity name="Directory" representedClassName=".Directory" parentEntity="ImageGroup" syncable="YES"/>
     <entity name="Image" representedClassName=".Image" syncable="YES">
         <attribute name="aspectRatio" optional="YES" attributeType="Float" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="height" attributeType="Double" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
@@ -25,21 +26,20 @@
             <fetchIndexElement property="session" type="Binary" order="ascending"/>
         </fetchIndex>
     </entity>
-    <entity name="ImageGroup" representedClassName=".ImageGroup" syncable="YES">
-        <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+    <entity name="ImageGroup" representedClassName=".ImageGroup" isAbstract="YES" syncable="YES">
+        <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
-        <attribute name="nested" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="pathData" attributeType="Binary" syncable="YES"/>
-        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="groups" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="group" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="parent" inverseEntity="ImageGroup" syncable="YES"/>
         <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="Image" inverseName="group" inverseEntity="Image" syncable="YES"/>
         <relationship name="nestedImages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="includedGroups" inverseEntity="Image" syncable="YES"/>
+        <relationship name="parent" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="children" inverseEntity="ImageGroup" syncable="YES"/>
         <relationship name="session" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="groups" inverseEntity="Session" syncable="YES"/>
         <fetchIndex name="byGroupIndex">
-            <fetchIndexElement property="group" type="Binary" order="ascending"/>
+            <fetchIndexElement property="parent" type="Binary" order="ascending"/>
         </fetchIndex>
         <fetchIndex name="byGroupsIndex">
-            <fetchIndexElement property="groups" type="Binary" order="ascending"/>
+            <fetchIndexElement property="children" type="Binary" order="ascending"/>
         </fetchIndex>
         <fetchIndex name="byImagesIndex">
             <fetchIndexElement property="images" type="Binary" order="ascending"/>
@@ -73,10 +73,11 @@
         </fetchIndex>
     </entity>
     <elements>
-        <element name="Archive" positionX="342" positionY="15" width="90" height="73"/>
+        <element name="Archive" positionX="206.74609375" positionY="29.02734375" width="90" height="73"/>
         <element name="Image" positionX="72" positionY="162" width="92" height="193"/>
-        <element name="ImageGroup" positionX="241" positionY="117" width="92" height="178"/>
-        <element name="PDF" positionX="153" positionY="18" width="92" height="43"/>
+        <element name="ImageGroup" positionX="241" positionY="117" width="92" height="163"/>
+        <element name="PDF" positionX="88.2109375" positionY="29.91015625" width="92" height="43"/>
         <element name="Session" positionX="414" positionY="117" width="90" height="223"/>
+        <element name="Directory" positionX="315.7265625" positionY="29.8828125" width="128" height="43"/>
     </elements>
 </model>

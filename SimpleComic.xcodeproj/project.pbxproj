@@ -47,6 +47,8 @@
 		5207FA712430E5E600FB5D4B /* SessionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA702430E5E600FB5D4B /* SessionWindowController.swift */; };
 		5207FA74243378C800FB5D4B /* CGSize+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA73243378C800FB5D4B /* CGSize+SimpleComic.swift */; };
 		5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */; };
+		5220B23B244B3BA200B7B8DA /* Directory+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5220B239244B3BA200B7B8DA /* Directory+CoreDataClass.swift */; };
+		5220B23C244B3BA200B7B8DA /* Directory+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5220B23A244B3BA200B7B8DA /* Directory+CoreDataProperties.swift */; };
 		523B8EB8243CC9AC002E9138 /* ImagePack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EB7243CC9AC002E9138 /* ImagePack.swift */; };
 		523B8EBA243E0551002E9138 /* CancellableBlockOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EB9243E0551002E9138 /* CancellableBlockOperation.swift */; };
 		523B8EBC243E3B41002E9138 /* CGRect+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */; };
@@ -175,6 +177,8 @@
 		5207FA702430E5E600FB5D4B /* SessionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionWindowController.swift; path = Session/SessionWindowController.swift; sourceTree = "<group>"; };
 		5207FA73243378C800FB5D4B /* CGSize+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+SimpleComic.swift"; sourceTree = "<group>"; };
 		5207FA752434CD9600FB5D4B /* UserDefaults+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+SimpleComic.swift"; sourceTree = "<group>"; };
+		5220B239244B3BA200B7B8DA /* Directory+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Directory+CoreDataClass.swift"; sourceTree = "<group>"; };
+		5220B23A244B3BA200B7B8DA /* Directory+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Directory+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		523B8EB7243CC9AC002E9138 /* ImagePack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePack.swift; sourceTree = "<group>"; };
 		523B8EB9243E0551002E9138 /* CancellableBlockOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancellableBlockOperation.swift; sourceTree = "<group>"; };
 		523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+SimpleComic.swift"; sourceTree = "<group>"; };
@@ -378,6 +382,8 @@
 		28FA4DD50B8A6F3B00496668 /* Managed Objects */ = {
 			isa = PBXGroup;
 			children = (
+				5220B239244B3BA200B7B8DA /* Directory+CoreDataClass.swift */,
+				5220B23A244B3BA200B7B8DA /* Directory+CoreDataProperties.swift */,
 				52611940242A406500958E3F /* Session+CoreDataClass.swift */,
 				52611941242A406500958E3F /* Session+CoreDataProperties.swift */,
 				52611938242911BC00958E3F /* Archive+CoreDataClass.swift */,
@@ -593,6 +599,7 @@
 				5207FA712430E5E600FB5D4B /* SessionWindowController.swift in Sources */,
 				52611912242759FA00958E3F /* InfoWindow.swift in Sources */,
 				5261193D242911BC00958E3F /* Archive+CoreDataProperties.swift in Sources */,
+				5220B23C244B3BA200B7B8DA /* Directory+CoreDataProperties.swift in Sources */,
 				52611943242A406500958E3F /* Session+CoreDataProperties.swift in Sources */,
 				52F52C77242E4C080020D911 /* Configuration.swift in Sources */,
 				525808A3244A174000434EE8 /* LoupeView.swift in Sources */,
@@ -607,6 +614,7 @@
 				523B8EBA243E0551002E9138 /* CancellableBlockOperation.swift in Sources */,
 				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,
 				523B8EBE243F8C2A002E9138 /* Orientation.swift in Sources */,
+				5220B23B244B3BA200B7B8DA /* Directory+CoreDataClass.swift in Sources */,
 				529C1B8C2440A4B400574BC0 /* BezelWindow.swift in Sources */,
 				529C1B922441829200574BC0 /* ColorTransformer.swift in Sources */,
 				5207FA762434CD9600FB5D4B /* UserDefaults+SimpleComic.swift in Sources */,

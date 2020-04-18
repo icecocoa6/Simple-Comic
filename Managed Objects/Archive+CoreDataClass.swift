@@ -15,6 +15,8 @@ import CoreData
 
 
 public class Archive: ImageGroup {
+    let groupLock = NSLock.init()
+
     @objc static let archiveExtensions = [
         "rar", "cbr", "zip", "cbz", "7z", "cb7", "lha", "lzh", "tar"
     ]
@@ -53,14 +55,8 @@ public class Archive: ImageGroup {
     }
     
     override public func didTurnIntoFault() {
+        super.didTurnIntoFault()
         self._instance = nil
-    }
-    
-    override public func willTurnIntoFault() {
-        if self.nested?.boolValue ?? false
-        {
-            try! FileManager.default.removeItem(atPath: (self.url?.path)!)
-        }
     }
     
     private var _instance: XADArchive?
@@ -108,19 +104,6 @@ public class Archive: ImageGroup {
         return imageData
     }
     
-    override var topLevelGroup: NSManagedObject {
-        var group: ImageGroup? = self
-        var parent = group
-        
-        while let grp = group
-        {
-            group = grp.group
-            parent = (group != nil && grp.isKind(of: Archive.self)) ? group : parent
-        }
-        
-        return parent!
-    }
-    
     fileprivate func url(forDataAt index: Int32, in imageArchive: XADArchive) -> URL {
         let fileName = URL.init(fileURLWithPath: imageArchive.name(ofEntry: index)!)
         let archivePath = tempDir.appendingPathComponent("\(index)").appendingPathComponent("\(fileName.lastPathComponent)")
@@ -152,8 +135,7 @@ public class Archive: ImageGroup {
                 image.index = counter as NSNumber
                 image.group = self
             case let group as ImageGroup:
-                group.nested = true
-                group.group = self
+                group.parent = self
                 self.addToNestedImages(group.nestedImages!)
             default:
                 break

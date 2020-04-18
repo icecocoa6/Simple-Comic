@@ -1,0 +1,53 @@
+//
+//  Directory+CoreDataClass.swift
+//  Simple Comic
+//
+//  Created by Tomioka Taichi on 2020/04/18.
+//
+//
+
+import Foundation
+import CoreData
+import Cocoa
+
+public class Directory: ImageGroup {
+    convenience init(context: NSManagedObjectContext, url: URL) {
+        self.init(context: context)
+        self.url = url
+        self.name = url.lastPathComponent
+        self.nestedFolderContents()
+    }
+    
+    func nestedFolderContents() {
+        let folderURL = self.url!
+        let nestedFiles: [String]
+        do {
+            nestedFiles = try FileManager.default.contentsOfDirectory(atPath: self.url!.path)
+        }
+        catch {
+            nestedFiles = []
+            NSApp.presentError(error)
+        }
+
+        for path in nestedFiles
+        {
+            let url = folderURL.appendingPathComponent(path)
+            let entity = self.managedObjectContext?.createEntity(fromContentsAtURL: url)
+
+            // ignore unreadable files
+            guard entity != nil else { continue }
+
+            switch entity {
+            case let group as ImageGroup:
+                group.parent = self
+                self.addToNestedImages(group.nestedImages!)
+            case let image as Image:
+                image.group = self
+            default:
+                assert(false)
+            }
+        }
+
+        self.addToNestedImages(self.images!)
+    }
+}

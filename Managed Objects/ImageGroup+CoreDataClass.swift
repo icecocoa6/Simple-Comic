@@ -15,38 +15,14 @@ import CoreData
 
 
 public class ImageGroup: NSManagedObject {
-    let groupLock = NSLock.init()
-    
-    convenience init(context: NSManagedObjectContext, url: URL) {
-        self.init(context: context)
-        self.url = url
-        self.name = url.lastPathComponent
-        self.nestedFolderContents()
-    }
-    
-    override public func awakeFromInsert() {
-        super.awakeFromInsert()
-    }
-    
-    override public func awakeFromFetch() {
-        super.awakeFromFetch()
-    }
-    
-    override public func willTurnIntoFault() {
-        if self.nested?.boolValue ?? false
-        {
-            try! FileManager.default.removeItem(atPath: self.url!.path)
-        }
-    }
-    
     @objc var url: URL? {
         get {
             do {
                 var stale = false
-                return try URL.init(resolvingBookmarkData: self.pathData!,
-                                           options: .withoutUI,
-                                           relativeTo: nil,
-                                           bookmarkDataIsStale: &stale)
+                return try URL(resolvingBookmarkData: self.pathData!,
+                               options: .withoutUI,
+                               relativeTo: nil,
+                               bookmarkDataIsStale: &stale)
             }
             catch {
                 self.managedObjectContext?.delete(self)
@@ -55,14 +31,12 @@ public class ImageGroup: NSManagedObject {
             }
         }
         set(_value) {
-            guard let value = _value else { return }
-            
-            let url = value
+            guard let url = _value else { return }
+
             do {
-                let data = try url.bookmarkData(options: .minimalBookmark,
-                                                includingResourceValuesForKeys: nil,
-                                                relativeTo: nil)
-                self.pathData = data
+                self.pathData = try url.bookmarkData(options: .minimalBookmark,
+                                                     includingResourceValuesForKeys: nil,
+                                                     relativeTo: nil)
             }
             catch {
                 NSApp.presentError(error)
@@ -70,47 +44,11 @@ public class ImageGroup: NSManagedObject {
         }
     }
     
-    func dataFor(pageIndex: Int) -> Data?
-    {
+    func dataFor(pageIndex: Int) -> Data? {
         return nil
     }
-    
-    @objc var topLevelGroup: NSManagedObject
-    {
-        return self
-    }
-    
-    @objc func nestedFolderContents()
-    {
-        let folderURL = self.url!
-        let nestedFiles: [String]
-        do {
-            nestedFiles = try FileManager.default.contentsOfDirectory(atPath: self.url!.path)
-        }
-        catch {
-            nestedFiles = []
-            NSApp.presentError(error)
-        }
-        
-        for path in nestedFiles
-        {
-            let url = folderURL.appendingPathComponent(path)
-            let entity = self.managedObjectContext?.createEntity(fromContentsAtURL: url)
-            
-            // ignore unreadable files
-            guard entity != nil else { continue }
-            
-            switch entity {
-            case let group as ImageGroup:
-                group.group = self
-                self.addToNestedImages(group.nestedImages!)
-            case let image as Image:
-                image.group = self
-            default:
-                assert(false)
-            }
-        }
-        
-        self.addToNestedImages(self.images!)
+
+    var topLevelGroup: NSManagedObject {
+        return self.parent?.topLevelGroup ?? self
     }
 }
