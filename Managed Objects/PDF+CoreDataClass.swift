@@ -16,7 +16,7 @@ import Quartz
 public class PDF: ImageGroup {
     convenience init(context: NSManagedObjectContext, url: URL) {
         self.init(context: context)
-        self.path = url.path
+        self.url = url
         self.name = url.lastPathComponent
         self.pdfContents()
     }
@@ -24,7 +24,7 @@ public class PDF: ImageGroup {
     private var _instance: PDFDocument?
     var instance: Any? {
         guard _instance == nil else { return _instance }
-        _instance = PDFDocument.init(url: URL.init(fileURLWithPath: self.path!))
+        _instance = PDFDocument.init(url: self.url!)
         return _instance
     }
     
@@ -74,7 +74,7 @@ public class PDF: ImageGroup {
         for pageNumber in 0 ..< doc.pageCount
         {
             let entity = Image.init(context: self.managedObjectContext!)
-            entity.imagePath = String.init(format: "%i", pageNumber + 1)
+            entity.imageURL = URL(fileURLWithPath: "\(pageNumber + 1)", relativeTo: self.url)
             entity.index = pageNumber as NSNumber
             set.add(entity)
         }

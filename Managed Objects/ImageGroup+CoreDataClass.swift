@@ -19,7 +19,7 @@ public class ImageGroup: NSManagedObject {
     
     convenience init(context: NSManagedObjectContext, url: URL) {
         self.init(context: context)
-        self.path = url.path
+        self.url = url
         self.name = url.lastPathComponent
         self.nestedFolderContents()
     }
@@ -35,19 +35,18 @@ public class ImageGroup: NSManagedObject {
     override public func willTurnIntoFault() {
         if self.nested?.boolValue ?? false
         {
-            try! FileManager.default.removeItem(atPath: self.path!)
+            try! FileManager.default.removeItem(atPath: self.url!.path)
         }
     }
     
-    @objc var path: String? {
+    @objc var url: URL? {
         get {
             do {
                 var stale = false
-                let fileURL = try URL.init(resolvingBookmarkData: self.pathData!,
+                return try URL.init(resolvingBookmarkData: self.pathData!,
                                            options: .withoutUI,
                                            relativeTo: nil,
                                            bookmarkDataIsStale: &stale)
-                return fileURL.path
             }
             catch {
                 self.managedObjectContext?.delete(self)
@@ -58,7 +57,7 @@ public class ImageGroup: NSManagedObject {
         set(_value) {
             guard let value = _value else { return }
             
-            let url = URL.init(fileURLWithPath: value)
+            let url = value
             do {
                 let data = try url.bookmarkData(options: .minimalBookmark,
                                                 includingResourceValuesForKeys: nil,
@@ -83,10 +82,10 @@ public class ImageGroup: NSManagedObject {
     
     @objc func nestedFolderContents()
     {
-        let folderURL = URL.init(fileURLWithPath: self.path!)
+        let folderURL = self.url!
         let nestedFiles: [String]
         do {
-            nestedFiles = try FileManager.default.contentsOfDirectory(atPath: self.path!)
+            nestedFiles = try FileManager.default.contentsOfDirectory(atPath: self.url!.path)
         }
         catch {
             nestedFiles = []

@@ -2,7 +2,7 @@
 //  Image+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by 冨岡太一 on 2020/03/24.
+//  Created by 冨岡太一 on 2020/04/18.
 //
 //
 
@@ -16,16 +16,16 @@ extension Image {
         return NSFetchRequest<Image>(entityName: "Image")
     }
 
-    @NSManaged public var height: NSNumber?
-    @NSManaged public var index: NSNumber?
-    @NSManaged public var width: NSNumber?
-    @NSManaged public var imagePath: String?
-    @NSManaged public var text: NSNumber?
     @NSManaged public var aspectRatio: NSNumber?
+    @NSManaged public var height: Double
+    @NSManaged public var imageURL: URL?
+    @NSManaged public var index: NSNumber?
+    @NSManaged public var text: Bool
     @NSManaged public var thumbnailData: Data?
+    @NSManaged public var width: Double
     @NSManaged public var group: ImageGroup?
-    @NSManaged public var session: Session?
     @NSManaged public var includedGroups: NSSet?
+    @NSManaged public var session: Session?
 
 }
 

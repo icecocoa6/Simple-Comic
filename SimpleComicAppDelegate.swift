@@ -180,22 +180,24 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         if storeInfo != nil && storeInfo!["viewVersion"] as? String != "Version 1708" {
             try! FileManager.default.removeItem(at: url)
         }
-        self._persistentStoreCoordinator = NSPersistentStoreCoordinator.init(managedObjectModel: self.managedObjectModel!)
+        self._persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel!)
 
         do {
-            try self._persistentStoreCoordinator?.addPersistentStore(ofType: NSSQLiteStoreType,
+            try self._persistentStoreCoordinator!.addPersistentStore(ofType: NSSQLiteStoreType,
                                                                      configurationName: nil,
                                                                      at: url,
                                                                      options: [NSMigratePersistentStoresAutomaticallyOption: true])
         }
         catch {
+            try! FileManager.default.removeItem(at: url)
             NSApp.presentError(error)
         }
 
-        let store = self._persistentStoreCoordinator?.persistentStore(for: url)
-        var metadata = self._persistentStoreCoordinator?.metadata(for: store!)
-        metadata!["viewVersion"] = "Version 1708"
-        self._persistentStoreCoordinator?.setMetadata(metadata, for: store!)
+        if let store = self._persistentStoreCoordinator!.persistentStore(for: url) {
+            var metadata = self._persistentStoreCoordinator!.metadata(for: store)
+            metadata["viewVersion"] = "Version 1708"
+            self._persistentStoreCoordinator!.setMetadata(metadata, for: store)
+        }
 
         return _persistentStoreCoordinator!
     }
@@ -304,8 +306,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         NSApp.stopModal(withCode: .OK)
     }
 
-    @IBAction
-    func modalCancel(_ sender: Any) {
+    @IBAction func modalCancel(_ sender: Any) {
         NSApp.stopModal(withCode: .cancel)
     }
 
@@ -353,7 +354,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func passwordForArchive(withPath path: String) -> String? {
+    func passwordForArchive(withPath url: URL) -> String? {
         var password: String? = nil
         passwordField?.stringValue = ""
 

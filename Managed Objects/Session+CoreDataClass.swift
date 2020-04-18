@@ -23,7 +23,7 @@ public class Session: NSManagedObject {
         for group in self.groups!
         {
             let grp = group as! ImageGroup
-            _ = grp.path
+            _ = grp.url
         }
     }
 

@@ -153,9 +153,9 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
 
     let fileNameComparator: Comparator = {
         let option: String.CompareOptions = [.caseInsensitive, .numeric, .widthInsensitive, .forcedOrdering]
-        let sa = $0 as! String
-        let sb = $1 as! String
-        return sa.compare(sb, options: option, range: nil, locale: nil)
+        let sa = $0 as! URL
+        let sb = $1 as! URL
+        return sa.path.compare(sb.path, options: option, range: nil, locale: nil)
     }
 
     init(window: NSWindow?, session: Session) {
@@ -167,8 +167,8 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         self.shouldCascadeWindows = cascade
         /* Make sure that the session does not start out in fullscreen, nor with the loupe enabled. */
         self.session?.loupe = false
-        let fileNameSort = NSSortDescriptor(keyPath: \Image.imagePath, ascending: true, comparator: fileNameComparator)
-        let archivePathSort = NSSortDescriptor(keyPath: \Image.group?.path, ascending: true, comparator: fileNameComparator)
+        let fileNameSort = NSSortDescriptor(keyPath: \Image.imageURL, ascending: true, comparator: fileNameComparator)
+        let archivePathSort = NSSortDescriptor(keyPath: \Image.group?.url, ascending: true, comparator: fileNameComparator)
         self.pageSortDescriptor = [archivePathSort, fileNameSort]
     }
 
@@ -460,7 +460,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         /* Makes sure that the group is both an archive and not nested */
         return (selectedGroup?.isKind(of: Archive.self))! &&
             selectedGroup == selectedGroup?.topLevelGroup &&
-            !selectedPage.text!.boolValue
+            !selectedPage.text
     }
 
     var pageSelectionInProgress: Bool {
@@ -575,14 +575,14 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         /* Makes sure that the group is both an archive and not nested */
         if (selectedGroup?.isKind(of: Archive.self))! &&
             selectedGroup == selectedGroup?.topLevelGroup &&
-            !selectedPage.text!.boolValue {
+            !selectedPage.text {
             let archive = selectedGroup as! Archive
-            let archivePath = URL.init(fileURLWithPath: selectedGroup!.path!).standardizedFileURL.path
+            let archivePath = selectedGroup!.url!.standardizedFileURL.path
 
             if archive.quicklookCompatible {
                 let xad = archive.instance!
-                let coverIndex = selectedPage.index!.intValue
-                let coverName = xad.rawName(ofEntry: Int32(coverIndex))
+                let coverIndex = selectedPage.index!
+                let coverName = xad.rawName(ofEntry: Int32(truncating: coverIndex))
                 let coverString = coverName!.string(withEncoding: String.Encoding.nonLossyASCII.rawValue)!
                 self.saveQuickLookMetadataOfFile(atPath: archivePath, name: coverString, rect: cropRect)
             } else if let source = selectedPage.pageImage {
@@ -656,9 +656,9 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         }
 
         let representationPath = pageOne.group != nil
-            ? (pageOne.group?.topLevelGroup as! ImageGroup).path
-            : pageOne.imagePath
-        self.window?.representedFilename = representationPath!
+            ? (pageOne.group?.topLevelGroup as! ImageGroup).url
+            : pageOne.imageURL
+        self.window!.representedFilename = representationPath!.path
         self.window?.title = titleString
         self.pageNames = titleString
 
@@ -666,11 +666,11 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         DispatchQueue.global().async {
             if pageOne.imageSource != nil {
                 self.pageView.setSource(first: ImagePack(image: pageOne),
-                                        CGSize.init(width: CGFloat(pageOne.width!.floatValue),
-                                                    height: CGFloat(pageOne.height!.floatValue)),
+                                        CGSize.init(width: CGFloat(pageOne.width),
+                                                    height: CGFloat(pageOne.height)),
                                         second: (pageTwo != nil) ? ImagePack(image: pageTwo!) : nil,
-                                        CGSize.init(width: CGFloat(pageTwo?.width?.floatValue ?? 0),
-                                                    height: CGFloat(pageTwo?.height?.floatValue ?? 0)))
+                                        CGSize.init(width: CGFloat(pageTwo?.width ?? 0),
+                                                    height: CGFloat(pageTwo?.height ?? 0)))
             }
 
             DispatchQueue.main.async {
@@ -1024,7 +1024,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
             return false
         }
         let page = self.pageController.selectedObjects[0] as! Image
-        return page.text!.boolValue
+        return page.text
     }
 
     func toolbarWillAddItem(_ notification: Notification) {

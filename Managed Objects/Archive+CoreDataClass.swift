@@ -33,7 +33,7 @@ public class Archive: ImageGroup {
     
     convenience init(context: NSManagedObjectContext, url: URL) {
         self.init(context: context)
-        self.path = url.path
+        self.url = url
         self.name = url.lastPathComponent
         self.nestedArchiveContents()
     }
@@ -59,22 +59,22 @@ public class Archive: ImageGroup {
     override public func willTurnIntoFault() {
         if self.nested?.boolValue ?? false
         {
-            try! FileManager.default.removeItem(atPath: self.path!)
+            try! FileManager.default.removeItem(atPath: (self.url?.path)!)
         }
     }
     
     private var _instance: XADArchive?
     public var instance: XADArchive? {
         guard _instance == nil else { return _instance }
-        guard FileManager.default.fileExists(atPath: self.path!) else { return nil }
-        guard FileManager.default.isReadableFile(atPath: self.path!) else { return nil }
+        guard FileManager.default.fileExists(atPath: self.url!.path) else { return nil }
+        guard FileManager.default.isReadableFile(atPath: self.url!.path) else { return nil }
         
-        _instance = XADArchive(file: self.path!, delegate: self, error: nil)
+        _instance = XADArchive(file: self.url!.path, delegate: self, error: nil)
         
         if _instance == nil {
             let alert = NSAlert()
             alert.messageText = "Invalid Archive Found"
-            alert.informativeText = "This application just ignores the invalid archive file. Check the archive at '\(self.path!)'."
+            alert.informativeText = "This application just ignores the invalid archive file. Check the archive at '\(self.url!)'."
             alert.addButton(withTitle: "OK")
             alert.runModal()
             return nil
@@ -173,7 +173,7 @@ public class Archive: ImageGroup {
         if self.password == nil
         {
             let app = NSApp.delegate as! SimpleComicAppDelegate
-            self.password = app.passwordForArchive(withPath: self.path!)
+            self.password = app.passwordForArchive(withPath: self.url!)
         }
         
         archive.setPassword(self.password!)

@@ -73,8 +73,8 @@ public class Image: NSManagedObject {
     
     convenience init(context: NSManagedObjectContext, url: URL, text: Bool = false) {
         self.init(context: context)
-        self.imagePath = url.path
-        self.text = text as NSNumber
+        self.imageURL = url
+        self.text = text
     }
     
     override public func awakeFromInsert() {
@@ -95,7 +95,7 @@ public class Image: NSManagedObject {
     }
     
     @objc func shouldDisplayAlone() -> Bool {
-        if self.text?.boolValue ?? false
+        if self.text
         {
             return true;
         }
@@ -121,22 +121,15 @@ public class Image: NSManagedObject {
         if NSZeroSize != imageSize
         {
             let aspect = imageSize.width / imageSize.height;
-            self.width = NSNumber.init(value: Float(imageSize.width))
-            self.height = NSNumber.init(value: Float(imageSize.height))
-            self.aspectRatio = NSNumber.init(value: Float(aspect))
+            self.width = Double(Float(imageSize.width))
+            self.height = Double(Float(imageSize.height))
+            self.aspectRatio = Float(aspect) as NSNumber
         }
     }
     
     @objc var name: String? {
         get {
-            if let path = self.imagePath
-            {
-                return NSURL.init(fileURLWithPath: path).lastPathComponent
-            }
-            else
-            {
-                return nil
-            }
+            self.imageURL?.lastPathComponent
         }
     }
     
@@ -175,7 +168,7 @@ public class Image: NSManagedObject {
     
     @objc var pageImage: NSImage? {
         let text = self.text
-        if text?.boolValue ?? false
+        if text
         {
             return self.textPage
         }
@@ -189,8 +182,8 @@ public class Image: NSManagedObject {
             imageFromData = NSImage.init(data: img)
         }
         
-        let width = self.width?.doubleValue ?? 0.0
-        let height = self.height?.doubleValue ?? 0.0
+        let width = self.width
+        let height = self.height
         let imageSize = NSSize.init(width: width, height: height)
         
         guard imageFromData != nil && imageSize != NSZeroSize else {
@@ -206,7 +199,7 @@ public class Image: NSManagedObject {
     }
     
     var imageSource: CGImageSource? {
-        guard text == nil || !text!.boolValue else { return nil }
+        guard !text else { return nil }
         guard let img = self.pageData else { return nil }
         
         self.setOwnSizeInfoWithData(imageData: img)
@@ -255,9 +248,9 @@ public class Image: NSManagedObject {
         {
             return self.group?.dataFor(pageIndex: index.intValue)
         }
-        else if let imagePath = self.imagePath
+        else if let url = self.imageURL
         {
-            return try! Data.init(contentsOf: URL.init(fileURLWithPath: imagePath))
+            return try! Data.init(contentsOf: url)
         }
         
         return nil
