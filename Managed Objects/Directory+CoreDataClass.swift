@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import Cocoa
 
-public class Directory: ImageGroup {
+public class Directory: PhysicalContainer {
     convenience init(context: NSManagedObjectContext, url: URL) {
         self.init(context: context)
         self.url = url
@@ -38,7 +38,7 @@ public class Directory: ImageGroup {
             guard entity != nil else { continue }
 
             switch entity {
-            case let group as ImageGroup:
+            case let group as PhysicalContainer:
                 group.parent = self
                 group.imageList = self.imageList
             case let image as Image:

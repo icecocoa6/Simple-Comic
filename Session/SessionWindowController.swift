@@ -656,7 +656,7 @@ class SessionWindowController: NSWindowController, NSTextFieldDelegate, NSMenuIt
         }
 
         let representationPath = pageOne.group != nil
-            ? (pageOne.group?.topLevelGroup as! ImageGroup).url
+            ? (pageOne.group?.topLevelGroup as! PhysicalContainer).url
             : pageOne.imageURL
         self.window!.representedFilename = representationPath!.path
         self.window?.title = titleString

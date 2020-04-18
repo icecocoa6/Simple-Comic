@@ -13,7 +13,7 @@ import Foundation
 import CoreData
 import Quartz
 
-public class PDF: ImageGroup {
+public class PDF: PhysicalContainer {
     let groupLock = NSLock.init()
 
     convenience init(context: NSManagedObjectContext, url: URL) {

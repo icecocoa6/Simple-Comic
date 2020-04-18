@@ -11,10 +11,10 @@ import CoreData
 
 
 public class ImageList: NSManagedObject {
-    private func allImages(in group: ImageGroup) -> Set<Image> {
+    private func allImages(in group: PhysicalContainer) -> Set<Image> {
         var result = Set<Image>(group.images?.allObjects as! [Image])
         for group in group.children ?? [] {
-            result.formUnion(allImages(in: group as! ImageGroup))
+            result.formUnion(allImages(in: group as! PhysicalContainer))
         }
         return result
     }
@@ -22,7 +22,7 @@ public class ImageList: NSManagedObject {
     @objc var allImages: Set<Image> {
         var result = Set<Image>(self.images!.allObjects as! [Image])
         for group in self.groups ?? [] {
-            let grp = group as! ImageGroup
+            let grp = group as! PhysicalContainer
             result.formUnion(self.allImages(in: grp))
         }
         return result

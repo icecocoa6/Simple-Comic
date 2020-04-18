@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19D76" minimumToolsVersion="Xcode 9.0" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Archive" representedClassName=".Archive" parentEntity="ImageGroup" syncable="YES">
+    <entity name="Archive" representedClassName=".Archive" parentEntity="PhysicalContainer" syncable="YES">
         <attribute name="password" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="solidDirectory" optional="YES" attributeType="URI" syncable="YES"/>
     </entity>
-    <entity name="Directory" representedClassName=".Directory" parentEntity="ImageGroup" syncable="YES"/>
+    <entity name="Directory" representedClassName=".Directory" parentEntity="PhysicalContainer" syncable="YES"/>
     <entity name="Image" representedClassName=".Image" syncable="YES">
         <attribute name="aspectRatio" optional="YES" attributeType="Float" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="height" attributeType="Double" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
@@ -13,20 +13,26 @@
         <attribute name="text" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="thumbnailData" optional="YES" transient="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="width" attributeType="Double" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
-        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="images" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="PhysicalContainer" inverseName="images" inverseEntity="PhysicalContainer" syncable="YES"/>
         <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ImageList" inverseName="images" inverseEntity="ImageList" syncable="YES"/>
         <fetchIndex name="byGroupIndex">
             <fetchIndexElement property="group" type="Binary" order="ascending"/>
         </fetchIndex>
     </entity>
-    <entity name="ImageGroup" representedClassName=".ImageGroup" isAbstract="YES" syncable="YES">
+    <entity name="ImageList" representedClassName=".ImageList" syncable="YES">
+        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PhysicalContainer" inverseName="imageList" inverseEntity="PhysicalContainer" syncable="YES"/>
+        <relationship name="images" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="imageList" inverseEntity="Image" syncable="YES"/>
+        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="imageList" inverseEntity="Session" syncable="YES"/>
+    </entity>
+    <entity name="PDF" representedClassName=".PDF" parentEntity="PhysicalContainer" syncable="YES"/>
+    <entity name="PhysicalContainer" representedClassName=".PhysicalContainer" isAbstract="YES" syncable="YES">
         <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
         <attribute name="pathData" attributeType="Binary" syncable="YES"/>
-        <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="parent" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="PhysicalContainer" inverseName="parent" inverseEntity="PhysicalContainer" syncable="YES"/>
         <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ImageList" inverseName="groups" inverseEntity="ImageList" syncable="YES"/>
         <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Cascade" destinationEntity="Image" inverseName="group" inverseEntity="Image" syncable="YES"/>
-        <relationship name="parent" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="children" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="parent" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="PhysicalContainer" inverseName="children" inverseEntity="PhysicalContainer" syncable="YES"/>
         <fetchIndex name="byChildrenIndex">
             <fetchIndexElement property="children" type="Binary" order="ascending"/>
         </fetchIndex>
@@ -34,12 +40,6 @@
             <fetchIndexElement property="images" type="Binary" order="ascending"/>
         </fetchIndex>
     </entity>
-    <entity name="ImageList" representedClassName=".ImageList" syncable="YES">
-        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="imageList" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="imageList" inverseEntity="Image" syncable="YES"/>
-        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="imageList" inverseEntity="Session" syncable="YES"/>
-    </entity>
-    <entity name="PDF" representedClassName=".PDF" parentEntity="ImageGroup" syncable="YES"/>
     <entity name="Session" representedClassName=".Session" syncable="YES">
         <attribute name="fullscreen" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="loupe" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
@@ -57,7 +57,7 @@
         <element name="Archive" positionX="260.94921875" positionY="246.109375" width="90" height="73"/>
         <element name="Directory" positionX="365.26953125" positionY="251.21875" width="128" height="43"/>
         <element name="Image" positionX="359.515625" positionY="-46.6171875" width="92" height="178"/>
-        <element name="ImageGroup" positionX="165.73828125" positionY="40.7109375" width="92" height="148"/>
+        <element name="PhysicalContainer" positionX="133.19140625" positionY="38.265625" width="111.44921875" height="148"/>
         <element name="ImageList" positionX="551.28515625" positionY="178.01953125" width="128" height="88"/>
         <element name="PDF" positionX="152.00390625" positionY="245.8046875" width="92" height="43"/>
         <element name="Session" positionX="723.54296875" positionY="57.3828125" width="90" height="208"/>

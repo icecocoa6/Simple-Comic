@@ -1,5 +1,5 @@
 //
-//  ImageGroup+CoreDataClass.swift
+//  PhysicalContainer+CoreDataClass.swift
 //  Simple Comic
 //
 //  Original version is created by Alexander Rauchfuss on 2/9/08.
@@ -14,7 +14,7 @@ import Foundation
 import CoreData
 
 
-public class ImageGroup: NSManagedObject {
+public class PhysicalContainer: NSManagedObject {
     @objc var url: URL? {
         get {
             do {

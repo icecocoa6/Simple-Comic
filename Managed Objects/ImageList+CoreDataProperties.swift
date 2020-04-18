@@ -43,10 +43,10 @@ extension ImageList {
 extension ImageList {
 
     @objc(addGroupsObject:)
-    @NSManaged public func addToGroups(_ value: ImageGroup)
+    @NSManaged public func addToGroups(_ value: PhysicalContainer)
 
     @objc(removeGroupsObject:)
-    @NSManaged public func removeFromGroups(_ value: ImageGroup)
+    @NSManaged public func removeFromGroups(_ value: PhysicalContainer)
 
     @objc(addGroups:)
     @NSManaged public func addToGroups(_ values: NSSet)

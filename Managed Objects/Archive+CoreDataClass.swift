@@ -14,7 +14,7 @@ import AppKit
 import CoreData
 
 
-public class Archive: ImageGroup {
+public class Archive: PhysicalContainer {
     let groupLock = NSLock.init()
 
     @objc static let archiveExtensions = [
@@ -135,7 +135,7 @@ public class Archive: ImageGroup {
                 image.index = counter as NSNumber
                 image.group = self
                 image.imageList = self.imageList
-            case let group as ImageGroup:
+            case let group as PhysicalContainer:
                 group.parent = self
                 group.imageList = self.imageList
             default:

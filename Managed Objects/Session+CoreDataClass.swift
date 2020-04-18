@@ -22,7 +22,7 @@ public class Session: NSManagedObject {
         are deleted. */
         for group in self.imageList!.groups!
         {
-            let grp = group as! ImageGroup
+            let grp = group as! PhysicalContainer
             _ = grp.url
         }
     }
@@ -42,7 +42,7 @@ public class Session: NSManagedObject {
         
         self.willChangeValue(for: \.allImages)
         switch entity {
-        case let group as ImageGroup:
+        case let group as PhysicalContainer:
             group.imageList = self.imageList
         case let image as Image:
             image.imageList = self.imageList

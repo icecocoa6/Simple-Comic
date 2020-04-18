@@ -23,7 +23,7 @@ extension Image {
     @NSManaged public var text: Bool
     @NSManaged public var thumbnailData: Data?
     @NSManaged public var width: Double
-    @NSManaged public var group: ImageGroup?
+    @NSManaged public var group: PhysicalContainer?
     @NSManaged public var imageList: ImageList?
 
 }
