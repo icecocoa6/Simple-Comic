@@ -14,16 +14,9 @@
         <attribute name="thumbnailData" optional="YES" transient="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="width" attributeType="Double" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <relationship name="group" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="images" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="includedGroups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="nestedImages" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="session" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="images" inverseEntity="Session" syncable="YES"/>
+        <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ImageList" inverseName="images" inverseEntity="ImageList" syncable="YES"/>
         <fetchIndex name="byGroupIndex">
             <fetchIndexElement property="group" type="Binary" order="ascending"/>
-        </fetchIndex>
-        <fetchIndex name="byIncludedGroupsIndex">
-            <fetchIndexElement property="includedGroups" type="Binary" order="ascending"/>
-        </fetchIndex>
-        <fetchIndex name="bySessionIndex">
-            <fetchIndexElement property="session" type="Binary" order="ascending"/>
         </fetchIndex>
     </entity>
     <entity name="ImageGroup" representedClassName=".ImageGroup" isAbstract="YES" syncable="YES">
@@ -31,25 +24,20 @@
         <attribute name="name" attributeType="String" syncable="YES"/>
         <attribute name="pathData" attributeType="Binary" syncable="YES"/>
         <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="parent" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="Image" inverseName="group" inverseEntity="Image" syncable="YES"/>
-        <relationship name="nestedImages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="includedGroups" inverseEntity="Image" syncable="YES"/>
+        <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ImageList" inverseName="groups" inverseEntity="ImageList" syncable="YES"/>
+        <relationship name="images" optional="YES" toMany="YES" minCount="1" deletionRule="Cascade" destinationEntity="Image" inverseName="group" inverseEntity="Image" syncable="YES"/>
         <relationship name="parent" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="children" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="session" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="groups" inverseEntity="Session" syncable="YES"/>
-        <fetchIndex name="byGroupIndex">
-            <fetchIndexElement property="parent" type="Binary" order="ascending"/>
-        </fetchIndex>
-        <fetchIndex name="byGroupsIndex">
+        <fetchIndex name="byChildrenIndex">
             <fetchIndexElement property="children" type="Binary" order="ascending"/>
         </fetchIndex>
         <fetchIndex name="byImagesIndex">
             <fetchIndexElement property="images" type="Binary" order="ascending"/>
         </fetchIndex>
-        <fetchIndex name="byNestedImagesIndex">
-            <fetchIndexElement property="nestedImages" type="Binary" order="ascending"/>
-        </fetchIndex>
-        <fetchIndex name="bySessionIndex">
-            <fetchIndexElement property="session" type="Binary" order="ascending"/>
-        </fetchIndex>
+    </entity>
+    <entity name="ImageList" representedClassName=".ImageList" syncable="YES">
+        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageGroup" inverseName="imageList" inverseEntity="ImageGroup" syncable="YES"/>
+        <relationship name="images" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="imageList" inverseEntity="Image" syncable="YES"/>
+        <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="imageList" inverseEntity="Session" syncable="YES"/>
     </entity>
     <entity name="PDF" representedClassName=".PDF" parentEntity="ImageGroup" syncable="YES"/>
     <entity name="Session" representedClassName=".Session" syncable="YES">
@@ -63,21 +51,15 @@
         <attribute name="selection" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="twoPageSpread" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="zoomLevel" attributeType="Float" defaultValueString="1" usesScalarValueType="YES" syncable="YES"/>
-        <relationship name="groups" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageGroup" inverseName="session" inverseEntity="ImageGroup" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Image" inverseName="session" inverseEntity="Image" syncable="YES"/>
-        <fetchIndex name="byGroupsIndex">
-            <fetchIndexElement property="groups" type="Binary" order="ascending"/>
-        </fetchIndex>
-        <fetchIndex name="byImagesIndex">
-            <fetchIndexElement property="images" type="Binary" order="ascending"/>
-        </fetchIndex>
+        <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ImageList" inverseName="session" inverseEntity="ImageList" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Archive" positionX="206.74609375" positionY="29.02734375" width="90" height="73"/>
-        <element name="Image" positionX="72" positionY="162" width="92" height="193"/>
-        <element name="ImageGroup" positionX="241" positionY="117" width="92" height="163"/>
-        <element name="PDF" positionX="88.2109375" positionY="29.91015625" width="92" height="43"/>
-        <element name="Session" positionX="414" positionY="117" width="90" height="223"/>
-        <element name="Directory" positionX="315.7265625" positionY="29.8828125" width="128" height="43"/>
+        <element name="Archive" positionX="260.94921875" positionY="246.109375" width="90" height="73"/>
+        <element name="Directory" positionX="365.26953125" positionY="251.21875" width="128" height="43"/>
+        <element name="Image" positionX="359.515625" positionY="-46.6171875" width="92" height="178"/>
+        <element name="ImageGroup" positionX="165.73828125" positionY="40.7109375" width="92" height="148"/>
+        <element name="ImageList" positionX="551.28515625" positionY="178.01953125" width="128" height="88"/>
+        <element name="PDF" positionX="152.00390625" positionY="245.8046875" width="92" height="43"/>
+        <element name="Session" positionX="723.54296875" positionY="57.3828125" width="90" height="208"/>
     </elements>
 </model>

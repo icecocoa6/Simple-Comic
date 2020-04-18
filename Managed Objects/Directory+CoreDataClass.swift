@@ -40,14 +40,13 @@ public class Directory: ImageGroup {
             switch entity {
             case let group as ImageGroup:
                 group.parent = self
-                self.addToNestedImages(group.nestedImages!)
+                group.imageList = self.imageList
             case let image as Image:
                 image.group = self
+                image.imageList = self.imageList
             default:
                 assert(false)
             }
         }
-
-        self.addToNestedImages(self.images!)
     }
 }

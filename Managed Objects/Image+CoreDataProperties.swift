@@ -24,24 +24,6 @@ extension Image {
     @NSManaged public var thumbnailData: Data?
     @NSManaged public var width: Double
     @NSManaged public var group: ImageGroup?
-    @NSManaged public var includedGroups: NSSet?
-    @NSManaged public var session: Session?
-
-}
-
-// MARK: Generated accessors for includedGroups
-extension Image {
-
-    @objc(addIncludedGroupsObject:)
-    @NSManaged public func addToIncludedGroups(_ value: ImageGroup)
-
-    @objc(removeIncludedGroupsObject:)
-    @NSManaged public func removeFromIncludedGroups(_ value: ImageGroup)
-
-    @objc(addIncludedGroups:)
-    @NSManaged public func addToIncludedGroups(_ values: NSSet)
-
-    @objc(removeIncludedGroups:)
-    @NSManaged public func removeFromIncludedGroups(_ values: NSSet)
+    @NSManaged public var imageList: ImageList?
 
 }

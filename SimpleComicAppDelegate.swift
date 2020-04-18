@@ -239,10 +239,10 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Session Management
 
     func windowForSession(_ session: Session) {
-        guard session.images!.count > 0 else { return }
+        guard session.imageList!.allImages.count > 0 else { return }
         guard (sessions.allSatisfy { $0.session != session }) else { return }
 
-        let comicWindow = SessionWindowController.init(window: nil, session: session)
+        let comicWindow = SessionWindowController(window: nil, session: session)
         sessions.append(comicWindow)
         comicWindow.showWindow(self)
     }
@@ -260,7 +260,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         let sessions = try! self.managedObjectContext.fetch(sessionRequest) as! [Session]
 
         for session in sessions {
-            if (session.groups?.count ?? 0) > 0 {
+            if (session.imageList?.allImages.count ?? 0) > 0 {
                 self.windowForSession(session)
             } else {
                 self.managedObjectContext.delete(session)
@@ -269,10 +269,11 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func newSessionWithFiles(_ files: [String]) -> Session {
-        let session = Session.init(context: self.managedObjectContext)
+        let session = Session(context: self.managedObjectContext)
         session.rawAdjustmentMode = Int16(UserDefaults.standard.rawAdjustmentMode)
         session.pageOrder = UserDefaults.standard.pageOrder
         session.twoPageSpread = UserDefaults.standard.twoPageSpread
+        session.imageList = ImageList(context: self.managedObjectContext)
 
         self.addFiles(urls: files.map { URL(fileURLWithPath: $0) }, toSession: session)
         return session

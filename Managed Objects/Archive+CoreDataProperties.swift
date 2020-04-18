@@ -2,7 +2,7 @@
 //  Archive+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by 冨岡太一 on 2020/04/05.
+//  Created by 冨岡太一 on 2020/04/18.
 //
 //
 

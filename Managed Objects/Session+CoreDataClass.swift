@@ -20,7 +20,7 @@ public class Session: NSManagedObject {
 
         /* By calling path for all children, groups with unresolved bookmarks
         are deleted. */
-        for group in self.groups!
+        for group in self.imageList!.groups!
         {
             let grp = group as! ImageGroup
             _ = grp.url
@@ -39,18 +39,23 @@ public class Session: NSManagedObject {
     func addFile(atURL url: URL) {
         let entity = self.managedObjectContext?.createEntity(fromContentsAtURL: url)
         guard entity != nil else { return }
+        
+        self.willChangeValue(for: \.allImages)
         switch entity {
         case let group as ImageGroup:
-            self.addToImages(group.nestedImages!)
-            group.session = self
+            group.imageList = self.imageList
         case let image as Image:
-            self.addToImages(image)
-            image.session = self
+            image.imageList = self.imageList
         default:
             assert(false)
         }
+        self.didChangeValue(for: \.allImages)
         
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
+    }
+    
+    @objc var allImages: Set<Image>? {
+        self.imageList?.allImages
     }
     
     var orientation: Orientation.Horizontal {

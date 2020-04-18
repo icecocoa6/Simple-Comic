@@ -134,15 +134,14 @@ public class Archive: ImageGroup {
             case let image as Image:
                 image.index = counter as NSNumber
                 image.group = self
+                image.imageList = self.imageList
             case let group as ImageGroup:
                 group.parent = self
-                self.addToNestedImages(group.nestedImages!)
+                group.imageList = self.imageList
             default:
                 break
             }
         }
-        
-        self.addToNestedImages(self.images!)
     }
     
     var quicklookCompatible: Bool {

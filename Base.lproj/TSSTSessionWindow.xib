@@ -281,9 +281,9 @@
                 <string>group</string>
             </declaredKeys>
             <connections>
+                <binding destination="-2" name="contentSet" keyPath="session.allImages" id="eqJ-AQ-L9U"/>
                 <binding destination="-2" name="managedObjectContext" keyPath="managedObjectContext" id="86"/>
                 <binding destination="-2" name="sortDescriptors" keyPath="pageSortDescriptor" id="158"/>
-                <binding destination="-2" name="contentSet" keyPath="session.images" id="644"/>
             </connections>
         </arrayController>
         <window title="InfoPane" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="350" userLabel="Scrub Panel" customClass="InfoWindow" customModule="Simple_Comic" customModuleProvider="target">

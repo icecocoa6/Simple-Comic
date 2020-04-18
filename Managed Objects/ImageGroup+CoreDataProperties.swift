@@ -19,11 +19,10 @@ extension ImageGroup {
     @NSManaged public var modified: TimeInterval
     @NSManaged public var name: String?
     @NSManaged public var pathData: Data?
-    @NSManaged public var parent: ImageGroup?
     @NSManaged public var children: NSSet?
     @NSManaged public var images: NSSet?
-    @NSManaged public var nestedImages: NSSet?
-    @NSManaged public var session: Session?
+    @NSManaged public var parent: ImageGroup?
+    @NSManaged public var imageList: ImageList?
 
 }
 
@@ -58,22 +57,5 @@ extension ImageGroup {
 
     @objc(removeImages:)
     @NSManaged public func removeFromImages(_ values: NSSet)
-
-}
-
-// MARK: Generated accessors for nestedImages
-extension ImageGroup {
-
-    @objc(addNestedImagesObject:)
-    @NSManaged public func addToNestedImages(_ value: Image)
-
-    @objc(removeNestedImagesObject:)
-    @NSManaged public func removeFromNestedImages(_ value: Image)
-
-    @objc(addNestedImages:)
-    @NSManaged public func addToNestedImages(_ values: NSSet)
-
-    @objc(removeNestedImages:)
-    @NSManaged public func removeFromNestedImages(_ values: NSSet)
 
 }

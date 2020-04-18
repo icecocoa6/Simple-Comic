@@ -81,6 +81,5 @@ public class PDF: ImageGroup {
             set.add(entity)
         }
         self.addToImages(set)
-        self.addToNestedImages(set)
     }
 }

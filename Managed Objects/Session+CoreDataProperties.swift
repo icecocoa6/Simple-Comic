@@ -26,41 +26,6 @@ extension Session {
     @NSManaged public var selection: Int16
     @NSManaged public var twoPageSpread: Bool
     @NSManaged public var zoomLevel: Float
-    @NSManaged public var groups: NSSet?
-    @NSManaged public var images: NSSet?
-
-}
-
-// MARK: Generated accessors for groups
-extension Session {
-
-    @objc(addGroupsObject:)
-    @NSManaged public func addToGroups(_ value: ImageGroup)
-
-    @objc(removeGroupsObject:)
-    @NSManaged public func removeFromGroups(_ value: ImageGroup)
-
-    @objc(addGroups:)
-    @NSManaged public func addToGroups(_ values: NSSet)
-
-    @objc(removeGroups:)
-    @NSManaged public func removeFromGroups(_ values: NSSet)
-
-}
-
-// MARK: Generated accessors for images
-extension Session {
-
-    @objc(addImagesObject:)
-    @NSManaged public func addToImages(_ value: Image)
-
-    @objc(removeImagesObject:)
-    @NSManaged public func removeFromImages(_ value: Image)
-
-    @objc(addImages:)
-    @NSManaged public func addToImages(_ values: NSSet)
-
-    @objc(removeImages:)
-    @NSManaged public func removeFromImages(_ values: NSSet)
+    @NSManaged public var imageList: ImageList?
 
 }
