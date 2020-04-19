@@ -42,22 +42,18 @@ import AppKit
 extension SessionWindowController: SimpleComicAction {
     @IBAction
     func changeTwoPage(_ sender: Any) {
-        if let session = self.session {
-            session.twoPageSpread = !session.twoPageSpread
-        }
+        session.twoPageSpread = !session.twoPageSpread
     }
 
     @IBAction
     func changePageOrder(_ sender: Any) {
-        if let session = self.session {
-            session.pageOrder = !session.pageOrder
-        }
+        session.pageOrder = !session.pageOrder
     }
 
     @IBAction
     func changeScaling(_ sender: Any) {
         let scaleType = (sender as AnyObject).tag % 400
-        session?.adjustmentMode = PageAdjustmentMode(rawValue: scaleType)!
+        session.adjustmentMode = PageAdjustmentMode(rawValue: scaleType)!
     }
 
     @IBAction
@@ -118,7 +114,7 @@ extension SessionWindowController: SimpleComicAction {
 
     @IBAction
     func lastPage(_ sender: Any) {
-        let contents = self.pageController.content as! [Any]
+        let contents = self.pageController.sortedImages
         self.pageController.setSelectionIndex(contents.count - 1)
     }
 
@@ -149,8 +145,8 @@ extension SessionWindowController: SimpleComicAction {
 
     @IBAction
     func zoomReset(_ sender: Any) {
-        self.session?.adjustmentMode = .none
-        self.session?.zoomLevel = 1.0
+        self.session.adjustmentMode = .none
+        self.session.zoomLevel = 1.0
         self.pageView.resizeView()
         self.refreshLoupePanel()
     }
@@ -170,33 +166,33 @@ extension SessionWindowController: SimpleComicAction {
 
     @IBAction
     func rotateRight(_ sender: Any?) {
-        var current: Int16 = self.session?.rotation ?? 0
+        var current: Int16 = self.session.rotation
         current = (current + 1) % 4
-        self.session?.rotation = current
+        self.session.rotation = current
         self.resizeWindow()
         self.refreshLoupePanel()
     }
 
     @IBAction
     func rotateLeft(_ sender: Any?) {
-        var current = self.session?.rotation ?? 0
+        var current = self.session.rotation
         current = (current + 3) % 4
-        self.session?.rotation = current
+        self.session.rotation = current
         self.resizeWindow()
         self.refreshLoupePanel()
     }
 
     @IBAction
     func noRotation(_ sender: Any) {
-        self.session?.rotation = 0
+        self.session.rotation = 0
         self.resizeWindow()
         self.refreshLoupePanel()
     }
 
     @IBAction
     func toggleLoupe(_ sender: Any) {
-        let loupe = (self.session?.loupe)!
-        self.session?.loupe = !loupe
+        let loupe = self.session.loupe
+        self.session.loupe = !loupe
     }
 
     @IBAction

@@ -61,6 +61,7 @@
 		523B8EBC243E3B41002E9138 /* CGRect+SimpleComic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */; };
 		523B8EBE243F8C2A002E9138 /* Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBD243F8C2A002E9138 /* Orientation.swift */; };
 		523B8EC0243F8C55002E9138 /* OrthogonalRotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523B8EBF243F8C55002E9138 /* OrthogonalRotation.swift */; };
+		5256C920244CB27E00287442 /* ImageListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256C91F244CB27E00287442 /* ImageListController.swift */; };
 		525808A3244A174000434EE8 /* LoupeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525808A2244A174000434EE8 /* LoupeView.swift */; };
 		526119102427438F00958E3F /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261190F2427438F00958E3F /* ImageView.swift */; };
 		52611912242759FA00958E3F /* InfoWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52611911242759FA00958E3F /* InfoWindow.swift */; };
@@ -193,6 +194,7 @@
 		523B8EBB243E3B41002E9138 /* CGRect+SimpleComic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+SimpleComic.swift"; sourceTree = "<group>"; };
 		523B8EBD243F8C2A002E9138 /* Orientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Orientation.swift; sourceTree = "<group>"; };
 		523B8EBF243F8C55002E9138 /* OrthogonalRotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrthogonalRotation.swift; sourceTree = "<group>"; };
+		5256C91F244CB27E00287442 /* ImageListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageListController.swift; sourceTree = "<group>"; };
 		525808A2244A174000434EE8 /* LoupeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoupeView.swift; sourceTree = "<group>"; };
 		526119012426832000958E3F /* Simple Comic-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Simple Comic-Bridging-Header.h"; sourceTree = "<group>"; };
 		526119052427247D00958E3F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
@@ -473,6 +475,7 @@
 				529C1B932441BA5C00574BC0 /* SessionWindowController+SimpleComicAction.swift */,
 				52611946242A44CF00958E3F /* ToolbarItem.swift */,
 				525808A2244A174000434EE8 /* LoupeView.swift */,
+				5256C91F244CB27E00287442 /* ImageListController.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -621,6 +624,7 @@
 				523B8EBA243E0551002E9138 /* CancellableBlockOperation.swift in Sources */,
 				52611947242A44CF00958E3F /* ToolbarItem.swift in Sources */,
 				52187E2F244B460400A7BABB /* ImageList+CoreDataClass.swift in Sources */,
+				5256C920244CB27E00287442 /* ImageListController.swift in Sources */,
 				523B8EBE243F8C2A002E9138 /* Orientation.swift in Sources */,
 				5220B23B244B3BA200B7B8DA /* Directory+CoreDataClass.swift in Sources */,
 				529C1B8C2440A4B400574BC0 /* BezelWindow.swift in Sources */,

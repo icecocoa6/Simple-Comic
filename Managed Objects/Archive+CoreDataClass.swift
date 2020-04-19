@@ -159,4 +159,25 @@ public class Archive: PhysicalContainer {
         
         archive.setPassword(self.password!)
     }
+    
+    func saveQuickLookMetadataOfFile(fromPageAt coverIndex: Int, rect cropRect: CGRect) {
+        let archivePath = self.url!.standardizedFileURL.path
+        let xad = self.instance!
+        let coverName = xad.rawName(ofEntry: Int32(coverIndex))
+        let coverString = coverName!.string(withEncoding: String.Encoding.nonLossyASCII.rawValue)!
+        
+        let data = coverString.data(using: .utf8)!
+        data.withUnsafeBytes { buffer -> Void in
+            let ptr = buffer.bindMemory(to: Int8.self).baseAddress!
+            setxattr(archivePath, "QCCoverName", ptr, buffer.count, 0, 0)
+        }
+        
+        let rect = NSStringFromRect(cropRect).data(using: .utf8)!
+        rect.withUnsafeBytes { buffer -> Void in
+            let ptr = buffer.bindMemory(to: Int8.self).baseAddress!
+            setxattr(archivePath, "QCCoverRect", ptr, buffer.count, 0, 0)
+        }
+
+        Process.launchedProcess(launchPath: "/usr/bin/touch", arguments: [archivePath])
+    }
 }

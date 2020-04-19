@@ -2,7 +2,7 @@
 //  ImageList+CoreDataProperties.swift
 //  Simple Comic
 //
-//  Created by 冨岡太一 on 2020/04/18.
+//  Created by 冨岡太一 on 2020/04/19.
 //
 //
 
@@ -16,26 +16,10 @@ extension ImageList {
         return NSFetchRequest<ImageList>(entityName: "ImageList")
     }
 
-    @NSManaged public var images: NSSet?
+    @NSManaged public var selectionIndex: Int64
     @NSManaged public var groups: NSSet?
+    @NSManaged public var images: NSSet?
     @NSManaged public var session: Session?
-
-}
-
-// MARK: Generated accessors for images
-extension ImageList {
-
-    @objc(addImagesObject:)
-    @NSManaged public func addToImages(_ value: Image)
-
-    @objc(removeImagesObject:)
-    @NSManaged public func removeFromImages(_ value: Image)
-
-    @objc(addImages:)
-    @NSManaged public func addToImages(_ values: NSSet)
-
-    @objc(removeImages:)
-    @NSManaged public func removeFromImages(_ values: NSSet)
 
 }
 
@@ -53,5 +37,22 @@ extension ImageList {
 
     @objc(removeGroups:)
     @NSManaged public func removeFromGroups(_ values: NSSet)
+
+}
+
+// MARK: Generated accessors for images
+extension ImageList {
+
+    @objc(addImagesObject:)
+    @NSManaged public func addToImages(_ value: Image)
+
+    @objc(removeImagesObject:)
+    @NSManaged public func removeFromImages(_ value: Image)
+
+    @objc(addImages:)
+    @NSManaged public func addToImages(_ values: NSSet)
+
+    @objc(removeImages:)
+    @NSManaged public func removeFromImages(_ values: NSSet)
 
 }

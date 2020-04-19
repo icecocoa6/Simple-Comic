@@ -20,6 +20,7 @@
         </fetchIndex>
     </entity>
     <entity name="ImageList" representedClassName=".ImageList" syncable="YES">
+        <attribute name="selectionIndex" attributeType="Integer 64" minValueString="0" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <relationship name="groups" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PhysicalContainer" inverseName="imageList" inverseEntity="PhysicalContainer" syncable="YES"/>
         <relationship name="images" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Image" inverseName="imageList" inverseEntity="Image" syncable="YES"/>
         <relationship name="session" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Session" inverseName="imageList" inverseEntity="Session" syncable="YES"/>
@@ -48,7 +49,6 @@
         <attribute name="rawAdjustmentMode" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="rotation" attributeType="Integer 16" valueTransformerName="NSSecureUnarchiveFromDataTransformer" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="scrollPosition" optional="YES" attributeType="Binary" syncable="YES"/>
-        <attribute name="selection" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="twoPageSpread" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="zoomLevel" attributeType="Float" defaultValueString="1" usesScalarValueType="YES" syncable="YES"/>
         <relationship name="imageList" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ImageList" inverseName="session" inverseEntity="ImageList" syncable="YES"/>
@@ -57,9 +57,9 @@
         <element name="Archive" positionX="260.94921875" positionY="246.109375" width="90" height="73"/>
         <element name="Directory" positionX="365.26953125" positionY="251.21875" width="128" height="43"/>
         <element name="Image" positionX="359.515625" positionY="-46.6171875" width="92" height="178"/>
-        <element name="PhysicalContainer" positionX="133.19140625" positionY="38.265625" width="111.44921875" height="148"/>
-        <element name="ImageList" positionX="551.28515625" positionY="178.01953125" width="128" height="88"/>
+        <element name="ImageList" positionX="551.28515625" positionY="178.01953125" width="128" height="103"/>
         <element name="PDF" positionX="152.00390625" positionY="245.8046875" width="92" height="43"/>
-        <element name="Session" positionX="723.54296875" positionY="57.3828125" width="90" height="208"/>
+        <element name="PhysicalContainer" positionX="133.19140625" positionY="38.265625" width="111.44921875" height="148"/>
+        <element name="Session" positionX="710.03515625" positionY="58.3671875" width="121.359375" height="193"/>
     </elements>
 </model>

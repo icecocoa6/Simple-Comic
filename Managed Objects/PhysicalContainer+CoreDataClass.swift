@@ -51,4 +51,8 @@ public class PhysicalContainer: NSManagedObject {
     var topLevelGroup: NSManagedObject {
         return self.parent?.topLevelGroup ?? self
     }
+    
+    var isTopLevel: Bool {
+        self.parent == nil
+    }
 }

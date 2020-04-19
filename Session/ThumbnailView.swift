@@ -174,7 +174,7 @@ public class ThumbnailView: NSView {
         let horSide = bounds.width / CGFloat(horCount)
         let horGridPos = CGFloat(index % horCount);
         let vertGridPos = CGFloat((index / horCount) % vertCount)
-        let pageOrder = dataSource?.session?.value(forKey: "pageOrder") as! NSNumber?
+        let pageOrder = dataSource?.session.value(forKey: "pageOrder") as! NSNumber?
         
         if pageOrder?.boolValue ?? false
         {

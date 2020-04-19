@@ -270,7 +270,7 @@
             </connections>
             <point key="canvasLocation" x="442" y="78"/>
         </window>
-        <arrayController mode="entity" entityName="Image" automaticallyPreparesContent="YES" clearsFilterPredicateOnInsertion="NO" id="12" userLabel="Page Controller">
+        <arrayController mode="entity" entityName="Image" automaticallyPreparesContent="YES" clearsFilterPredicateOnInsertion="NO" id="12" userLabel="Page Controller" customClass="ImageListController" customModule="Simple_Comic" customModuleProvider="target">
             <declaredKeys>
                 <string>name</string>
                 <string>archive.path</string>
@@ -281,9 +281,9 @@
                 <string>group</string>
             </declaredKeys>
             <connections>
-                <binding destination="-2" name="contentSet" keyPath="session.allImages" id="eqJ-AQ-L9U"/>
                 <binding destination="-2" name="managedObjectContext" keyPath="managedObjectContext" id="86"/>
                 <binding destination="-2" name="sortDescriptors" keyPath="pageSortDescriptor" id="158"/>
+                <binding destination="-2" name="contentSet" keyPath="session.allImages" id="eqJ-AQ-L9U"/>
             </connections>
         </arrayController>
         <window title="InfoPane" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="350" userLabel="Scrub Panel" customClass="InfoWindow" customModule="Simple_Comic" customModuleProvider="target">

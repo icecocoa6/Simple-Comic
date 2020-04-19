@@ -252,7 +252,7 @@ class SimpleComicAppDelegate: NSObject, NSApplicationDelegate {
         if let index = sessions.firstIndex(of: controller) {
             sessions.remove(at: index)
         }
-        self.managedObjectContext.delete(controller.session!)
+        self.managedObjectContext.delete(controller.session)
     }
 
     func sessionRelaunch() {

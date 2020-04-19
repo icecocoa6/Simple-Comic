@@ -255,4 +255,16 @@ public class Image: NSManagedObject {
         
         return nil
     }
+    
+    /* Makes sure that the group is both an archive and not nested */
+    var isExtractable: Bool {
+        self.group is Archive && self.group!.isTopLevel && !self.text
+    }
+    
+    /// returns a url at which this the source file of this image is actually placed.
+    var representationURL: URL? {
+        self.group != nil
+            ? (self.group!.topLevelGroup as! PhysicalContainer).url
+            : self.imageURL
+    }
 }
